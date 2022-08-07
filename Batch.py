@@ -62,3 +62,5 @@ def batch_size_fn(new, count, sofar):
     src_elements = count * max_src_in_batch
     tgt_elements = count * max_tgt_in_batch
     return max(src_elements, tgt_elements)
+
+
