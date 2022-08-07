@@ -71,3 +71,15 @@ def get_model(opt, src_vocab, trg_vocab):
     
     return model
     
+
+
+class PreTrainedTokTransformer(nn.Module):
+    def __init__(self, src_vocab, trg_vocab, d_model, N, heads, dropout):
+        super().__init__()
+        self.decoder = Decoder(trg_vocab, d_model, N, heads, dropout)
+        self.out = nn.Linear(d_model, trg_vocab)
+    def forward(self, encoding, trg, encoding_mask, trg_mask):
+        #print("DECODER")
+        d_output = self.decoder(trg, encoding, encoding_mask, trg_mask)
+        output = self.out(d_output)
+        return output
