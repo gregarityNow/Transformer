@@ -1,8 +1,8 @@
 import pandas as pd
 import torchtext
 from torchtext import data
-from Batch import MyIterator, batch_size_fn
-from Tokenize import tokenize, CamTok
+from .Batch import MyIterator, batch_size_fn
+from .Tokenize import tokenize, CamTok
 import os
 import dill as pickle
 
