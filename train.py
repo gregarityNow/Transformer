@@ -207,7 +207,7 @@ def train_modelFEH(model,opt, trainDS, SRC, TRG):
             src = batch.src.transpose(0, 1)
             trg = batch.trg.transpose(0, 1)
             trg_input = trg[:, :-1]
-            src_mask, trg_mask = create_masks(src, trg_input, opt)
+            src_mask, trg_mask = create_masks(src, trg, srcPad, trgPad)
             preds = model(src, trg_input, src_mask, trg_mask)
             ys = trg[:, 1:].contiguous().view(-1)
             opt.optimizer.zero_grad()

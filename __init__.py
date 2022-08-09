@@ -1,3 +1,4 @@
+print("beginn ja")
 from .Batch import *
 from .Process import *
 print("letrain")
