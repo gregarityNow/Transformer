@@ -10,7 +10,7 @@ import dill as pickle
 # from ..src.basis_funcs import loadTokenizerAndModel
 from .Tokenize import CamTok
 
-def loadTokenizerAndModel(name, loadFinetunedModels = False):
+def loadTokenizerAndModel(name, loadFinetunedModels = False, modelToo = False):
     import torch
     techName = ""
     if name == "xlmRob":
@@ -26,6 +26,8 @@ def loadTokenizerAndModel(name, loadFinetunedModels = False):
         tok = AutoTokenizer.from_pretrained(techName)
     except:
         tok = AutoTokenizer.from_pretrained(techName, proxies=proxDict)
+    if not modelToo:
+        return tok, None
     if loadFinetunedModels:
         rootPath = "/mnt/beegfs/projects/neo_scf_herron/stage/out/dump/models/"+name + "-finetuned-tech/"
         checkpoints = [x for x in os.listdir(rootPath) if os.path.isdir(rootPath + "/" + x) and "checkpoint-" in x]
