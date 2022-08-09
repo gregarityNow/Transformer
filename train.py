@@ -1,4 +1,3 @@
-print("zooerst")
 import argparse
 import time
 import torch
@@ -8,7 +7,6 @@ import torch.nn.functional as F
 from .Optim import CosineWithRestarts
 from .Batch import create_masks
 import dill as pickle
-print("importin module? nahh")
 
 def train_model(model, opt):
     
@@ -186,7 +184,6 @@ if __name__ == "__main__":
     main()
 
 
-print("moo")
 
 def train_modelFEH(model,opt, trainDS, SRC, TRG):
     print("training model...")
