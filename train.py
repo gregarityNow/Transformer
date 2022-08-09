@@ -7,7 +7,7 @@ import torch.nn.functional as F
 from .Optim import CosineWithRestarts
 from .Batch import create_masks
 import dill as pickle
-
+print("moo")
 
 def train_model(model, opt):
     
