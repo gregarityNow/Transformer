@@ -3,7 +3,7 @@ from .Beam import beam_search
 import pathlib
 import argparse
 import time
-from nltk.corpus import wordnet
+# from nltk.corpus import wordnet
 import torch
 from .Models import get_model
 from .Process import *
@@ -107,8 +107,9 @@ def train_model(model, opt):
         print("%dm: epoch %d [%s%s]  %d%%  loss = %.3f\nepoch %d complete, loss = %.03f" %\
         ((time.time() - start)//60, epoch + 1, "".join('#'*(100//5)), "".join(' '*(20-(100//5))), 100, avg_loss, epoch + 1, avg_loss))
 
-
+#
 def get_synonym(word, SRC):
+    return 0;
     syns = wordnet.synsets(word)
     for s in syns:
         for l in s.lemmas():
