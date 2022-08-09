@@ -70,7 +70,7 @@ def create_dataset(opt, SRC, TRG):
     
     os.remove('translate_transformer_temp.csv')
 
-    if opt.load_weights is None:
+    if not opt.load_weights:
         SRC.build_vocab(train)
         TRG.build_vocab(train)
         if opt.checkpoint > 0:
