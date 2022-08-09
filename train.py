@@ -1,4 +1,5 @@
 from torch.autograd import Variable
+import re
 from .Beam import beam_search
 import pathlib
 import argparse

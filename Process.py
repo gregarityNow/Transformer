@@ -41,10 +41,10 @@ def create_fields(opt, camTok):
     if opt.load_weights is not None:
         try:
             print("loading presaved fields...")
-            SRC = pickle.load(open(f'{opt.load_weights}/SRC.pkl', 'rb'))
-            TRG = pickle.load(open(f'{opt.load_weights}/TRG.pkl', 'rb'))
+            SRC = pickle.load(open(f'{opt.weightSaveLoc}/SRC.pkl', 'rb'))
+            TRG = pickle.load(open(f'{opt.weightSaveLoc}/TRG.pkl', 'rb'))
         except:
-            print("error opening SRC.pkl and TXT.pkl field files, please ensure they are in " + opt.load_weights + "/")
+            print("error opening SRC.pkl and TXT.pkl field files, please ensure they are in " + opt.weightSaveLoc + "/")
             quit()
     return (SRC, TRG)
 
