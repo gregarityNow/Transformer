@@ -127,7 +127,7 @@ def translate():
 
     tokenizer, _ = loadTokenizerAndModel("camem")
     camTok = CamTok(tokenizer)
-    SRC, TRG = create_fields(camTok)
+    SRC, TRG = create_fields(opt, camTok)
 
     model = get_model(opt, len(SRC.vocab), len(TRG.vocab))
 
@@ -172,7 +172,7 @@ def mainFelix():
     read_data_felix(opt)
     tokenizer, _ = loadTokenizerAndModel("camem")
     camTok = CamTok(tokenizer)
-    SRC, TRG = create_fields(camTok)
+    SRC, TRG = create_fields(opt, camTok)
     opt.train = create_dataset(opt, SRC, TRG)
     model = get_model(opt, len(SRC.vocab), len(TRG.vocab))
     print("moodely")

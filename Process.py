@@ -35,9 +35,17 @@ def read_data_felix(opt):
 
 
 
-def create_fields(camTok):
+def create_fields(opt, camTok):
     TRG = data.Field(lower=True, tokenize=camTok.tokenize, init_token='<sos>', eos_token='<eos>')
     SRC = data.Field(lower=True, tokenize=camTok.tokenize)
+    if opt.load_weights is not None:
+        try:
+            print("loading presaved fields...")
+            SRC = pickle.load(open(f'{opt.load_weights}/SRC.pkl', 'rb'))
+            TRG = pickle.load(open(f'{opt.load_weights}/TRG.pkl', 'rb'))
+        except:
+            print("error opening SRC.pkl and TXT.pkl field files, please ensure they are in " + opt.load_weights + "/")
+            quit()
     return (SRC, TRG)
 
 def create_dataset(opt, SRC, TRG):
