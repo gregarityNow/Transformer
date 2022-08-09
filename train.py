@@ -235,7 +235,7 @@ def mainFelix():
     if opt.checkpoint > 0:
         print("model weights will be saved every %d minutes and at end of epoch to directory weights/" % (opt.checkpoint))
 
-    if opt.load_weights is not None and opt.floyd is not None:
+    if opt.load_weights and opt.floyd is not None:
         os.mkdir('weights')
         pickle.dump(SRC, open('weights/SRC.pkl', 'wb'))
         pickle.dump(TRG, open('weights/TRG.pkl', 'wb'))
@@ -256,7 +256,7 @@ def promptNextAction(model, opt, SRC, TRG):
 
     saved_once = 1 if opt.load_weights is not None or opt.checkpoint > 0 else 0
     
-    if opt.load_weights is not None:
+    if opt.load_weights:
         dst = opt.load_weights
     if opt.checkpoint > 0:
         dst = 'weights'

@@ -38,7 +38,7 @@ def read_data_felix(opt):
 def create_fields(opt, tokenizer):
     TRG = data.Field(lower=True, tokenize=tokenizer.cam_tokenize, init_token='<sos>', eos_token='<eos>')
     SRC = data.Field(lower=True, tokenize=tokenizer.letter_tokenize)
-    if opt.load_weights is not None:
+    if opt.load_weights:
         try:
             print("loading presaved fields...")
             SRC = pickle.load(open(f'{opt.weightSaveLoc}/SRC.pkl', 'rb'))
