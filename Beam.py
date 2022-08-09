@@ -14,7 +14,7 @@ def init_vars(src, model, SRC, TRG, opt):
     if opt.device == 0:
         outputs = outputs.cuda()
     
-    trg_mask = nopeak_mask(1, opt)
+    trg_mask = nopeak_mask(opt)
     
     out = model.out(model.decoder(outputs,
     e_output, src_mask, trg_mask))
@@ -61,7 +61,7 @@ def beam_search(src, model, SRC, TRG, opt):
     ind = None
     for i in range(2, opt.max_len):
     
-        trg_mask = nopeak_mask(i, opt)
+        trg_mask = nopeak_mask(opt)
 
         out = model.out(model.decoder(outputs[:,:i],
         e_outputs, src_mask, trg_mask))
