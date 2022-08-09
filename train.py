@@ -182,6 +182,7 @@ def promptNextAction(model, opt, SRC, TRG):
 
     # for asking about further training use while true loop, and return
 if __name__ == "__main__":
+    print("shooo")
     main()
 
 

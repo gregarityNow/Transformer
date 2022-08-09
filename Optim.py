@@ -1,7 +1,6 @@
 import torch
 import numpy as np
 # code from AllenNLP
-print("hoss")
 class CosineWithRestarts(torch.optim.lr_scheduler._LRScheduler):
     """
     Cosine annealing with restarts.
