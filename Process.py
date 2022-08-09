@@ -62,9 +62,9 @@ def create_dataset(opt, SRC, TRG):
     
     os.remove('translate_transformer_temp.csv')
 
+    SRC.build_vocab(train)
+    TRG.build_vocab(train)
     if opt.load_weights is None:
-        SRC.build_vocab(train)
-        TRG.build_vocab(train)
         if opt.checkpoint > 0:
             try:
                 os.mkdir("weights")
