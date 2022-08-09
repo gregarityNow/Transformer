@@ -67,7 +67,7 @@ def get_model(opt, src_vocab, trg_vocab):
                 nn.init.xavier_uniform_(p) 
     
     if opt.device == 0:
-        model = model.cuda()
+        model = model.to("cuda:0")
     
     return model
     
