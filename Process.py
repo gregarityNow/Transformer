@@ -2,7 +2,7 @@ import pandas as pd
 import torchtext
 from torchtext import data
 from .Batch import MyIterator, batch_size_fn
-from .Tokenize import tokenize, CamTok
+from .Tokenize import tokenize, CamOrLetterTokenizer
 import os
 import dill as pickle
 import torch
@@ -35,9 +35,9 @@ def read_data_felix(opt):
 
 
 
-def create_fields(opt, camTok):
-    TRG = data.Field(lower=True, tokenize=camTok.tokenize, init_token='<sos>', eos_token='<eos>')
-    SRC = data.Field(lower=True, tokenize=camTok.tokenize)
+def create_fields(opt, tokenizer):
+    TRG = data.Field(lower=True, tokenize=tokenizer.cam_tokenize, init_token='<sos>', eos_token='<eos>')
+    SRC = data.Field(lower=True, tokenize=tokenizer.letter_tokenize)
     if opt.load_weights is not None:
         try:
             print("loading presaved fields...")
@@ -99,7 +99,7 @@ def get_len(train):
 
 
 def create_fieldsFEH(tokenizer):
-    camTok = CamTok(tokenizer)
+    camTok = CamOrLetterTokenizer(tokenizer)
     TRG = data.Field(lower=True, tokenize=camTok.tokenize, init_token='<sos>', eos_token='<eos>')
     SRC = data.Field(lower=True, tokenize=camTok.tokenize)
     return (SRC, TRG)

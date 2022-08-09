@@ -13,7 +13,7 @@ from .Optim import CosineWithRestarts
 from .Batch import create_masks
 import dill as pickle
 # from ..src.basis_funcs import loadTokenizerAndModel
-from .Tokenize import CamTok
+from .Tokenize import CamOrLetterTokenizer
 
 def loadTokenizerAndModel(name, loadFinetunedModels = False, modelToo = False):
     import torch
@@ -177,8 +177,8 @@ def translateMain():
     assert opt.max_len > 10
 
     tokenizer, _ = loadTokenizerAndModel("camem")
-    camTok = CamTok(tokenizer)
-    SRC, TRG = create_fields(opt, camTok)
+    camOrLetterTokenizer = CamOrLetterTokenizer(tokenizer)
+    SRC, TRG = create_fields(opt, camOrLetterTokenizer)
 
     model = get_model(opt, len(SRC.vocab), len(TRG.vocab))
 
@@ -222,8 +222,8 @@ def mainFelix():
 
     read_data_felix(opt)
     tokenizer, _ = loadTokenizerAndModel("camem")
-    camTok = CamTok(tokenizer)
-    SRC, TRG = create_fields(opt, camTok)
+    camOrLetterTokenizer = CamOrLetterTokenizer(tokenizer)
+    SRC, TRG = create_fields(opt, camOrLetterTokenizer)
     opt.train = create_dataset(opt, SRC, TRG)
     model = get_model(opt, len(SRC.vocab), len(TRG.vocab))
     print("moodely")

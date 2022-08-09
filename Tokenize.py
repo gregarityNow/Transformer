@@ -17,8 +17,12 @@ class tokenize(object):
         return [tok.text for tok in self.nlp.tokenizer(sentence) if tok.text != " "]
 
 
-class CamTok():
+class CamOrLetterTokenizer():
     def __init__(self,camTok):
         self.camTok = camTok
-    def tokenize(self, sentence):
+    def cam_tokenize(self, sentence):
         return [str(x) for x in self.camTok.encode(sentence)]
+
+    def letter_tokenize(self, sentence):
+        return list(sentence)
+
