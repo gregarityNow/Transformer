@@ -81,7 +81,11 @@ def main():
     assert opt.k > 0
     assert opt.max_len > 10
 
+
+    tokenizer, _ = loadTokenizerAndModel("camem")
+    camTok = CamTok(camTok)
     SRC, TRG = create_fields(opt)
+
     model = get_model(opt, len(SRC.vocab), len(TRG.vocab))
     
     while True:

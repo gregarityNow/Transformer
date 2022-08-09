@@ -105,6 +105,48 @@ def train_model(model, opt):
         ((time.time() - start)//60, epoch + 1, "".join('#'*(100//5)), "".join(' '*(20-(100//5))), 100, avg_loss, epoch + 1, avg_loss))
 
 
+def translate():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-load_weights', default=True)
+    parser.add_argument("-weightSaveLoc",type=str,default = "/mnt/beegfs/home/herron/neo_scf_herron/stage/out/dump/byChar/weights")
+    parser.add_argument('-k', type=int, default=3)
+    parser.add_argument('-max_len', type=int, default=80)
+    parser.add_argument('-d_model', type=int, default=512)
+    parser.add_argument('-n_layers', type=int, default=6)
+    parser.add_argument('-src_lang', required=True)
+    parser.add_argument('-trg_lang', required=True)
+    parser.add_argument('-heads', type=int, default=8)
+    parser.add_argument('-dropout', type=int, default=0.1)
+    parser.add_argument('-no_cuda', action='store_true')
+    parser.add_argument('-floyd', action='store_true')
+
+    opt = parser.parse_args()
+
+    opt.device = 0 if opt.no_cuda is False else -1
+
+    assert opt.k > 0
+    assert opt.max_len > 10
+
+    tokenizer, _ = loadTokenizerAndModel("camem")
+    camTok = CamTok(tokenizer)
+    SRC, TRG = create_fields(camTok)
+
+    model = get_model(opt, len(SRC.vocab), len(TRG.vocab))
+
+    while True:
+        opt.text = input("Enter a sentence to translate (type 'f' to load from file, or 'q' to quit):\n")
+        if opt.text == "q":
+            break
+        if opt.text == 'f':
+            fpath = input("Enter a sentence to translate (type 'f' to load from file, or 'q' to quit):\n")
+            try:
+                opt.text = ' '.join(open(opt.text, encoding='utf-8').read().split('\n'))
+            except:
+                print("error opening or reading text file")
+                continue
+        phrase = translate(opt, model, SRC, TRG)
+        print('> ' + phrase + '\n')
+
 def mainFelix():
     parser = argparse.ArgumentParser()
     parser.add_argument('-no_cuda', action='store_true')
