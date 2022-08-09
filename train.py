@@ -1,12 +1,14 @@
 import argparse
 import time
 import torch
-from Models import get_model
-from Process import *
+from .Models import get_model
+from .Process import *
 import torch.nn.functional as F
-from Optim import CosineWithRestarts
-from Batch import create_masks
+from .Optim import CosineWithRestarts
+from .Batch import create_masks
 import dill as pickle
+from ..src.basis_funcs import loadTokenizerAndModel
+from .Tokenize import CamTok
 
 def train_model(model, opt):
     
@@ -62,8 +64,8 @@ def train_model(model, opt):
         print("%dm: epoch %d [%s%s]  %d%%  loss = %.3f\nepoch %d complete, loss = %.03f" %\
         ((time.time() - start)//60, epoch + 1, "".join('#'*(100//5)), "".join(' '*(20-(100//5))), 100, avg_loss, epoch + 1, avg_loss))
 
-def main():
 
+def mainFelix():
     parser = argparse.ArgumentParser()
     parser.add_argument('-src_data', required=True)
     parser.add_argument('-trg_data', required=True)
@@ -86,12 +88,12 @@ def main():
     parser.add_argument('-checkpoint', type=int, default=0)
 
     opt = parser.parse_args()
-    
+
     opt.device = 0 if opt.no_cuda is False else -1
     if opt.device == 0:
         assert torch.cuda.is_available()
-    
-    read_data(opt)
+
+    read_data_felix(opt)
     SRC, TRG = create_fields(opt)
     opt.train = create_dataset(opt, SRC, TRG)
     model = get_model(opt, len(SRC.vocab), len(TRG.vocab))
@@ -101,13 +103,13 @@ def main():
         opt.sched = CosineWithRestarts(opt.optimizer, T_max=opt.train_len)
 
     if opt.checkpoint > 0:
-        print("model weights will be saved every %d minutes and at end of epoch to directory weights/"%(opt.checkpoint))
-    
+        print("model weights will be saved every %d minutes and at end of epoch to directory weights/" % (opt.checkpoint))
+
     if opt.load_weights is not None and opt.floyd is not None:
         os.mkdir('weights')
         pickle.dump(SRC, open('weights/SRC.pkl', 'wb'))
         pickle.dump(TRG, open('weights/TRG.pkl', 'wb'))
-    
+
     train_model(model, opt)
 
     if opt.floyd is False:
@@ -180,4 +182,4 @@ def promptNextAction(model, opt, SRC, TRG):
 
     # for asking about further training use while true loop, and return
 if __name__ == "__main__":
-    main()
+    mainFelix()

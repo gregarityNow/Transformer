@@ -6,6 +6,9 @@ from Batch import MyIterator, batch_size_fn
 import os
 import dill as pickle
 
+from src import pickLoad
+
+
 def read_data(opt):
     
     if opt.src_data is not None:
@@ -22,32 +25,18 @@ def read_data(opt):
             print("error: '" + opt.trg_data + "' file not found")
             quit()
 
-def create_fields(opt):
-    
-    spacy_langs = ['en', 'fr', 'de', 'es', 'pt', 'it', 'nl']
-    if opt.src_lang not in spacy_langs:
-        print('invalid src language: ' + opt.src_lang + 'supported languages : ' + spacy_langs)  
-    if opt.trg_lang not in spacy_langs:
-        print('invalid trg language: ' + opt.trg_lang + 'supported languages : ' + spacy_langs)
-    
-    print("loading spacy tokenizers...")
-    
-    t_src = tokenize(opt.src_lang)
-    t_trg = tokenize(opt.trg_lang)
+def read_data_felix(opt):
+    #todo@feh: create df cleaning func ugh
+    df = pickLoad("/mnt/beegfs/projects/neo_scf_herron/stage/out/dump/combined_dfFinal.pickle")
+    opt.src_data = list(df.defn.values)
+    opt.trg_data = list(df.term.values)
 
-    TRG = data.Field(lower=True, tokenize=t_trg.tokenizer, init_token='<sos>', eos_token='<eos>')
-    SRC = data.Field(lower=True, tokenize=t_src.tokenizer)
 
-    if opt.load_weights is not None:
-        try:
-            print("loading presaved fields...")
-            SRC = pickle.load(open(f'{opt.load_weights}/SRC.pkl', 'rb'))
-            TRG = pickle.load(open(f'{opt.load_weights}/TRG.pkl', 'rb'))
-        except:
-            print("error opening SRC.pkl and TXT.pkl field files, please ensure they are in " + opt.load_weights + "/")
-            quit()
-        
-    return(SRC, TRG)
+
+def create_fields(opt, camTok):
+    TRG = data.Field(lower=True, tokenize=camTok.tokenize, init_token='<sos>', eos_token='<eos>')
+    SRC = data.Field(lower=True, tokenize=camTok.tokenize)
+    return (SRC, TRG)
 
 def create_dataset(opt, SRC, TRG):
 
