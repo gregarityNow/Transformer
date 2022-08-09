@@ -76,6 +76,7 @@ def create_dataset(opt, SRC, TRG):
     opt.trg_pad = TRG.vocab.stoi['<pad>']
 
     opt.train_len = get_len(train_iter)
+    print("curated")
 
     return train_iter
 
@@ -86,20 +87,6 @@ def get_len(train):
     
     return i
 
-def create_datasetFEH(srcData, targData, SRC, TRG):
-    print("creating dataset and iterator... ")
-    raw_data = {'src': srcData, 'trg': targData}
-    df = pd.DataFrame(raw_data, columns=["src", "trg"])
-    df.to_csv("translate_transformer_temp.csv", index=False)
-    data_fields = [('src', SRC), ('trg', TRG)]
-    train = data.TabularDataset('./translate_transformer_temp.csv', format='csv', fields=data_fields)
-    train_iter = MyIterator(train, batch_size=1500, device="cuda:0",
-                            repeat=True, sort_key=lambda x: (len(x.src), len(x.trg)), train=True, shuffle=True)
-    # train_iter = MyIterator(train, batch_size=1500, device="cuda:0",repeat=False, sort_key=lambda x: (len(x.src), len(x.trg)), train=True, shuffle=True)
-    SRC.build_vocab(train)
-    TRG.build_vocab(train)
-    os.remove('translate_transformer_temp.csv')
-    return train_iter
 
 def create_fieldsFEH(tokenizer):
     camTok = CamTok(tokenizer)

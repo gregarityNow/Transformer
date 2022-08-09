@@ -68,7 +68,7 @@ def train_model(model, opt):
             torch.save(model.state_dict(), 'weights/model_weights')
                     
         for i, batch in enumerate(opt.train): 
-
+            print("batch",i)
             src = batch.src.transpose(0,1)
             trg = batch.trg.transpose(0,1)
             trg_input = trg[:, :-1]
@@ -133,6 +133,7 @@ def mainFelix():
     SRC, TRG = create_fields(camTok)
     opt.train = create_dataset(opt, SRC, TRG)
     model = get_model(opt, len(SRC.vocab), len(TRG.vocab))
+    print("moodely")
 
     opt.optimizer = torch.optim.Adam(model.parameters(), lr=opt.lr, betas=(0.9, 0.98), eps=1e-9)
     if opt.SGDR == True:
