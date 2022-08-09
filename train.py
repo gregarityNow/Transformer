@@ -1,6 +1,9 @@
+from torch.autograd import Variable
+from .Beam import beam_search
 import pathlib
 import argparse
 import time
+from nltk.corpus import wordnet
 import torch
 from .Models import get_model
 from .Process import *
@@ -105,7 +108,53 @@ def train_model(model, opt):
         ((time.time() - start)//60, epoch + 1, "".join('#'*(100//5)), "".join(' '*(20-(100//5))), 100, avg_loss, epoch + 1, avg_loss))
 
 
-def translate():
+def get_synonym(word, SRC):
+    syns = wordnet.synsets(word)
+    for s in syns:
+        for l in s.lemmas():
+            if SRC.vocab.stoi[l.name()] != 0:
+                return SRC.vocab.stoi[l.name()]
+
+    return 0
+
+
+def multiple_replace(dict, text):
+    # Create a regular expression  from the dictionary keys
+    regex = re.compile("(%s)" % "|".join(map(re.escape, dict.keys())))
+
+    # For each match, look-up corresponding value in dictionary
+    return regex.sub(lambda mo: dict[mo.string[mo.start():mo.end()]], text)
+
+
+def translate_sentence(sentence, model, opt, SRC, TRG):
+    model.eval()
+    indexed = []
+    sentence = SRC.preprocess(sentence)
+    for tok in sentence:
+        if SRC.vocab.stoi[tok] != 0 or opt.floyd == True:
+            indexed.append(SRC.vocab.stoi[tok])
+        else:
+            indexed.append(get_synonym(tok, SRC))
+    sentence = Variable(torch.LongTensor([indexed]))
+    if opt.device == 0:
+        sentence = sentence.cuda()
+
+    sentence = beam_search(sentence, model, SRC, TRG, opt)
+
+    return multiple_replace({' ?': '?', ' !': '!', ' .': '.', '\' ': '\'', ' ,': ','}, sentence)
+
+
+def translate(opt, model, SRC, TRG):
+    sentences = opt.text.lower().split('.')
+    translated = []
+
+    for sentence in sentences:
+        translated.append(translate_sentence(sentence + '.', model, opt, SRC, TRG).capitalize())
+
+    return (' '.join(translated))
+
+
+def translateMain():
     parser = argparse.ArgumentParser()
     parser.add_argument('-load_weights', default=True)
     parser.add_argument("-weightSaveLoc",type=str,default = "/mnt/beegfs/home/herron/neo_scf_herron/stage/out/dump/byChar/weights")
@@ -158,7 +207,7 @@ def mainFelix():
     parser.add_argument('-printevery', type=int, default=100)
     parser.add_argument('-lr', type=int, default=0.0001)
     parser.add_argument("-weightSaveLoc",type=str,default = "/mnt/beegfs/home/herron/neo_scf_herron/stage/out/dump/byChar/weights")
-    parser.add_argument('-load_weights')
+    parser.add_argument('-load_weights', default=False)
     parser.add_argument('-create_valset', action='store_true')
     parser.add_argument('-max_strlen', type=int, default=80)
     parser.add_argument('-floyd', action='store_true')
