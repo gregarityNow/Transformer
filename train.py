@@ -177,7 +177,7 @@ def promptNextAction(model, opt, SRC, TRG):
                     if res == 'y':
                         break
                 dst = input('enter folder name to create for weights (no spaces) : ')
-                if ' ' in dst or len(dst) < 1 or len(dst) > 30:
+                if ' ' in dst or len(dst) < 1:
                     dst = input("name must not contain spaces and be between 1 and 30 characters length, enter again : ")
                 else:
                     try:
