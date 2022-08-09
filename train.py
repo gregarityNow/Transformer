@@ -1,3 +1,4 @@
+import pathlib
 import argparse
 import time
 import torch
@@ -116,6 +117,7 @@ def mainFelix():
     parser.add_argument('-batchsize', type=int, default=1500)
     parser.add_argument('-printevery', type=int, default=100)
     parser.add_argument('-lr', type=int, default=0.0001)
+    parser.add_argument("-weightSaveLoc",type=str,default = "/mnt/beegfs/home/herron/neo_scf_herron/stage/out/dump/byChar/weights")
     parser.add_argument('-load_weights')
     parser.add_argument('-create_valset', action='store_true')
     parser.add_argument('-max_strlen', type=int, default=80)
@@ -176,17 +178,9 @@ def promptNextAction(model, opt, SRC, TRG):
                     res = yesno("save to same folder? [y/n] : ")
                     if res == 'y':
                         break
-                dst = input('enter folder name to create for weights (no spaces) : ')
-                if ' ' in dst or len(dst) < 1:
-                    dst = input("name must not contain spaces and be between 1 and 30 characters length, enter again : ")
-                else:
-                    try:
-                        os.mkdir(dst)
-                    except:
-                        res= yesno(input(dst + " already exists, use anyway? [y/n] : "))
-                        if res == 'n':
-                            continue
-                    break
+                dst = opt.weightSaveLoc
+                pathlib.Path(dst).mkdir(exist_ok=True,parents=True);
+                break
             
             print("saving weights to " + dst + "/...")
             torch.save(model.state_dict(), f'{dst}/model_weights')
