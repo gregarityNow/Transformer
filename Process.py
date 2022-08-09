@@ -106,6 +106,8 @@ def create_datasetFEH(srcData, targData, SRC, TRG):
     train_iter = MyIterator(train, batch_size=1500, device="cuda:0",
                             repeat=True, sort_key=lambda x: (len(x.src), len(x.trg)), train=True, shuffle=True)
     # train_iter = MyIterator(train, batch_size=1500, device="cuda:0",repeat=False, sort_key=lambda x: (len(x.src), len(x.trg)), train=True, shuffle=True)
+    SRC.build_vocab(train)
+    TRG.build_vocab(train)
     os.remove('translate_transformer_temp.csv')
     return train_iter
 
@@ -113,5 +115,4 @@ def create_fieldsFEH(tokenizer):
     camTok = CamTok(tokenizer)
     TRG = data.Field(lower=True, tokenize=camTok.tokenize, init_token='<sos>', eos_token='<eos>')
     SRC = data.Field(lower=True, tokenize=camTok.tokenize)
-
     return (SRC, TRG)
