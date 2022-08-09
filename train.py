@@ -1,14 +1,14 @@
 import argparse
 import time
 import torch
-from Models import get_model
-from Process import *
+from .Models import get_model
+from .Process import *
 import torch.nn.functional as F
-from Optim import CosineWithRestarts
-from Batch import create_masks
+from .Optim import CosineWithRestarts
+from .Batch import create_masks
 import dill as pickle
 from ..src.basis_funcs import loadTokenizerAndModel
-from Tokenize import CamTok
+from .Tokenize import CamTok
 
 def train_model(model, opt):
     
@@ -86,7 +86,6 @@ def mainFelix():
     parser.add_argument('-max_strlen', type=int, default=80)
     parser.add_argument('-floyd', action='store_true')
     parser.add_argument('-checkpoint', type=int, default=0)
-
     opt = parser.parse_args()
 
     opt.device = 0 if opt.no_cuda is False else -1
