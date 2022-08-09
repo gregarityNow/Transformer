@@ -7,8 +7,45 @@ import torch.nn.functional as F
 from .Optim import CosineWithRestarts
 from .Batch import create_masks
 import dill as pickle
-from ..src.basis_funcs import loadTokenizerAndModel
+# from ..src.basis_funcs import loadTokenizerAndModel
 from .Tokenize import CamTok
+
+def loadTokenizerAndModel(name, loadFinetunedModels = False):
+    import torch
+    techName = ""
+    if name == "xlmRob":
+        techName = "xlm-roberta-base"
+    if name == "camem":
+        techName = "camembert-base"
+    if name == "flaub":
+        techName = "flaubert/flaubert_base_cased"
+    print("loading",techName)
+    proxDict = {"http": "http://webproxy.lab-ia.fr:8080", "https": "http://webproxy.lab-ia.fr:8080"}
+    from transformers import AutoTokenizer, AutoModelForMaskedLM
+    try:
+        tok = AutoTokenizer.from_pretrained(techName)
+    except:
+        tok = AutoTokenizer.from_pretrained(techName, proxies=proxDict)
+    if loadFinetunedModels:
+        rootPath = "/mnt/beegfs/projects/neo_scf_herron/stage/out/dump/models/"+name + "-finetuned-tech/"
+        checkpoints = [x for x in os.listdir(rootPath) if os.path.isdir(rootPath + "/" + x) and "checkpoint-" in x]
+        checkpoints.sort(key = lambda cp: int(cp.split("-")[1]))
+        latestCheckpoint = rootPath + "/" + checkpoints[-1]
+        print("loading model from",latestCheckpoint)
+        model = AutoModelForMaskedLM.from_pretrained(latestCheckpoint)
+    else:
+    # if name in tokModDict:
+    #     return tokModDict[name]["tok"],tokModDict[name]["model"]
+        try:
+            model = AutoModelForMaskedLM.from_pretrained(techName,proxies=proxDict)
+        except:
+            model = AutoModelForMaskedLM.from_pretrained(techName)
+    device = "cuda:0" if torch.cuda.is_available() else "cpu"
+    model = model.to(device)
+    # tokModDict[techName] = {}
+    # tokModDict[techName]["tok"] = tok
+    # tokModDict[techName]["model"] = model
+    return tok, model
 
 def train_model(model, opt):
     
