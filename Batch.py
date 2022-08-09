@@ -11,7 +11,7 @@ def nopeak_mask(size):
     np_mask = np_mask.cuda()
     return np_mask
 
-def create_masks(src, trg, srcPad, trgPad):
+def create_masks(src, trg_input, opt):
     src_mask = (src != srcPad).unsqueeze(-2)
     if trg is not None:
         trg_mask = (trg != trgPad).unsqueeze(-2)
