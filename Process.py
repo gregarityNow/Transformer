@@ -6,8 +6,9 @@ from .Tokenize import tokenize, CamTok
 import os
 import dill as pickle
 
-from src import pickLoad
-
+def pickLoad(pth):
+    with open(pth,"rb") as fpp:
+        return pickle.load(fpp)
 
 def read_data(opt):
     
