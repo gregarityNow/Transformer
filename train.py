@@ -94,7 +94,9 @@ def mainFelix():
         assert torch.cuda.is_available()
 
     read_data_felix(opt)
-    SRC, TRG = create_fields(opt)
+    tokenizer, _ = loadTokenizerAndModel("camem")
+    camTok = CamTok(tokenizer)
+    SRC, TRG = create_fields(camTok)
     opt.train = create_dataset(opt, SRC, TRG)
     model = get_model(opt, len(SRC.vocab), len(TRG.vocab))
 

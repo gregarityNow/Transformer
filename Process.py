@@ -33,7 +33,7 @@ def read_data_felix(opt):
 
 
 
-def create_fields(opt, camTok):
+def create_fields(camTok):
     TRG = data.Field(lower=True, tokenize=camTok.tokenize, init_token='<sos>', eos_token='<eos>')
     SRC = data.Field(lower=True, tokenize=camTok.tokenize)
     return (SRC, TRG)
