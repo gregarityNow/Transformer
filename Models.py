@@ -18,6 +18,7 @@ class Encoder(nn.Module):
         self.norm = Norm(d_model)
     def forward(self, src, mask):
         x = self.embed(src)
+        print("embedded",x);
         x = self.pe(x)
         for i in range(self.N):
             x = self.layers[i](x, mask)

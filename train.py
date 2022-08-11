@@ -15,6 +15,8 @@ import dill as pickle
 # from ..src.basis_funcs import loadTokenizerAndModel
 from .Tokenize import CamOrLetterTokenizer
 
+modelDim = 768
+
 def loadTokenizerAndModel(name, loadFinetunedModels = False, modelToo = False):
     import torch
     techName = ""
@@ -163,7 +165,7 @@ def translateMain():
     parser.add_argument("-weightSaveLoc",type=str,default = "/mnt/beegfs/home/herron/neo_scf_herron/stage/out/dump/byChar/weights")
     parser.add_argument('-k', type=int, default=3)
     parser.add_argument('-max_len', type=int, default=80)
-    parser.add_argument('-d_model', type=int, default=512)
+    parser.add_argument('-d_model', type=int, default=modelDim)
     parser.add_argument('-n_layers', type=int, default=6)
     parser.add_argument('-heads', type=int, default=8)
     parser.add_argument('-dropout', type=int, default=0.1)
@@ -202,7 +204,7 @@ def mainFelix():
     parser.add_argument('-no_cuda', action='store_true')
     parser.add_argument('-SGDR', action='store_true')
     parser.add_argument('-epochs', type=int, default=2)
-    parser.add_argument('-d_model', type=int, default=512)
+    parser.add_argument('-d_model', type=int, default=modelDim)
     parser.add_argument('-n_layers', type=int, default=6)
     parser.add_argument('-heads', type=int, default=8)
     parser.add_argument('-dropout', type=int, default=0.1)

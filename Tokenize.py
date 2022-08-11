@@ -22,7 +22,6 @@ class CamOrLetterTokenizer():
         self.camTok = camTok
     def cam_tokenize(self, sentence):
         return [str(x) for x in self.camTok.encode(sentence)]
-
     def letter_tokenize(self, sentence):
         return list(sentence)
 

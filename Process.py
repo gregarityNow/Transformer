@@ -36,8 +36,8 @@ def read_data_felix(opt):
 
 
 def create_fields(opt, tokenizer):
-    TRG = data.Field(lower=True, tokenize=tokenizer.cam_tokenize, init_token='<sos>', eos_token='<eos>')
-    SRC = data.Field(lower=True, tokenize=tokenizer.letter_tokenize)
+    TRG = data.Field(lower=True, tokenize=tokenizer.letter_tokenize, init_token='<sos>', eos_token='<eos>')
+    SRC = data.Field(lower=True, tokenize=tokenizer.cam_tokenize)
     if opt.load_weights:
         try:
             print("loading presaved fields...")
@@ -47,6 +47,26 @@ def create_fields(opt, tokenizer):
             print("error opening SRC.pkl and TXT.pkl field files, please ensure they are in " + opt.weightSaveLoc + "/")
             quit()
     return (SRC, TRG)
+
+def writeMods():
+    with open("./spam.txt","w") as fp:
+        fp.write(str(model))
+        fp.write(str(mod))
+
+def create_dataset_spam():
+    raw_data = {'src': [line for line in df.defn.values], 'trg': [line for line in df.term.values]}
+    dfr = pd.DataFrame(raw_data, columns=["src", "trg"])
+    mask = (dfr['src'].str.count(' ') < 80) & (dfr['trg'].str.count(' ') < 80)
+    dfr = dfr.loc[mask]
+    dfr.to_csv("translate_transformer_temp.csv", index=False)
+    data_fields = [('src', SRC), ('trg', TRG)]
+    train = data.TabularDataset('./translate_transformer_temp.csv', format='csv', fields=data_fields)
+    train_iter = MyIterator(train, batch_size=1500, device=torch.device('cuda'),
+                            repeat=False, sort_key=lambda x: (len(x.src), len(x.trg)),
+                            batch_size_fn=batch_size_fn, train=True, shuffle=True)
+    SRC.build_vocab(train)
+    TRG.build_vocab(train)
+
 
 def create_dataset(opt, SRC, TRG):
 
@@ -67,7 +87,6 @@ def create_dataset(opt, SRC, TRG):
                         repeat=False, sort_key=lambda x: (len(x.src), len(x.trg)),
                         batch_size_fn=batch_size_fn, train=True, shuffle=True)
     print("postit")
-    
     os.remove('translate_transformer_temp.csv')
 
     if not opt.load_weights:
