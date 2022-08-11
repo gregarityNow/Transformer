@@ -73,6 +73,7 @@ def batch_size_fn(new, count, sofar):
     max_tgt_in_batch = max(max_tgt_in_batch,  len(new.trg) + 2)
     src_elements = count * max_src_in_batch
     tgt_elements = count * max_tgt_in_batch
+    print("maxin and relaxin",max(src_elements, tgt_elements))
     return max(src_elements, tgt_elements)
 
 #grex tremendae

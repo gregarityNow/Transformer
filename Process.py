@@ -63,7 +63,7 @@ def create_dataset_spam():
     train = data.TabularDataset('./translate_transformer_temp.csv', format='csv', fields=data_fields)
     train_iter = MyIterator(train, batch_size=1500, device=torch.device('cuda'),
                             repeat=False, sort_key=lambda x: (len(x.src), len(x.trg)),
-                            batch_size_fn=batch_size_fn, train=True, shuffle=True)
+                            batch_size_fn=batch_size_fn, train=True, shuffle=False)
     SRC.build_vocab(train)
     TRG.build_vocab(train)
 
