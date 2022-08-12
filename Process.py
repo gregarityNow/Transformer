@@ -35,9 +35,9 @@ def read_data_felix(opt):
 
 
 
-def create_fields(opt, tokenizer):
-    TRG = data.Field(lower=True, tokenize=tokenizer.letter_tokenize, init_token='<sos>', eos_token='<eos>')
-    SRC = data.Field(lower=True, tokenize=tokenizer.cam_tokenize)
+def create_fields(opt, camOrLetterTokenizer):
+    TRG = data.Field(lower=True, tokenize=camOrLetterTokenizer.letter_tokenize, init_token='<sos>', eos_token='<eos>')
+    SRC = data.Field(lower=True, tokenize=camOrLetterTokenizer.cam_tokenize)
     if opt.load_weights:
         try:
             print("loading presaved fields...")
@@ -66,6 +66,7 @@ def create_dataset_spam():
                             batch_size_fn=batch_size_fn, train=True, shuffle=False)
     SRC.build_vocab(train)
     TRG.build_vocab(train)
+    return train_iter
 
 
 def create_dataset(opt, SRC, TRG):

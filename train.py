@@ -74,14 +74,18 @@ def train_model(model, opt):
         if opt.checkpoint > 0:
             torch.save(model.state_dict(), 'weights/model_weights')
                     
-        for i, batch in enumerate(opt.train): 
+        for i, batch in enumerate(opt.train):
             print("batch",i)
+            # for i, batch in enumerate(train_iter):
+            #     if i == 1: break;
+
             src = batch.src.transpose(0,1)
             trg = batch.trg.transpose(0,1)
             trg_input = trg[:, :-1]
+            # src_mask, trg_mask = create_masks(src, trg_input, None)
             src_mask, trg_mask = create_masks(src, trg_input, opt)
             preds = model(src, trg_input, src_mask, trg_mask)
-            print("predis",preds);
+            print("predis",preds.shape);
             ys = trg[:, 1:].contiguous().view(-1)
             opt.optimizer.zero_grad()
             loss = F.cross_entropy(preds.view(-1, preds.size(-1)), ys, ignore_index=opt.trg_pad)
@@ -224,10 +228,11 @@ def mainFelix():
         assert torch.cuda.is_available()
 
     read_data_felix(opt)
-    tokenizer, _ = loadTokenizerAndModel("camem")
+    tokenizer, mod = loadTokenizerAndModel("camem")
     camOrLetterTokenizer = CamOrLetterTokenizer(tokenizer)
     SRC, TRG = create_fields(opt, camOrLetterTokenizer)
     opt.train = create_dataset(opt, SRC, TRG)
+    # create_dataset_spam()
     model = get_model(opt, len(SRC.vocab), len(TRG.vocab))
     print("moodely")
 

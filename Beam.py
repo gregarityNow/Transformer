@@ -53,7 +53,6 @@ def k_best_outputs(outputs, out, log_scores, i, k):
     return outputs, log_scores
 
 def beam_search(src, model, SRC, TRG, opt):
-    
 
     outputs, e_outputs, log_scores = init_vars(src, model, SRC, TRG, opt)
     eos_tok = TRG.vocab.stoi['<eos>']
