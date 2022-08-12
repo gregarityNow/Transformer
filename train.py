@@ -272,15 +272,15 @@ def promptNextAction(model, opt, SRC, TRG):
     while True:
         save = yesno(input('training complete, save results? [y/n] : '))
         if save == 'y':
+            dst = opt.weightSaveLoc
             while True:
                 if saved_once != 0:
                     res = yesno("save to same folder? [y/n] : ")
                     if res == 'y':
                         break
-                dst = opt.weightSaveLoc
+
                 pathlib.Path(dst).mkdir(exist_ok=True,parents=True);
                 break
-            
             print("saving weights to " + dst + "/...")
             torch.save(model.state_dict(), f'{dst}/model_weights')
             if saved_once == 0:
