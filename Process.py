@@ -33,7 +33,6 @@ def read_data_felix(opt):
     df = pickLoad("/mnt/beegfs/projects/neo_scf_herron/stage/out/dump/combined_dfFinal.pickle")
     # df = df[df.defn.str.len() < np.percentile(df.defn.apply(lambda x: len(x)),3)]
     for subset in ("valid","train"):
-        df = df[df.subset == subset]
         setattr(opt, "src_data_" + subset, list(df[df.subset==subset].defn.values))
         setattr(opt, "trg_data_" + subset, list(df[df.subset==subset].term.values))
 
