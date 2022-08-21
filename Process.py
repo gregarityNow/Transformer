@@ -28,13 +28,14 @@ def read_data(opt):
             print("error: '" + opt.trg_data + "' file not found")
             quit()
 
-def read_data_felix(opt, subset = "train"):
+def read_data_felix(opt):
     #todo@feh: create df cleaning func ugh
     df = pickLoad("/mnt/beegfs/projects/neo_scf_herron/stage/out/dump/combined_dfFinal.pickle")
     # df = df[df.defn.str.len() < np.percentile(df.defn.apply(lambda x: len(x)),3)]
-    df = df[df.subset == subset]
-    opt.src_data = list(df.defn.values)
-    opt.trg_data = list(df.term.values)
+    for subset in ("valid","train"):
+        df = df[df.subset == subset]
+        opt["src_data_" + subset] = list(df[df.subset==subset].defn.values)
+        opt["trg_data" + subset] = list(df[df.subset==subset].term.values)
 
 
 
@@ -77,30 +78,39 @@ def create_dataset_spam():
     return train_iter
 
 
-def create_dataset(opt, SRC, TRG):
+def create_dataset(opt, SRC, TRG, validBatchSize = -1):
 
     print("creating dataset and iterator... ")
 
-    raw_data = {'src' : [line for line in opt.src_data], 'trg': [line for line in opt.trg_data]}
-    df = pd.DataFrame(raw_data, columns=["src", "trg"])
-    
-    mask = (df['src'].str.count(' ') < opt.max_strlen) & (df['trg'].str.count(' ') < opt.max_strlen)
-    df = df.loc[mask]
 
-    df.to_csv("translate_transformer_temp.csv", index=False)
-    
-    data_fields = [('src', SRC), ('trg', TRG)]
-    train = data.TabularDataset('./translate_transformer_temp.csv', format='csv', fields=data_fields)
-    print("preit")
-    train_iter = MyIterator(train, batch_size=opt.batchsize, device=torch.device('cuda'),
-                        repeat=False, sort_key=lambda x: (len(x.src), len(x.trg)),
-                        batch_size_fn=batch_size_fn, train=True, shuffle=True)
-    print("postit")
-    os.remove('translate_transformer_temp.csv')
+
+    datasets = {}
+    for subset in ("train","valid"):
+        raw_data = {'src' : [line for line in opt["src_data_"+subset]], 'trg': [line for line in opt["trg_data_"+subset]]}
+        df = pd.DataFrame(raw_data, columns=["src", "trg"])
+
+        if subset == "valid" and validBatchSize == -1:
+            validBatchSize = len(df);
+            print("validBatchSize",validBatchSize)
+
+        mask = (df['src'].str.count(' ') < opt.max_strlen) & (df['trg'].str.count(' ') < opt.max_strlen)
+        df = df.loc[mask]
+
+        df.to_csv("translate_transformer_temp.csv", index=False)
+
+        data_fields = [('src', SRC), ('trg', TRG)]
+        dataset = data.TabularDataset('./translate_transformer_temp.csv', format='csv', fields=data_fields)
+        print("preit")
+        myIter = MyIterator(dataset, batch_size=(opt.batchsize if subset == "train" else validBatchSize), device=torch.device('cuda'),
+                            repeat=False, sort_key=lambda x: (len(x.src), len(x.trg)),
+                            batch_size_fn=batch_size_fn, train=True, shuffle=True)
+        print("postit")
+        os.remove('translate_transformer_temp.csv')
+        datasets[subset] = {"iter":myIter, "ds":dataset}
 
     if not opt.load_weights:
-        SRC.build_vocab(train)
-        TRG.build_vocab(train)
+        SRC.build_vocab(datasets["train"]["ds"])
+        TRG.build_vocab(datasets["train"]["ds"])
         if opt.checkpoint > 0:
             try:
                 os.mkdir("weights")
@@ -113,10 +123,10 @@ def create_dataset(opt, SRC, TRG):
     opt.src_pad = SRC.vocab.stoi['<pad>']
     opt.trg_pad = TRG.vocab.stoi['<pad>']
 
-    opt.train_len = get_len(train_iter)
+    opt.train_len = get_len(datasets["train"]["iter"])
     print("curated")
 
-    return train_iter
+    return datasets["train"]["iter"], datasets["valid"]["iter"]
 
 def get_len(train):
 

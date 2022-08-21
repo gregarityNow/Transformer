@@ -74,10 +74,11 @@ def train_model(model, opt):
     if opt.checkpoint > 0:
         cptime = time.time()
 
-    # srcValid = validSrc.transpose(0, 1)
-    # trgValid = validTrg.transpose(0, 1)
-    # trg_inputValid = trgValid[:, :-1]
-    # src_maskValid, trg_maskValid = create_masks(srcValid, trg_inputValid, opt)
+    validBatch = opt.valid[0]
+    srcValid = validBatch.src.transpose(0, 1)
+    trgValid = validBatch.trg.transpose(0, 1)
+    trg_inputValid = trgValid[:, :-1]
+    src_maskValid, trg_maskValid = create_masks(srcValid, trg_inputValid, opt)
                  
     for epoch in range(opt.epochs):
 
@@ -111,7 +112,8 @@ def train_model(model, opt):
             if opt.SGDR == True: 
                 opt.sched.step()
 
-            # _, validLoss = getPredsAndLoss(model, srcValid,trgValid, trg_inputValid, src_maskValid, trg_maskValid,opt, isTrain = False)
+            _, validLoss = getPredsAndLoss(model, srcValid,trgValid, trg_inputValid, src_maskValid, trg_maskValid,opt, isTrain = False)
+            print("trainLoss",loss.item(),"walidLoss",validLoss.item());
             
             total_loss += loss.item()
             
@@ -232,7 +234,7 @@ def mainFelix():
     parser.add_argument('-heads', type=int, default=8)
     parser.add_argument('-dropout', type=int, default=0.1)
     parser.add_argument('-batchsize', type=int, default=1500)
-    parser.add_argument('-printevery', type=int, default=100)
+    parser.add_argument('-printevery', type=int, default=10)
     parser.add_argument('-lr', type=int, default=0.0001)
     parser.add_argument("-weightSaveLoc",type=str,default = "/mnt/beegfs/home/herron/neo_scf_herron/stage/out/dump/byChar/weights")
     parser.add_argument('-load_weights', default=False)
@@ -250,7 +252,7 @@ def mainFelix():
     tokenizer, mod = loadTokenizerAndModel("camem")
     camOrLetterTokenizer = CamOrLetterTokenizer(tokenizer)
     SRC, TRG = create_fields(opt, camOrLetterTokenizer)
-    opt.train = create_dataset(opt, SRC, TRG)
+    opt.train, opt.valid = create_dataset(opt, SRC, TRG)
     # create_dataset_spam()
     model = get_model(opt, len(SRC.vocab), len(TRG.vocab))
     print("moodely")
