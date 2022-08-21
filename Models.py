@@ -19,7 +19,11 @@ class Encoder(nn.Module):
     def forward(self, src, mask):
         x = self.embed(src)
         print("embedded",x.shape, src.shape);
-        x = self.pe(x)
+        try:
+            x = self.pe(x)
+        except Exception as e:
+            print("flubbation",x, src)
+            raise Exception("wubble du" + str(e))
         for i in range(self.N):
             x = self.layers[i](x, mask)
         return self.norm(x)
