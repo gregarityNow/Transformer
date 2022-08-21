@@ -43,10 +43,12 @@ def create_fields(opt, camOrLetterTokenizer):
     if opt.load_weights:
         try:
             srcPath = f'{opt.weightSaveLoc}/SRC.pkl'
+            trgPath = f'{opt.weightSaveLoc}/TRG.pkl'
             print("loading presaved fields...",srcPath)
             print(os.path.exists(srcPath),srcPath)
-            SRC = pickle.load(open(f'{opt.weightSaveLoc}/SRC.pkl', 'rb'))
-            TRG = pickle.load(open(f'{opt.weightSaveLoc}/TRG.pkl', 'rb'))
+            SRC = pickle.load(open(srcPath, 'rb'))
+            print(os.path.exists(trgPath), trgPath)
+            TRG = pickle.load(open(trgPath, 'rb'))
         except:
             print("error opening SRC.pkl and TXT.pkl field files, please ensure they are in " + opt.weightSaveLoc + "/")
             quit()
