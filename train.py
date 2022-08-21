@@ -74,11 +74,13 @@ def train_model(model, opt):
     if opt.checkpoint > 0:
         cptime = time.time()
 
-    validBatch = opt.valid[0]
-    srcValid = validBatch.src.transpose(0, 1)
-    trgValid = validBatch.trg.transpose(0, 1)
-    trg_inputValid = trgValid[:, :-1]
-    src_maskValid, trg_maskValid = create_masks(srcValid, trg_inputValid, opt)
+    for validBatch in opt.valid:
+        srcValid = validBatch.src.transpose(0, 1)
+        trgValid = validBatch.trg.transpose(0, 1)
+        print("shaka smart",srcValid.shape, trgValid.shape)
+        trg_inputValid = trgValid[:, :-1]
+        src_maskValid, trg_maskValid = create_masks(srcValid, trg_inputValid, opt)
+        break;
                  
     for epoch in range(opt.epochs):
 
