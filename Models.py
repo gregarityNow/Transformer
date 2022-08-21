@@ -22,7 +22,7 @@ class Encoder(nn.Module):
         try:
             x = self.pe(x)
         except Exception as e:
-            print("flubbation",x, src)
+            print("flubbation",src)
             raise Exception("wubble du" + str(e))
         for i in range(self.N):
             x = self.layers[i](x, mask)

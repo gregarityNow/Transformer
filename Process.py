@@ -31,7 +31,7 @@ def read_data(opt):
 def read_data_felix(opt):
     #todo@feh: create df cleaning func ugh
     df = pickLoad("/mnt/beegfs/projects/neo_scf_herron/stage/out/dump/combined_dfFinal.pickle")
-    df = df[df.defn.str.len() > np.percentile(df.defn.apply(lambda x: len(x)),97)]
+    df = df[df.defn.str.len() < np.percentile(df.defn.apply(lambda x: len(x)),3)]
     opt.src_data = list(df.defn.values)
     opt.trg_data = list(df.term.values)
 
