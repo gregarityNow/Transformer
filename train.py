@@ -262,34 +262,20 @@ def yesno(response):
 
 def promptNextAction(model, opt, SRC, TRG):
 
-    saved_once = 1 if opt.load_weights is not None or opt.checkpoint > 0 else 0
+    saved_once = 1 if opt.load_weights or opt.checkpoint > 0 else 0
     print("salvidor ramirez",saved_once, opt.load_weights, opt.checkpoint)
-    
-    if opt.load_weights:
-        dst = opt.load_weights
-    if opt.checkpoint > 0:
-        dst = 'weights'
+
 
     while True:
-        save = yesno(input('training complete, save results? [y/n] : '))
-        if save == 'y':
-            dst = opt.weightSaveLoc
-            while True:
-                if saved_once != 0:
-                    res = yesno("save to same folder? [y/n] : ")
-                    if res == 'y':
-                        break
+        dst = opt.weightSaveLoc
 
-                pathlib.Path(dst).mkdir(exist_ok=True,parents=True);
-                break
-            print("saving weights to " + dst + "/...")
-            torch.save(model.state_dict(), f'{dst}/model_weights')
-            if saved_once == 0:
-                pickle.dump(SRC, open(f'{dst}/SRC.pkl', 'wb'))
-                pickle.dump(TRG, open(f'{dst}/TRG.pkl', 'wb'))
-                saved_once = 1
-            
-            print("weights and field pickles saved to " + dst)
+        pathlib.Path(dst).mkdir(exist_ok=True,parents=True);
+        print("saving weights to " + dst + "/...")
+        torch.save(model.state_dict(), f'{dst}/model_weights')
+        pickle.dump(SRC, open(f'{dst}/SRC.pkl', 'wb'))
+        pickle.dump(TRG, open(f'{dst}/TRG.pkl', 'wb'))
+
+        print("weights and field pickles saved to " + dst)
 
         res = yesno(input("train for more epochs? [y/n] : "))
         if res == 'y':
