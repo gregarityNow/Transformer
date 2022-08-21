@@ -100,9 +100,7 @@ def train_model(model, opt):
             src = batch.src.transpose(0,1)
             trg = batch.trg.transpose(0,1)
 
-            print(src);
-            print(trg);
-            print(src.shape, trg.shape)
+            print("trainshape",src.shape, trg.shape)
             exit()
             trg_input = trg[:, :-1]
             # src_mask, trg_mask = create_masks(src, trg_input, None)
