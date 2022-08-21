@@ -88,6 +88,7 @@ def create_dataset(opt, SRC, TRG, validBatchSize = -1):
     for subset in ("train","valid"):
         raw_data = {'src' : [line for line in getattr(opt,"src_data_"+subset)], 'trg': [line for line in getattr(opt,"trg_data_"+subset)]}
         df = pd.DataFrame(raw_data, columns=["src", "trg"])
+        print("deeyef",df);
 
         if subset == "valid" and validBatchSize == -1:
             validBatchSize = len(df);
