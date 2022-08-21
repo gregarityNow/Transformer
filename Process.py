@@ -35,7 +35,7 @@ def read_data_felix(opt):
     for subset in ("valid","train"):
         df = df[df.subset == subset]
         setattr(opt, "src_data_" + subset, list(df[df.subset==subset].defn.values))
-        setattr(opt, "trg_data" + subset, list(df[df.subset==subset].term.values))
+        setattr(opt, "trg_data_" + subset, list(df[df.subset==subset].term.values))
 
 
 
