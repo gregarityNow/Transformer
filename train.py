@@ -115,7 +115,7 @@ def train_model(model, opt):
                 opt.sched.step()
 
             _, validLoss = getPredsAndLoss(model, srcValid,trgValid, trg_inputValid, src_maskValid, trg_maskValid,opt, isTrain = False)
-            losses.append({"epoch":epoch + i/opt.train_len,"train_loss":loss,"valid_loss":validLoss})
+            losses.append({"epoch":epoch + i/opt.train_len,"train_loss":loss.item(),"valid_loss":validLoss.item()})
             print("trainLoss",loss.item(),"walidLoss",validLoss.item());
             
             total_loss += loss.item()
