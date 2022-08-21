@@ -34,8 +34,8 @@ def read_data_felix(opt):
     # df = df[df.defn.str.len() < np.percentile(df.defn.apply(lambda x: len(x)),3)]
     for subset in ("valid","train"):
         df = df[df.subset == subset]
-        opt["src_data_" + subset] = list(df[df.subset==subset].defn.values)
-        opt["trg_data" + subset] = list(df[df.subset==subset].term.values)
+        setattr(opt, "src_data_" + subset, list(df[df.subset==subset].defn.values))
+        setattr(opt, "trg_data" + subset, list(df[df.subset==subset].term.values))
 
 
 
@@ -86,7 +86,7 @@ def create_dataset(opt, SRC, TRG, validBatchSize = -1):
 
     datasets = {}
     for subset in ("train","valid"):
-        raw_data = {'src' : [line for line in opt["src_data_"+subset]], 'trg': [line for line in opt["trg_data_"+subset]]}
+        raw_data = {'src' : [line for line in getattr(opt,"src_data_"+subset)], 'trg': [line for line in getattr(opt,"trg_data_"+subset)]}
         df = pd.DataFrame(raw_data, columns=["src", "trg"])
 
         if subset == "valid" and validBatchSize == -1:
