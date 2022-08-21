@@ -263,6 +263,7 @@ def yesno(response):
 def promptNextAction(model, opt, SRC, TRG):
 
     saved_once = 1 if opt.load_weights is not None or opt.checkpoint > 0 else 0
+    print("salvidor ramirez",saved_once, opt.load_weights, opt.checkpoint)
     
     if opt.load_weights:
         dst = opt.load_weights
