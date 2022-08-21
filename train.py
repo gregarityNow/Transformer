@@ -86,7 +86,12 @@ def train_model(model, opt):
 
 
     def shouldBreak(myl):
-        return not (myl[-3:] == sorted(myl[-3:], reverse=True) or (myl[-3] - myl[-1]) / myl[-3] > 0.05)
+        try:
+            shouldBreak = not (myl[-3:] == sorted(myl[-3:], reverse=True) or (myl[-10] - myl[-1]) / myl[-10] > 0.05)
+            return shouldBreak
+        except:
+            return False
+
                  
     for epoch in range(opt.epochs):
 
