@@ -42,7 +42,7 @@ def create_fields(opt, camOrLetterTokenizer):
     SRC = data.Field(lower=True, tokenize=camOrLetterTokenizer.cam_tokenize)
     if opt.load_weights:
         try:
-            print("loading presaved fields...")
+            print("loading presaved fields...",f'{opt.weightSaveLoc}/SRC.pkl')
             SRC = pickle.load(open(f'{opt.weightSaveLoc}/SRC.pkl', 'rb'))
             TRG = pickle.load(open(f'{opt.weightSaveLoc}/TRG.pkl', 'rb'))
         except:
