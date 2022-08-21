@@ -49,8 +49,9 @@ def create_fields(opt, camOrLetterTokenizer):
             SRC = pickle.load(open(srcPath, 'rb'))
             print(os.path.exists(trgPath), trgPath)
             TRG = pickle.load(open(trgPath, 'rb'))
-        except:
+        except Exception as e:
             print("error opening SRC.pkl and TXT.pkl field files, please ensure they are in " + opt.weightSaveLoc + "/")
+            raise(e)
             quit()
     return (SRC, TRG)
 
