@@ -56,6 +56,16 @@ def loadTokenizerAndModel(name, loadFinetunedModels = False, modelToo = False):
     # tokModDict[techName]["model"] = model
     return tok, model
 
+def getPredsAndLoss(model, src,trg,  trg_input, src_mask, trg_mask, opt, isTrain = True):
+    preds = model(src, trg_input, src_mask, trg_mask)
+    print("predis", preds.shape);
+    ys = trg[:, 1:].contiguous().view(-1)
+    if isTrain:
+        opt.optimizer.zero_grad()
+    loss = F.cross_entropy(preds.view(-1, preds.size(-1)), ys, ignore_index=opt.trg_pad)
+    return preds, loss
+
+
 def train_model(model, opt):
     
     print("training model...")
@@ -63,6 +73,11 @@ def train_model(model, opt):
     start = time.time()
     if opt.checkpoint > 0:
         cptime = time.time()
+
+    # srcValid = validSrc.transpose(0, 1)
+    # trgValid = validTrg.transpose(0, 1)
+    # trg_inputValid = trgValid[:, :-1]
+    # src_maskValid, trg_maskValid = create_masks(srcValid, trg_inputValid, opt)
                  
     for epoch in range(opt.epochs):
 
@@ -81,18 +96,22 @@ def train_model(model, opt):
 
             src = batch.src.transpose(0,1)
             trg = batch.trg.transpose(0,1)
+
+            print(src);
+            print(trg);
+            print(src.shape, trg.shape)
+            exit()
             trg_input = trg[:, :-1]
             # src_mask, trg_mask = create_masks(src, trg_input, None)
             src_mask, trg_mask = create_masks(src, trg_input, opt)
-            preds = model(src, trg_input, src_mask, trg_mask)
-            print("predis",preds.shape);
-            ys = trg[:, 1:].contiguous().view(-1)
-            opt.optimizer.zero_grad()
-            loss = F.cross_entropy(preds.view(-1, preds.size(-1)), ys, ignore_index=opt.trg_pad)
+
+            preds, loss = getPredsAndLoss(model, src,trg, trg_input, src_mask, trg_mask,opt, isTrain = True)
             loss.backward()
             opt.optimizer.step()
             if opt.SGDR == True: 
                 opt.sched.step()
+
+            # _, validLoss = getPredsAndLoss(model, srcValid,trgValid, trg_inputValid, src_maskValid, trg_maskValid,opt, isTrain = False)
             
             total_loss += loss.item()
             
