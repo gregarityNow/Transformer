@@ -75,7 +75,7 @@ def train_model(model, opt):
             torch.save(model.state_dict(), 'weights/model_weights')
                     
         for i, batch in enumerate(opt.train):
-            print("batch",i)
+            print("batch",i,opt.train_len)
             # for i, batch in enumerate(train_iter):
             #     if i == 1: break;
 
