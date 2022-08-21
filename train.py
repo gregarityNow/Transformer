@@ -84,6 +84,9 @@ def train_model(model, opt):
 
     losses = []
 
+
+    def shouldBreak(myl):
+        return not (myl[-3:] == sorted(myl[-3:], reverse=True) or (myl[-3] - myl[-1]) / myl[-3] > 0.05)
                  
     for epoch in range(opt.epochs):
 
@@ -134,6 +137,10 @@ def train_model(model, opt):
             if opt.checkpoint > 0 and ((time.time()-cptime)//60) // opt.checkpoint >= 1:
                 torch.save(model.state_dict(), 'weights/model_weights')
                 cptime = time.time()
+
+            if shouldBreak([loss["train_loss"] for loss in losses]):
+                print("progress has stopped; breaking")
+                break;
    
    
         print("%dm: epoch %d [%s%s]  %d%%  loss = %.3f\nepoch %d complete, loss = %.03f" %\
