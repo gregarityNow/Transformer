@@ -81,6 +81,9 @@ def train_model(model, opt):
         trg_inputValid = trgValid[:, :-1]
         src_maskValid, trg_maskValid = create_masks(srcValid, trg_inputValid, opt)
         break;
+
+    losses = []
+
                  
     for epoch in range(opt.epochs):
 
@@ -100,8 +103,7 @@ def train_model(model, opt):
             src = batch.src.transpose(0,1)
             trg = batch.trg.transpose(0,1)
 
-            print("trainshape",src.shape, trg.shape)
-            exit()
+            # print("trainshape",src.shape, trg.shape)
             trg_input = trg[:, :-1]
             # src_mask, trg_mask = create_masks(src, trg_input, None)
             src_mask, trg_mask = create_masks(src, trg_input, opt)
@@ -113,6 +115,7 @@ def train_model(model, opt):
                 opt.sched.step()
 
             _, validLoss = getPredsAndLoss(model, srcValid,trgValid, trg_inputValid, src_maskValid, trg_maskValid,opt, isTrain = False)
+            losses.append({"epoch":epoch + i/opt.train_len,"train_loss":loss,"valid_loss":validLoss})
             print("trainLoss",loss.item(),"walidLoss",validLoss.item());
             
             total_loss += loss.item()
@@ -135,6 +138,8 @@ def train_model(model, opt):
    
         print("%dm: epoch %d [%s%s]  %d%%  loss = %.3f\nepoch %d complete, loss = %.03f" %\
         ((time.time() - start)//60, epoch + 1, "".join('#'*(100//5)), "".join(' '*(20-(100//5))), 100, avg_loss, epoch + 1, avg_loss))
+    with open("/mnt/beegfs/home/herron/neo_scf_herron/stage/out/dump/byChar/losses.pickle","wb") as fp:
+        pickle.dump(losses, fp);
 
 #
 def get_synonym(word, SRC):
