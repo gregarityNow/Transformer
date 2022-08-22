@@ -53,11 +53,12 @@ def k_best_outputs(outputs, out, log_scores, i, k):
     return outputs, log_scores
 
 def beam_search(src, model, SRC, TRG, opt):
-
+    import pickle
     outputs, e_outputs, log_scores = init_vars(src, model, SRC, TRG, opt)
     eos_tok = TRG.vocab.stoi['<eos>']
     src_mask = (src != SRC.vocab.stoi['<pad>']).unsqueeze(-2)
     ind = None
+
     for i in range(2, opt.max_len):
         print("iggle",i)
         trg_mask = nopeak_mask(i)
@@ -79,7 +80,7 @@ def beam_search(src, model, SRC, TRG, opt):
                 sentence_lengths[i] = vec[1] # Position of first end symbol
 
         num_finished_sentences = len([s for s in sentence_lengths if s > 0])
-
+        print("numster",num_finished_sentences)
         if num_finished_sentences == opt.k:
             alpha = 0.7
             div = 1/(sentence_lengths.type_as(log_scores)**alpha)
