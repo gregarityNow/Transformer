@@ -84,8 +84,9 @@ def beam_search(src, model, SRC, TRG, opt):
         if num_finished_sentences == opt.k:
             alpha = 0.7
             div = 1/(sentence_lengths.type_as(log_scores)**alpha)
-            _, ind = torch.max(log_scores * div, 1)
+            nose, ind = torch.max(log_scores * div, 1)
             ind = ind.data[0]
+            print("nose",nose);
             break
     
     if ind is None:
