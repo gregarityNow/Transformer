@@ -60,6 +60,8 @@ def beam_search(src, model, SRC, TRG, opt):
     ind = None
     print("shoutputs",outputs)
 
+    constructionsAndLikelihoods = []
+
     for i in range(2, opt.max_len):
         print("iggle",i)
         trg_mask = nopeak_mask(i)
@@ -79,6 +81,10 @@ def beam_search(src, model, SRC, TRG, opt):
             print("wec",vec,i);
             if sentence_lengths[i]==0: # First end symbol has not been found yet
                 sentence_lengths[i] = vec[1] # Position of first end symbol
+        alpha = 0.7
+        div = 1 / (sentence_lengths.type_as(log_scores) ** alpha)
+        likeScores = log_scores * div
+        print("likeScores",likeScores)
 
         num_finished_sentences = len([s for s in sentence_lengths if s > 0])
         print("numster",num_finished_sentences, "legno",sentence_lengths)
