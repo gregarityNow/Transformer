@@ -58,13 +58,13 @@ def beam_search(src, model, SRC, TRG, opt):
     eos_tok = TRG.vocab.stoi['<eos>']
     src_mask = (src != SRC.vocab.stoi['<pad>']).unsqueeze(-2)
     ind = None
+    print("shoutputs",outputs)
 
     for i in range(2, opt.max_len):
         print("iggle",i)
         trg_mask = nopeak_mask(i)
 
-        out = model.out(model.decoder(outputs[:,:i],
-        e_outputs, src_mask, trg_mask))
+        out = model.out(model.decoder(outputs[:,:i],e_outputs, src_mask, trg_mask))
 
         out = F.softmax(out, dim=-1)
     
