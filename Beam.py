@@ -2,7 +2,7 @@ import torch
 from .Batch import nopeak_mask
 import torch.nn.functional as F
 import math
-
+from numpy import inf
 
 def init_vars(src, model, SRC, TRG, opt):
     
@@ -52,6 +52,10 @@ def k_best_outputs(outputs, out, log_scores, i, k):
     
     return outputs, log_scores
 
+def outputAndLengthToTerm(TRG, output, length):
+    return ' '.join([TRG.vocab.itos[tok] for tok in output[1:length]])
+
+
 def beam_search(src, model, SRC, TRG, opt):
     import pickle
     outputs, e_outputs, log_scores = init_vars(src, model, SRC, TRG, opt)
@@ -83,8 +87,11 @@ def beam_search(src, model, SRC, TRG, opt):
                 sentence_lengths[i] = vec[1] # Position of first end symbol
         alpha = 0.7
         div = 1 / (sentence_lengths.type_as(log_scores) ** alpha)
-        likeScores = log_scores * div
-        print("likeScores",likeScores)
+        likeScores = (log_scores * div).numpy()[0]
+        for wordIndex, score in enumerate(likeScores):
+            if score == -inf: continue;
+            word = outputAndLengthToTerm(TRG, outputs[wordIndex],sentence_lengths[wordIndex])
+            constructionsAndLikelihoods.append((word, score));
 
         num_finished_sentences = len([s for s in sentence_lengths if s > 0])
         print("numster",num_finished_sentences, "legno",sentence_lengths)
@@ -96,13 +103,16 @@ def beam_search(src, model, SRC, TRG, opt):
             ind = ind.data[0]
             print("nose",nose);
             break
+
+    print("here we are, constructionsAndLikelihoods",constructionsAndLikelihoods);
     
     if ind is None:
         length = (outputs[0]==eos_tok).nonzero()[0]
-        return ' '.join([TRG.vocab.itos[tok] for tok in outputs[0][1:length]])
-    
+        outputWord = outputAndLengthToTerm(outputs, length)
+        return outputWord
+
     else:
         length = (outputs[ind]==eos_tok).nonzero()[0]
-        return ' '.join([TRG.vocab.itos[tok] for tok in outputs[ind][1:length]])
+        return outputAndLengthToTerm(TRG, outputs[ind],length)
 
 
