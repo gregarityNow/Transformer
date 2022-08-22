@@ -59,7 +59,7 @@ def beam_search(src, model, SRC, TRG, opt):
     src_mask = (src != SRC.vocab.stoi['<pad>']).unsqueeze(-2)
     ind = None
     for i in range(2, opt.max_len):
-    
+        print("iggle",i)
         trg_mask = nopeak_mask(i)
 
         out = model.out(model.decoder(outputs[:,:i],
@@ -68,6 +68,8 @@ def beam_search(src, model, SRC, TRG, opt):
         out = F.softmax(out, dim=-1)
     
         outputs, log_scores = k_best_outputs(outputs, out, log_scores, i, opt.k)
+        #todo@feh: what are the outputs then?
+        print("outputtation",outputs)
         
         ones = (outputs==eos_tok).nonzero() # Occurrences of end symbols for all input sentences.
         sentence_lengths = torch.zeros(len(outputs), dtype=torch.long).cuda()
@@ -92,3 +94,5 @@ def beam_search(src, model, SRC, TRG, opt):
     else:
         length = (outputs[ind]==eos_tok).nonzero()[0]
         return ' '.join([TRG.vocab.itos[tok] for tok in outputs[ind][1:length]])
+
+
