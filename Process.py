@@ -28,10 +28,10 @@ def read_data(opt):
             print("error: '" + opt.trg_data + "' file not found")
             quit()
 
-def read_data_felix(opt, quickie = False):
+def read_data_felix(opt):
     #todo@feh: create df cleaning func ugh
     df = pickLoad("/mnt/beegfs/projects/neo_scf_herron/stage/out/dump/combined_dfFinal.pickle")
-    if quickie:
+    if opt.quickie:
         df = df.sample(100);
     # df = df[df.defn.str.len() < np.percentile(df.defn.apply(lambda x: len(x)),3)]
     for subset in ("valid","train"):
