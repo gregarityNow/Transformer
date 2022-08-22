@@ -28,13 +28,16 @@ def read_data(opt):
             print("error: '" + opt.trg_data + "' file not found")
             quit()
 
-def read_data_felix(opt):
+def read_data_felix(opt, quickie = False):
     #todo@feh: create df cleaning func ugh
     df = pickLoad("/mnt/beegfs/projects/neo_scf_herron/stage/out/dump/combined_dfFinal.pickle")
+    if quickie:
+        df = df.sample(100);
     # df = df[df.defn.str.len() < np.percentile(df.defn.apply(lambda x: len(x)),3)]
     for subset in ("valid","train"):
         setattr(opt, "src_data_" + subset, list(df[df.subset==subset].defn.values))
         setattr(opt, "trg_data_" + subset, list(df[df.subset==subset].term.values))
+    return df
 
 
 
@@ -93,7 +96,7 @@ def create_dataset(opt, SRC, TRG, validBatchSize = -1):
             validBatchSize = len(df);
             print("validBatchSize",validBatchSize)
 
-        mask = (df['src'].str.count(' ') < opt.max_strlen) & (df['trg'].str.count(' ') < opt.max_strlen)
+        mask = (df['src'].str.count(' ') < opt.max_len) & (df['trg'].str.count(' ') < opt.max_len)
         df = df.loc[mask]
 
         df.to_csv("translate_transformer_temp.csv", index=False)

@@ -153,6 +153,7 @@ def train_model(model, opt):
     with open("/mnt/beegfs/home/herron/neo_scf_herron/stage/out/dump/byChar/losses.pickle","wb") as fp:
         pickle.dump(losses, fp);
 
+
 #
 def get_synonym(word, SRC):
     return 0;
@@ -199,6 +200,10 @@ def translate(opt, model, SRC, TRG):
         translated.append(translate_sentence(sentence + '.', model, opt, SRC, TRG).capitalize())
 
     return (' '.join(translated))
+
+def evaluate(opt, model, SRC, TRG, df, suffix):
+
+    df["byChar_" + suffix] = df.apply(lambda row: translate_sentence(row.defn, model, opt, SRC, TRG),axis=1);
 
 
 def translateMain():
@@ -256,7 +261,7 @@ def mainFelix():
     parser.add_argument("-weightSaveLoc",type=str,default = "/mnt/beegfs/home/herron/neo_scf_herron/stage/out/dump/byChar/weights")
     parser.add_argument('-load_weights', default=False)
     parser.add_argument('-create_valset', action='store_true')
-    parser.add_argument('-max_strlen', type=int, default=80)
+    parser.add_argument('-max_len', type=int, default=80)
     parser.add_argument('-floyd', action='store_true')
     parser.add_argument('-checkpoint', type=int, default=0)
     opt = parser.parse_args()
@@ -265,7 +270,7 @@ def mainFelix():
     if opt.device == 0:
         assert torch.cuda.is_available()
 
-    read_data_felix(opt)
+    df = read_data_felix(opt)
     tokenizer, mod = loadTokenizerAndModel("camem")
     camOrLetterTokenizer = CamOrLetterTokenizer(tokenizer)
     SRC, TRG = create_fields(opt, camOrLetterTokenizer)
@@ -286,10 +291,11 @@ def mainFelix():
         pickle.dump(SRC, open('weights/SRC.pkl', 'wb'))
         pickle.dump(TRG, open('weights/TRG.pkl', 'wb'))
 
+    evaluate(opt, model, SRC, TRG, df[df.subset=="valid"],"_preTrain")
     train_model(model, opt)
+    evaluate(opt, model, SRC, TRG, df[df.subset == "valid"], "_postTrain")
 
-    if opt.floyd is False:
-        promptNextAction(model, opt, SRC, TRG)
+    saveModel(model, opt, SRC, TRG, df)
 
 def yesno(response):
     while True:
@@ -298,42 +304,23 @@ def yesno(response):
         else:
             return response
 
-def promptNextAction(model, opt, SRC, TRG):
+def saveModel(model, opt, SRC, TRG, df):
 
     saved_once = 1 if opt.load_weights or opt.checkpoint > 0 else 0
     print("salvidor ramirez",saved_once, opt.load_weights, opt.checkpoint)
 
 
-    while True:
-        dst = opt.weightSaveLoc
+    dst = opt.weightSaveLoc
 
-        pathlib.Path(dst).mkdir(exist_ok=True,parents=True);
-        print("saving weights to " + dst + "/...")
-        torch.save(model.state_dict(), f'{dst}/model_weights')
-        pickle.dump(SRC, open(f'{dst}/SRC.pkl', 'wb'))
-        pickle.dump(TRG, open(f'{dst}/TRG.pkl', 'wb'))
+    pathlib.Path(dst).mkdir(exist_ok=True,parents=True);
+    print("saving weights to " + dst + "/...")
+    torch.save(model.state_dict(), f'{dst}/model_weights')
+    pickle.dump(SRC, open(f'{dst}/SRC.pkl', 'wb'))
+    pickle.dump(TRG, open(f'{dst}/TRG.pkl', 'wb'))
+    pickle.dump(df, open(f'{dst}/postTune.pkl','wb'));
 
-        print("weights and field pickles saved to " + dst)
+    print("weights and field pickles saved to " + dst)
 
-        res = yesno(input("train for more epochs? [y/n] : "))
-        if res == 'y':
-            while True:
-                epochs = input("type number of epochs to train for : ")
-                try:
-                    epochs = int(epochs)
-                except:
-                    print("input not a number")
-                    continue
-                if epochs < 1:
-                    print("epochs must be at least 1")
-                    continue
-                else:
-                    break
-            opt.epochs = epochs
-            train_model(model, opt)
-        else:
-            print("exiting program...")
-            break
 
     # for asking about further training use while true loop, and return
 if __name__ == "__main__":

@@ -57,17 +57,13 @@ def outputAndLengthToTerm(TRG, output, length):
 
 
 def beam_search(src, model, SRC, TRG, opt):
-    import pickle
     outputs, e_outputs, log_scores = init_vars(src, model, SRC, TRG, opt)
     eos_tok = TRG.vocab.stoi['<eos>']
     src_mask = (src != SRC.vocab.stoi['<pad>']).unsqueeze(-2)
-    ind = None
-    print("shoutputs",outputs)
 
     constructionsAndLikelihoods = []
 
     for i in range(2, opt.max_len):
-        print("iggle",i)
         trg_mask = nopeak_mask(i)
 
         out = model.out(model.decoder(outputs[:,:i],e_outputs, src_mask, trg_mask))
@@ -76,13 +72,11 @@ def beam_search(src, model, SRC, TRG, opt):
     
         outputs, log_scores = k_best_outputs(outputs, out, log_scores, i, opt.k)
         #todo@feh: what are the outputs then?
-        print("outputtation",outputs)
-        
+
         ones = (outputs==eos_tok).nonzero() # Occurrences of end symbols for all input sentences.
         sentence_lengths = torch.zeros(len(outputs), dtype=torch.long).cuda()
         for vec in ones:
             i = vec[0]
-            print("wec",vec,i);
             if sentence_lengths[i]==0: # First end symbol has not been found yet
                 sentence_lengths[i] = vec[1] # Position of first end symbol
         alpha = 0.7
@@ -93,26 +87,14 @@ def beam_search(src, model, SRC, TRG, opt):
             word = outputAndLengthToTerm(TRG, outputs[wordIndex],sentence_lengths[wordIndex])
             constructionsAndLikelihoods.append((word, score));
 
-        num_finished_sentences = len([s for s in sentence_lengths if s > 0])
-        print("numster",num_finished_sentences, "legno",sentence_lengths)
 
-        if num_finished_sentences == opt.k:
-            alpha = 0.7
-            div = 1/(sentence_lengths.type_as(log_scores)**alpha)
-            nose, ind = torch.max(log_scores * div, 1)
-            ind = ind.data[0]
-            print("nose",nose);
-            break
-
-    print("here we are, constructionsAndLikelihoods",constructionsAndLikelihoods);
-    
-    if ind is None:
-        length = (outputs[0]==eos_tok).nonzero()[0]
-        outputWord = outputAndLengthToTerm(outputs, length)
-        return outputWord
-
+    if len(constructionsAndLikelihoods) > 0:
+        print("here we are, constructionsAndLikelihoods",constructionsAndLikelihoods);
+        bestWord = max(constructionsAndLikelihoods,key=lambda tup: tup[1])[0]
     else:
-        length = (outputs[ind]==eos_tok).nonzero()[0]
-        return outputAndLengthToTerm(TRG, outputs[ind],length)
+        print("ain't got nothing");
+        bestWord = "N/A"
+    return bestWord
+
 
 
