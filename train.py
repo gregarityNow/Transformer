@@ -318,9 +318,14 @@ def mainFelix():
 
     # df = evaluate(opt, model, SRC, TRG, df[df.subset=="valid"],"_preTrain")
     train_model(model, opt)
+    saveModel(model, opt, SRC, TRG, df)
     df = evaluate(opt, model, SRC, TRG, df[df.subset == "valid"], "_postTrain")
 
-    saveModel(model, opt, SRC, TRG, df)
+    dst = opt.weightSaveLoc
+    pickle.dump(df, open(f'{dst}/postTune' + ("_quickie" if opt.quickie else "") + '.pkl','wb'));
+    print("df is at",f'{dst}/postTune' + ("_quickie" if opt.quickie else "") + '.pkl')
+
+
 
 def yesno(response):
     while True:
@@ -342,8 +347,6 @@ def saveModel(model, opt, SRC, TRG, df):
     torch.save(model.state_dict(), f'{dst}/model_weights' + ("_quickie" if opt.quickie else ""))
     pickle.dump(SRC, open(f'{dst}/SRC.pkl', 'wb'))
     pickle.dump(TRG, open(f'{dst}/TRG.pkl', 'wb'))
-    pickle.dump(df, open(f'{dst}/postTune' + ("_quickie" if opt.quickie else "") + '.pkl','wb'));
-    print("df is at",f'{dst}/postTune' + ("_quickie" if opt.quickie else "") + '.pkl')
 
     print("weights and field pickles saved to " + dst)
 
