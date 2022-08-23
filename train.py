@@ -329,6 +329,9 @@ def mainFelix():
     if opt.doTrain:
         train_model(model, opt)
         saveModel(model, opt, SRC, TRG)
+    else:
+        SRC = pickle.load(open('weights/SRC.pkl', 'rb'))
+        TRG = pickle.load(open('weights/TRG.pkl', 'rb'))
     if opt.doEval:
         dfValid = df[df.subset == "valid"]
         df = evaluate(opt, model, SRC, TRG, dfValid, "_postTrain")
