@@ -143,9 +143,9 @@ def train_model(model, opt):
                 torch.save(model.state_dict(), 'weights/model_weights')
                 cptime = time.time()
 
-            if shouldBreak([loss["train_loss"] for loss in losses]):
-                print("progress has stopped; breaking")
-                break;
+        if shouldBreak([loss["train_loss"] for loss in losses]):
+            print("progress has stopped; breaking")
+            break;
    
    
         print("%dm: epoch %d [%s%s]  %d%%  loss = %.3f\nepoch %d complete, loss = %.03f" %\
