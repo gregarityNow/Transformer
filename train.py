@@ -87,10 +87,16 @@ def train_model(model, opt):
 
     def shouldBreak(myl):
         try:
-            shouldBreak = not (myl[-3:] == sorted(myl[-3:], reverse=True) or (myl[-10] - myl[-1]) / myl[-10] > 0.05)
-            return shouldBreak
+            if (myl[-1] - myl[0]) / myl[-1] > 0.05:
+            #loss at end of epoch was significantly greater than beginning of epoch; that's no good at all!
+                return True;
+            if (max(myl) - min(myl)) / max(myl) < 0.05:
+                #no loss fluctuation at all
+                return True
+            return False
         except:
             return False
+
 
                  
     for epoch in range(opt.epochs):
@@ -143,7 +149,7 @@ def train_model(model, opt):
                 torch.save(model.state_dict(), 'weights/model_weights')
                 cptime = time.time()
 
-        if shouldBreak([loss["train_loss"] for loss in losses]):
+        if shouldBreak([loss["train_loss"] for loss in losses if loss["epoch"] > epoch]):
             print("progress has stopped; breaking")
             break;
    
@@ -251,7 +257,7 @@ def mainFelix():
     parser = argparse.ArgumentParser()
     parser.add_argument('-no_cuda', action='store_true')
     parser.add_argument('-SGDR', action='store_true')
-    parser.add_argument('-epochs', type=int, default=2)
+    parser.add_argument('-epochs', type=int, default=3)
     parser.add_argument('-d_model', type=int, default=modelDim)
     parser.add_argument('-n_layers', type=int, default=6)
     parser.add_argument('-heads', type=int, default=8)
