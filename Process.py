@@ -128,7 +128,7 @@ def create_dataset(opt, SRC, TRG, validBatchSize = -1):
     opt.trg_pad = TRG.vocab.stoi['<pad>']
 
     opt.train_len = get_len(datasets["train"]["iter"])
-    print("curated")
+    print("curated", datasets["train"]["iter"])
 
     return datasets["train"]["iter"], datasets["valid"]["iter"]
 
