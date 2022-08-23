@@ -102,7 +102,6 @@ def train_model(model, opt):
             return False
 
     outPath = "/mnt/beegfs/home/herron/neo_scf_herron/stage/out/dump/byChar"
-    bestModel = None
     bestLoss = np.inf
     epoch = 0;
     while True:
@@ -113,7 +112,8 @@ def train_model(model, opt):
             ((time.time() - start)//60, epoch + 1, "".join(' '*20), 0, '...'), end='\r')
         
         if opt.checkpoint > 0:
-            torch.save(model.state_dict(), 'weights/model_weights')
+            print("each save")
+            torch.save(model.state_dict(), outPath + '/weights/model_weights')
                     
         for i, batch in enumerate(opt.train):
             print("batch",i,epoch,opt.train_len,len(batch))
@@ -224,6 +224,12 @@ def translate(opt, model, SRC, TRG):
 def evaluate(opt, model, SRC, TRG, df, suffix):
     from tqdm import tqdm
     tqdm.pandas()
+    try:
+        model.load_state_dict(torch.load(f'{opt.weightSaveLoc}/model_weights_best'))
+        print("the model now has (lowers sunglasses) best weights, ooo");
+    except:
+        print("no best weights available, no worries hoss")
+
     df = df.reset_index()
     df["byChar_" + suffix] = df.progress_apply(lambda row: translate_sentence(row.defn, model, opt, SRC, TRG, gold = row.term),axis=1)
     return df
@@ -318,7 +324,7 @@ def mainFelix():
 
     # df = evaluate(opt, model, SRC, TRG, df[df.subset=="valid"],"_preTrain")
     train_model(model, opt)
-    saveModel(model, opt, SRC, TRG, df)
+    saveModel(model, opt, SRC, TRG)
     df = evaluate(opt, model, SRC, TRG, df[df.subset == "valid"], "_postTrain")
 
     dst = opt.weightSaveLoc
@@ -334,7 +340,7 @@ def yesno(response):
         else:
             return response
 
-def saveModel(model, opt, SRC, TRG, df):
+def saveModel(model, opt, SRC, TRG):
 
     saved_once = 1 if opt.load_weights or opt.checkpoint > 0 else 0
     print("salvidor ramirez",saved_once, opt.load_weights, opt.checkpoint)
