@@ -53,7 +53,7 @@ def k_best_outputs(outputs, out, log_scores, i, k):
     return outputs, log_scores
 
 def outputAndLengthToTerm(TRG, output, length):
-    return ' '.join([TRG.vocab.itos[tok] for tok in output[1:length]])
+    return ''.join([TRG.vocab.itos[tok] for tok in output[1:length]])
 
 
 def beam_search(src, model, SRC, TRG, opt):

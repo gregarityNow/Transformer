@@ -266,7 +266,7 @@ def mainFelix():
     parser.add_argument('-max_len', type=int, default=80)
     parser.add_argument('-floyd', action='store_true')
     parser.add_argument('-checkpoint', type=int, default=0)
-    parser.add_argument('-quickie', type=int, default=1)
+    parser.add_argument('-quickie', type=int, default=0)
     opt = parser.parse_args()
 
     opt.device = 0 if opt.no_cuda is False else -1
