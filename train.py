@@ -151,7 +151,7 @@ def train_model(model, opt):
                 torch.save(model.state_dict(), 'weights/model_weights')
                 cptime = time.time()
             if validLoss < bestLoss:
-                torch.save(model.state_dict(), 'weights/model_weights/best')
+                torch.save(model.state_dict(), 'weights/model_weights_best')
                 print("saving best model woot")
                 cptime = time.time()
                 bestLoss = validLoss
