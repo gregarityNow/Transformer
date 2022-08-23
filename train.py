@@ -87,11 +87,15 @@ def train_model(model, opt):
 
     def shouldBreak(myl):
         try:
-            if (myl[-1] - myl[0]) / myl[-1] > 0.05:
+            percDiff = (myl[-1] - myl[0]) / myl[-1]
+            if percDiff > 0.05:
             #loss at end of epoch was significantly greater than beginning of epoch; that's no good at all!
+                print("endingLoss",myl[-1]," was greater than beginning loss",myl[0],"percDiff",percDiff)
                 return True;
-            if (max(myl) - min(myl)) / max(myl) < 0.05:
+            percDiffMaxMin = (max(myl) - min(myl)) / max(myl)
+            if percDiffMaxMin < 0.05:
                 #no loss fluctuation at all
+                print("no loss fluxuation",max(myl),min(myl),percDiffMaxMin)
                 return True
             return False
         except:
