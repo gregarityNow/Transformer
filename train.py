@@ -326,14 +326,10 @@ def mainFelix():
         pickle.dump(TRG, open('weights/TRG.pkl', 'wb'))
 
     if opt.doTrain:
-
-    # df = evaluate(opt, model, SRC, TRG, df[df.subset=="valid"],"_preTrain")
         train_model(model, opt)
         saveModel(model, opt, SRC, TRG)
     if opt.doEval:
         dfValid = df[df.subset == "valid"]
-        if opt.quickie:
-            dfValid = dfValid.sample(500);
         df = evaluate(opt, model, SRC, TRG, dfValid, "_postTrain")
         dst = opt.weightSaveLoc
         pickle.dump(df, open(f'{dst}/postTune' + ("_quickie" if opt.quickie else "") + '.pkl','wb'));
