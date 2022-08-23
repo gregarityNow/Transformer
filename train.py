@@ -221,7 +221,7 @@ def evaluate(opt, model, SRC, TRG, df, suffix):
     from tqdm import tqdm
     tqdm.pandas()
     df = df.reset_index()
-    df["byChar_" + suffix] = df.progress_apply(lambda row: translate_sentence(row.defn, model, opt, SRC, TRG, gold = row.term))
+    df["byChar_" + suffix] = df.progress_apply(lambda row: translate_sentence(row.defn, model, opt, SRC, TRG, gold = row.term),axis=1)
     return df
 
 
