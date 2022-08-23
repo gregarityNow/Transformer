@@ -97,7 +97,8 @@ def train_model(model, opt):
         except:
             return False
 
-
+    bestModel = None
+    bestLoss = np.inf
     epoch = 0;
     while True:
 
@@ -148,6 +149,10 @@ def train_model(model, opt):
             if opt.checkpoint > 0 and ((time.time()-cptime)//60) // opt.checkpoint >= 1:
                 torch.save(model.state_dict(), 'weights/model_weights')
                 cptime = time.time()
+            if validLoss < bestLoss:
+                torch.save(model.state_dict(), 'weights/model_weights/best')
+                cptime = time.time()
+                bestLoss = validLoss
 
         if shouldBreak([loss["train_loss"] for loss in losses if loss["epoch"] > epoch]):
             print("progress has stopped; breaking")
@@ -264,7 +269,7 @@ def mainFelix():
     parser.add_argument('-n_layers', type=int, default=6)
     parser.add_argument('-heads', type=int, default=8)
     parser.add_argument('-dropout', type=int, default=0.1)
-    parser.add_argument('-batchsize', type=int, default=150)
+    parser.add_argument('-batchsize', type=int, default=1500)
     parser.add_argument('-printevery', type=int, default=10)
     parser.add_argument('-lr', type=int, default=0.0001)
     parser.add_argument('-k', type=int, default=3)
