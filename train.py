@@ -258,6 +258,7 @@ def mainFelix():
     parser.add_argument('-batchsize', type=int, default=1500)
     parser.add_argument('-printevery', type=int, default=10)
     parser.add_argument('-lr', type=int, default=0.0001)
+    parser.add_argument('-k', type=int, default=3)
     parser.add_argument("-weightSaveLoc",type=str,default = "/mnt/beegfs/home/herron/neo_scf_herron/stage/out/dump/byChar/weights")
     parser.add_argument('-load_weights', default=False)
     parser.add_argument('-create_valset', action='store_true')
@@ -315,10 +316,10 @@ def saveModel(model, opt, SRC, TRG, df):
 
     pathlib.Path(dst).mkdir(exist_ok=True,parents=True);
     print("saving weights to " + dst + "/...")
-    torch.save(model.state_dict(), f'{dst}/model_weights')
+    torch.save(model.state_dict(), f'{dst}/model_weights' + ("_quickie" if opt.quickie else ""))
     pickle.dump(SRC, open(f'{dst}/SRC.pkl', 'wb'))
     pickle.dump(TRG, open(f'{dst}/TRG.pkl', 'wb'))
-    pickle.dump(df, open(f'{dst}/postTune.pkl','wb'));
+    pickle.dump(df, open(f'{dst}/postTune' + ("_quickie" if opt.quickie else "") + '.pkl','wb'));
 
     print("weights and field pickles saved to " + dst)
 
