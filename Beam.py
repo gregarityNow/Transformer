@@ -56,7 +56,7 @@ def outputAndLengthToTerm(TRG, output, length):
     return ''.join([TRG.vocab.itos[tok] for tok in output[1:length]])
 
 
-def beam_search(src, model, SRC, TRG, opt):
+def beam_search(src, model, SRC, TRG, opt, gold = ""):
     outputs, e_outputs, log_scores = init_vars(src, model, SRC, TRG, opt)
     eos_tok = TRG.vocab.stoi['<eos>']
     src_mask = (src != SRC.vocab.stoi['<pad>']).unsqueeze(-2)
@@ -95,10 +95,10 @@ def beam_search(src, model, SRC, TRG, opt):
             print("adding",(word, score),sentence_lengths[wordIndex])
 
     if len(constructionsAndLikelihoods) > 0:
-        print("here we are, constructionsAndLikelihoods",constructionsAndLikelihoods);
+        print("here we are,|"+gold+"|, constructionsAndLikelihoods",constructionsAndLikelihoods);
         bestWord = max(constructionsAndLikelihoods,key=lambda tup: tup[1])[0]
     else:
-        print("ain't got nothing");
+        print("ain't got nothing",gold);
         bestWord = "N/A"
     return bestWord
 

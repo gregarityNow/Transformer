@@ -147,10 +147,12 @@ def train_model(model, opt):
                  total_loss = 0
             
             if opt.checkpoint > 0 and ((time.time()-cptime)//60) // opt.checkpoint >= 1:
+                print("dumping model weights");
                 torch.save(model.state_dict(), 'weights/model_weights')
                 cptime = time.time()
             if validLoss < bestLoss:
                 torch.save(model.state_dict(), 'weights/model_weights/best')
+                print("saving best model woot")
                 cptime = time.time()
                 bestLoss = validLoss
 
@@ -187,7 +189,7 @@ def multiple_replace(dict, text):
     return regex.sub(lambda mo: dict[mo.string[mo.start():mo.end()]], text)
 
 
-def translate_sentence(sentence, model, opt, SRC, TRG):
+def translate_sentence(sentence, model, opt, SRC, TRG, gold = ""):
     model.eval()
     indexed = []
     sentence = SRC.preprocess(sentence)
@@ -200,7 +202,7 @@ def translate_sentence(sentence, model, opt, SRC, TRG):
     if opt.device == 0:
         sentence = sentence.cuda()
 
-    sentence = beam_search(sentence, model, SRC, TRG, opt)
+    sentence = beam_search(sentence, model, SRC, TRG, opt, gold = gold)
 
     return multiple_replace({' ?': '?', ' !': '!', ' .': '.', '\' ': '\'', ' ,': ','}, sentence)
 
@@ -216,7 +218,8 @@ def translate(opt, model, SRC, TRG):
 
 def evaluate(opt, model, SRC, TRG, df, suffix):
 
-    df["byChar_" + suffix] = df.defn.apply(lambda defn: translate_sentence(defn, model, opt, SRC, TRG))
+    df = df.reset_index()
+    df["byChar_" + suffix] = df.progress_apply(lambda row: translate_sentence(row.defn, model, opt, SRC, TRG, gold = row.term))
     return df
 
 
@@ -279,7 +282,7 @@ def mainFelix():
     parser.add_argument('-max_len', type=int, default=80)
     parser.add_argument('-floyd', action='store_true')
     parser.add_argument('-checkpoint', type=int, default=0)
-    parser.add_argument('-quickie', type=int, default=0)
+    parser.add_argument('-quickie', type=int, default=1)
     opt = parser.parse_args()
 
     opt.device = 0 if opt.no_cuda is False else -1
