@@ -203,7 +203,8 @@ def translate(opt, model, SRC, TRG):
 
 def evaluate(opt, model, SRC, TRG, df, suffix):
 
-    df["byChar_" + suffix] = df.apply(lambda row: translate_sentence(row.defn, model, opt, SRC, TRG),axis=1);
+    df["byChar_" + suffix] = df.defn.apply(lambda defn: translate_sentence(defn, model, opt, SRC, TRG))
+    return df
 
 
 def translateMain():
@@ -293,9 +294,9 @@ def mainFelix():
         pickle.dump(SRC, open('weights/SRC.pkl', 'wb'))
         pickle.dump(TRG, open('weights/TRG.pkl', 'wb'))
 
-    evaluate(opt, model, SRC, TRG, df[df.subset=="valid"],"_preTrain")
+    df = evaluate(opt, model, SRC, TRG, df[df.subset=="valid"],"_preTrain")
     train_model(model, opt)
-    evaluate(opt, model, SRC, TRG, df[df.subset == "valid"], "_postTrain")
+    df = evaluate(opt, model, SRC, TRG, df[df.subset == "valid"], "_postTrain")
 
     saveModel(model, opt, SRC, TRG, df)
 
@@ -320,6 +321,7 @@ def saveModel(model, opt, SRC, TRG, df):
     pickle.dump(SRC, open(f'{dst}/SRC.pkl', 'wb'))
     pickle.dump(TRG, open(f'{dst}/TRG.pkl', 'wb'))
     pickle.dump(df, open(f'{dst}/postTune' + ("_quickie" if opt.quickie else "") + '.pkl','wb'));
+    print("df is at",f'{dst}/postTune' + ("_quickie" if opt.quickie else "") + '.pkl')
 
     print("weights and field pickles saved to " + dst)
 

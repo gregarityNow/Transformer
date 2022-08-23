@@ -81,11 +81,13 @@ def beam_search(src, model, SRC, TRG, opt):
                 sentence_lengths[i] = vec[1] # Position of first end symbol
         alpha = 0.7
         div = 1 / (sentence_lengths.type_as(log_scores) ** alpha)
+        print("slen",sentence_lengths)
         likeScores = (log_scores * div).numpy()[0]
         for wordIndex, score in enumerate(likeScores):
             if score == -inf: continue;
             word = outputAndLengthToTerm(TRG, outputs[wordIndex],sentence_lengths[wordIndex])
             constructionsAndLikelihoods.append((word, score));
+            print("adding",(word, score),sentence_lengths[wordIndex])
 
 
     if len(constructionsAndLikelihoods) > 0:
