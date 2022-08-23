@@ -98,8 +98,8 @@ def train_model(model, opt):
             return False
 
 
-                 
-    for epoch in range(opt.epochs):
+    epoch = 0;
+    while True:
 
         total_loss = 0
         if opt.floyd is False:
@@ -152,6 +152,8 @@ def train_model(model, opt):
         if shouldBreak([loss["train_loss"] for loss in losses if loss["epoch"] > epoch]):
             print("progress has stopped; breaking")
             break;
+        else:
+            epoch += 1;
    
    
         print("%dm: epoch %d [%s%s]  %d%%  loss = %.3f\nepoch %d complete, loss = %.03f" %\
@@ -262,7 +264,7 @@ def mainFelix():
     parser.add_argument('-n_layers', type=int, default=6)
     parser.add_argument('-heads', type=int, default=8)
     parser.add_argument('-dropout', type=int, default=0.1)
-    parser.add_argument('-batchsize', type=int, default=1500)
+    parser.add_argument('-batchsize', type=int, default=150)
     parser.add_argument('-printevery', type=int, default=10)
     parser.add_argument('-lr', type=int, default=0.0001)
     parser.add_argument('-k', type=int, default=3)
