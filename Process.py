@@ -31,8 +31,10 @@ def read_data(opt):
 def read_data_felix(opt):
     #todo@feh: create df cleaning func ugh
     df = pickLoad("/mnt/beegfs/projects/neo_scf_herron/stage/out/dump/combined_dfFinal.pickle")
-    if opt.quickie:
+    if opt.quickie == 1:
         df = df.sample(100);
+    elif opt.quickie > 1:
+        df = df.sample(min(len(df),opt.quickie));
     # df = df[df.defn.str.len() < np.percentile(df.defn.apply(lambda x: len(x)),3)]
     for subset in ("valid","train"):
         setattr(opt, "src_data_" + subset, list(df[df.subset==subset].defn.values))
