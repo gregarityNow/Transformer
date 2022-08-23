@@ -333,6 +333,7 @@ def mainFelix():
     else:
         SRC = pickle.load(open(f'{dst}/SRC.pkl', 'rb'))
         TRG = pickle.load(open(f'{dst}/TRG.pkl', 'rb'))
+        model = get_model(opt, len(SRC.vocab), len(TRG.vocab))
     if opt.doEval:
         dfValid = df[df.subset == "valid"]
         df = evaluate(opt, model, SRC, TRG, dfValid, "_postTrain")
