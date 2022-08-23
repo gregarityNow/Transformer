@@ -229,8 +229,8 @@ def evaluate(opt, model, SRC, TRG, df, suffix):
         print("tryna load",f'{opt.weightSaveLoc}/model_weights_best')
         model.load_state_dict(torch.load(f'{opt.weightSaveLoc}/model_weights_best'))
         print("the model now has (lowers sunglasses) best weights, ooo");
-    except:
-        print("no best weights available, no worries hoss")
+    except Exception as e:
+        print("no best weights available, no worries hoss",e)
 
     df = df.reset_index()
     df["byChar_" + suffix] = df.progress_apply(lambda row: translate_sentence(row.defn, model, opt, SRC, TRG, gold = row.term),axis=1)
