@@ -294,7 +294,7 @@ def mainFelix():
         pickle.dump(SRC, open('weights/SRC.pkl', 'wb'))
         pickle.dump(TRG, open('weights/TRG.pkl', 'wb'))
 
-    df = evaluate(opt, model, SRC, TRG, df[df.subset=="valid"],"_preTrain")
+    # df = evaluate(opt, model, SRC, TRG, df[df.subset=="valid"],"_preTrain")
     train_model(model, opt)
     df = evaluate(opt, model, SRC, TRG, df[df.subset == "valid"], "_postTrain")
 
