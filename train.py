@@ -226,6 +226,7 @@ def evaluate(opt, model, SRC, TRG, df, suffix):
     from tqdm import tqdm
     tqdm.pandas()
     try:
+        print("tryna load",f'{opt.weightSaveLoc}/model_weights_best')
         model.load_state_dict(torch.load(f'{opt.weightSaveLoc}/model_weights_best'))
         print("the model now has (lowers sunglasses) best weights, ooo");
     except:
