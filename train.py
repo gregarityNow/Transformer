@@ -156,8 +156,9 @@ def train_model(model, opt):
                 torch.save(model.state_dict(),  outPath + 'weights/model_weights')
                 cptime = time.time()
             if validLoss < bestLoss:
-                torch.save(model.state_dict(), outPath + '/weights/model_weights_best')
-                print("saving best model woot", outPath + '/weights/model_weights_best')
+                bestPath = outPath + '/weights/model_weights_best' + ("_quickie" if opt.quickie else "");
+                torch.save(model.state_dict(), bestPath)
+                print("saving best model woot", bestPath)
                 cptime = time.time()
                 bestLoss = validLoss
 
@@ -170,7 +171,7 @@ def train_model(model, opt):
    
         print("%dm: epoch %d [%s%s]  %d%%  loss = %.3f\nepoch %d complete, loss = %.03f" %\
         ((time.time() - start)//60, epoch + 1, "".join('#'*(100//5)), "".join(' '*(20-(100//5))), 100, avg_loss, epoch + 1, avg_loss))
-    with open(outPath + "/losses.pickle","wb") as fp:
+    with open(outPath + "/losses" + ("_quickie" if opt.quickie else "") + ".pickle","wb") as fp:
         pickle.dump(losses, fp);
 
 
@@ -295,6 +296,8 @@ def mainFelix():
     parser.add_argument('-floyd', action='store_true')
     parser.add_argument('-checkpoint', type=int, default=0)
     parser.add_argument('-quickie', type=int, default=1)
+    parser.add_argument('-doTrain', type=int, default=1)
+    parser.add_argument('-doEval', type=int, default=1)
     opt = parser.parse_args()
 
     opt.device = 0 if opt.no_cuda is False else -1
@@ -322,14 +325,19 @@ def mainFelix():
         pickle.dump(SRC, open('weights/SRC.pkl', 'wb'))
         pickle.dump(TRG, open('weights/TRG.pkl', 'wb'))
 
-    # df = evaluate(opt, model, SRC, TRG, df[df.subset=="valid"],"_preTrain")
-    train_model(model, opt)
-    saveModel(model, opt, SRC, TRG)
-    df = evaluate(opt, model, SRC, TRG, df[df.subset == "valid"], "_postTrain")
+    if opt.doTrain:
 
-    dst = opt.weightSaveLoc
-    pickle.dump(df, open(f'{dst}/postTune' + ("_quickie" if opt.quickie else "") + '.pkl','wb'));
-    print("df is at",f'{dst}/postTune' + ("_quickie" if opt.quickie else "") + '.pkl')
+    # df = evaluate(opt, model, SRC, TRG, df[df.subset=="valid"],"_preTrain")
+        train_model(model, opt)
+        saveModel(model, opt, SRC, TRG)
+    if opt.doEval:
+        dfValid = df[df.subset == "valid"]
+        if opt.quickie:
+            dfValid = dfValid.sample(500);
+        df = evaluate(opt, model, SRC, TRG, dfValid, "_postTrain")
+        dst = opt.weightSaveLoc
+        pickle.dump(df, open(f'{dst}/postTune' + ("_quickie" if opt.quickie else "") + '.pkl','wb'));
+        print("df is at",f'{dst}/postTune' + ("_quickie" if opt.quickie else "") + '.pkl')
 
 
 
