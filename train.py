@@ -104,7 +104,7 @@ def train_model(model, opt):
             torch.save(model.state_dict(), 'weights/model_weights')
                     
         for i, batch in enumerate(opt.train):
-            print("batch",i,opt.train_len)
+            print("batch",i,opt.train_len,len(batch))
             # for i, batch in enumerate(train_iter):
             #     if i == 1: break;
 
@@ -119,7 +119,7 @@ def train_model(model, opt):
             preds, loss = getPredsAndLoss(model, src,trg, trg_input, src_mask, trg_mask,opt, isTrain = True)
             loss.backward()
             opt.optimizer.step()
-            if opt.SGDR == True: 
+            if opt.SGDR == True:
                 opt.sched.step()
 
             _, validLoss = getPredsAndLoss(model, srcValid,trgValid, trg_inputValid, src_maskValid, trg_maskValid,opt, isTrain = False)
