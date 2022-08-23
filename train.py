@@ -313,6 +313,7 @@ def mainFelix():
     # create_dataset_spam()
     model = get_model(opt, len(SRC.vocab), len(TRG.vocab))
     print("moodely")
+    dst = opt.weightSaveLoc
 
     opt.optimizer = torch.optim.Adam(model.parameters(), lr=opt.lr, betas=(0.9, 0.98), eps=1e-9)
     if opt.SGDR == True:
@@ -330,12 +331,12 @@ def mainFelix():
         train_model(model, opt)
         saveModel(model, opt, SRC, TRG)
     else:
-        SRC = pickle.load(open('weights/SRC.pkl', 'rb'))
-        TRG = pickle.load(open('weights/TRG.pkl', 'rb'))
+        SRC = pickle.load(open(f'{dst}/SRC.pkl', 'rb'))
+        TRG = pickle.load(open(f'{dst}/TRG.pkl', 'rb'))
     if opt.doEval:
         dfValid = df[df.subset == "valid"]
         df = evaluate(opt, model, SRC, TRG, dfValid, "_postTrain")
-        dst = opt.weightSaveLoc
+
         pickle.dump(df, open(f'{dst}/postTune' + ("_quickie" if opt.quickie else "") + '.pkl','wb'));
         print("df is at",f'{dst}/postTune' + ("_quickie" if opt.quickie else "") + '.pkl')
 
