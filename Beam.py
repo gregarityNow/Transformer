@@ -62,6 +62,7 @@ def beam_search(src, model, SRC, TRG, opt):
     src_mask = (src != SRC.vocab.stoi['<pad>']).unsqueeze(-2)
 
     constructionsAndLikelihoods = []
+    seenWords = set()
 
     for i in range(2, opt.max_len):
         trg_mask = nopeak_mask(i)
@@ -86,7 +87,11 @@ def beam_search(src, model, SRC, TRG, opt):
         for wordIndex, score in enumerate(likeScores):
             if score == -inf: continue;
             word = outputAndLengthToTerm(TRG, outputs[wordIndex],sentence_lengths[wordIndex])
+            if word in seenWords:
+                print("evicted!",word);
+                continue;
             constructionsAndLikelihoods.append((word, score));
+            seenWords.add(word);
             print("adding",(word, score),sentence_lengths[wordIndex])
 
 
