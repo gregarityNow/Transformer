@@ -88,12 +88,11 @@ def beam_search(src, model, SRC, TRG, opt):
             if score == -inf: continue;
             word = outputAndLengthToTerm(TRG, outputs[wordIndex],sentence_lengths[wordIndex])
             if word in seenWords:
-                print("evicted!",word);
+                # print("evicted!",word);
                 continue;
             constructionsAndLikelihoods.append((word, score));
             seenWords.add(word);
             print("adding",(word, score),sentence_lengths[wordIndex])
-
 
     if len(constructionsAndLikelihoods) > 0:
         print("here we are, constructionsAndLikelihoods",constructionsAndLikelihoods);
