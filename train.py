@@ -97,6 +97,7 @@ def train_model(model, opt):
         except:
             return False
 
+    outPath = "/mnt/beegfs/home/herron/neo_scf_herron/stage/out/dump/byChar"
     bestModel = None
     bestLoss = np.inf
     epoch = 0;
@@ -148,11 +149,11 @@ def train_model(model, opt):
             
             if opt.checkpoint > 0 and ((time.time()-cptime)//60) // opt.checkpoint >= 1:
                 print("dumping model weights");
-                torch.save(model.state_dict(), 'weights/model_weights')
+                torch.save(model.state_dict(),  outPath + 'weights/model_weights')
                 cptime = time.time()
             if validLoss < bestLoss:
-                torch.save(model.state_dict(), 'weights/model_weights_best')
-                print("saving best model woot")
+                torch.save(model.state_dict(), outPath + '/weights/model_weights_best')
+                print("saving best model woot", outPath + '/weights/model_weights_best')
                 cptime = time.time()
                 bestLoss = validLoss
 
@@ -165,7 +166,7 @@ def train_model(model, opt):
    
         print("%dm: epoch %d [%s%s]  %d%%  loss = %.3f\nepoch %d complete, loss = %.03f" %\
         ((time.time() - start)//60, epoch + 1, "".join('#'*(100//5)), "".join(' '*(20-(100//5))), 100, avg_loss, epoch + 1, avg_loss))
-    with open("/mnt/beegfs/home/herron/neo_scf_herron/stage/out/dump/byChar/losses.pickle","wb") as fp:
+    with open(outPath + "/losses.pickle","wb") as fp:
         pickle.dump(losses, fp);
 
 
