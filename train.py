@@ -179,7 +179,7 @@ def train_model(model, opt, camemMod = None, camemTok = None):
    
         print("%dm: epoch %d [%s%s]  %d%%  loss = %.3f\nepoch %d complete, loss = %.03f" %\
         ((time.time() - start)//60, epoch + 1, "".join('#'*(100//5)), "".join(' '*(20-(100//5))), 100, avg_loss, epoch + 1, avg_loss))
-    with open(outPath + "../losses" + ("_quickie" if opt.quickie else "") + ".pickle","wb") as fp:
+    with open(outPath + "/../losses" + ("_quickie" if opt.quickie else "") + ".pickle","wb") as fp:
         pickle.dump(losses, fp);
 
 
