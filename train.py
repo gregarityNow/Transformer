@@ -105,7 +105,7 @@ def train_model(model, opt, camemMod = None, camemTok = None):
         except:
             return False
 
-    outPath = "/mnt/beegfs/home/herron/neo_scf_herron/stage/out/dump/byChar"
+    outPath = opt.weightSaveLoc#"/mnt/beegfs/home/herron/neo_scf_herron/stage/out/dump/byChar"
     bestLoss = np.inf
     epoch = 0;
     while True:
@@ -117,7 +117,7 @@ def train_model(model, opt, camemMod = None, camemTok = None):
         
         if opt.checkpoint > 0:
             print("each save")
-            torch.save(model.state_dict(), outPath + '/weights/model_weights')
+            torch.save(model.state_dict(), outPath + '/model_weights')
                     
         for i, batch in enumerate(opt.train):
             print("batch",i,epoch,opt.train_len,len(batch))
@@ -157,10 +157,10 @@ def train_model(model, opt, camemMod = None, camemTok = None):
             
             if opt.checkpoint > 0 and ((time.time()-cptime)//60) // opt.checkpoint >= 1:
                 print("dumping model weights");
-                torch.save(model.state_dict(),  outPath + 'weights/model_weights')
+                torch.save(model.state_dict(),  outPath + '/model_weights')
                 cptime = time.time()
             if validLoss < bestLoss:
-                bestPath = outPath + '/weights/model_weights_best' + ("_quickie" if opt.quickie else "");
+                bestPath = outPath + '/model_weights_best' + ("_quickie" if opt.quickie else "");
                 torch.save(model.state_dict(), bestPath)
                 print("saving best model woot", bestPath)
                 cptime = time.time()
@@ -179,7 +179,7 @@ def train_model(model, opt, camemMod = None, camemTok = None):
    
         print("%dm: epoch %d [%s%s]  %d%%  loss = %.3f\nepoch %d complete, loss = %.03f" %\
         ((time.time() - start)//60, epoch + 1, "".join('#'*(100//5)), "".join(' '*(20-(100//5))), 100, avg_loss, epoch + 1, avg_loss))
-    with open(outPath + "/losses" + ("_quickie" if opt.quickie else "") + ".pickle","wb") as fp:
+    with open(outPath + "../losses" + ("_quickie" if opt.quickie else "") + ".pickle","wb") as fp:
         pickle.dump(losses, fp);
 
 
@@ -248,7 +248,7 @@ def evaluate(opt, model, SRC, TRG, df, suffix):
 def translateMain():
     parser = argparse.ArgumentParser()
     parser.add_argument('-load_weights', default=True)
-    parser.add_argument("-weightSaveLoc",type=str,default = "/mnt/beegfs/home/herron/neo_scf_herron/stage/out/dump/byChar/weights")
+    parser.add_argument("-weightSaveLoc",type=str,default = "/mnt/beegfs/home/herron/neo_scf_herron/stage/out/dump/byChar/weights/")
     parser.add_argument('-k', type=int, default=3)
     parser.add_argument('-max_len', type=int, default=80)
     parser.add_argument('-d_model', type=int, default=modelDim)
@@ -298,7 +298,7 @@ def mainFelix():
     parser.add_argument('-printevery', type=int, default=10)
     parser.add_argument('-lr', type=int, default=0.0001)
     parser.add_argument('-k', type=int, default=3)
-    parser.add_argument("-weightSaveLoc",type=str,default = "/mnt/beegfs/home/herron/neo_scf_herron/stage/out/dump/byChar/weights")
+    parser.add_argument("-weightSaveLoc",type=str,default = "/mnt/beegfs/home/herron/neo_scf_herron/stage/out/dump/byChar/weights/")
     parser.add_argument('-load_weights', default=False)
     parser.add_argument('-create_valset', action='store_true')
     parser.add_argument('-max_len', type=int, default=80)
