@@ -393,7 +393,7 @@ def mainFelixCamemLayer():
     if opt.device == 0:
         assert torch.cuda.is_available()
 
-    camemTok, camemMod = loadTokenizerAndModel("camem", modelToo=True)
+    camemTok, camemMod = loadTokenizerAndModel("camem", modelToo=True, hiddenStates=True)
     df = read_data_felix(opt)
     camOrLetterTokenizer = CamOrLetterTokenizer(camemTok)
     SRC, TRG = create_fields(opt, camOrLetterTokenizer)
