@@ -57,25 +57,9 @@ def loadTokenizerAndModel(name, loadFinetunedModels = False, modelToo = False, h
     return tok, model
 
 def getPredsAndLoss(model, src,trg,  trg_input, src_mask, trg_mask, opt, isTrain = True, camemModel = None, camemTok = None):
-    print("norse",type(src),src.shape,trg.shape);
-    with open("norse.pickle","wb") as fp:
-        pickle.dump(src,fp);
-    if camemModel is not None:
-        outputs = []
-        with torch.no_grad():
-            for sampleIndex in range(len(src)):
-                samp = src[sampleIndex].reshape(-1,1);
-                print("samp",samp.shape);
-                output = camemModel(samp)[1][-1].squeeze()
-                print("output")
-                print(output.shape);
-                print(type(output))
-                outputs.append(output)
-                token_ids = camemTok.encode("bonjour oui", return_tensors='pt')
-                bonjour = camemModel(token_ids.cuda())[1][-1].squeeze()
-                print("bonjour",bonjour.shape, len(token_ids));
-        srcCamem = torch.concat(outputs);
-
+    # print("norse",type(src),src.shape,trg.shape);
+    # with open("norse.pickle","wb") as fp:
+    #     pickle.dump(src,fp);
 
     preds = model(src, trg_input, src_mask, trg_mask)
     ys = trg[:, 1:].contiguous().view(-1)
