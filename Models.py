@@ -109,6 +109,7 @@ def get_model(opt, src_vocab, trg_vocab, camemModel = None):
     assert opt.dropout < 1
 
     if camemModel is not None:
+        print("getting extended model")
         model = TransformerCamembertLayer(trg_vocab, opt.d_model, opt.n_layers, opt.heads, opt.dropout, camemModel)
     else:
         model = Transformer(src_vocab, trg_vocab, opt.d_model, opt.n_layers, opt.heads, opt.dropout)
