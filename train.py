@@ -60,13 +60,15 @@ def getPredsAndLoss(model, src,trg,  trg_input, src_mask, trg_mask, opt, isTrain
     print("norse",type(src),src.shape);
     with open("norse.pickle","wb") as fp:
         pickle.dump(src,fp);
-    # if camemModel is not None:
-    #     with torch.no_grad():
-    #         output = camemModel(token_ids.cuda())[1][-1].squeeze()
-    #         return output
-    #
-    #         df["camemLayer"] = df.defn.apply(getFinalLayer)
+    if camemModel is not None:
+        outputs = []
+        with torch.no_grad():
+            output = camemModel()[1][-1].squeeze()
+            outputs.append(output)
+        srcCamem = torch.concat(outputs);
+
     print(src[0],src[:,0]);
+    print(type(srcCamem),srcCamem.shape);
     exit()
     preds = model(src, trg_input, src_mask, trg_mask)
     print("predis", preds.shape);
