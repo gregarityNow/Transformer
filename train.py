@@ -66,7 +66,7 @@ def getPredsAndLoss(model, src,trg,  trg_input, src_mask, trg_mask, opt, isTrain
     #         return output
     #
     #         df["camemLayer"] = df.defn.apply(getFinalLayer)
-    print(src[0]);
+    print(src[0],src[:,0]);
     exit()
     preds = model(src, trg_input, src_mask, trg_mask)
     print("predis", preds.shape);
