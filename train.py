@@ -66,7 +66,9 @@ def getPredsAndLoss(model, src,trg,  trg_input, src_mask, trg_mask, opt, isTrain
             for sampleIndex in range(len(src)):
                 samp = src[sampleIndex]
                 print("samp",samp.shape);
-                output = camemModel(samp)[1][-1].squeeze()
+                output = camemModel(samp)
+                print("output",output.shape);
+                output = output[1][-1].squeeze()
                 outputs.append(output)
         srcCamem = torch.concat(outputs);
 
