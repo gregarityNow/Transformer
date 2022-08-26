@@ -31,9 +31,9 @@ def read_data(opt):
 def read_data_felix(opt, allTerms = False):
     #todo@feh: create df cleaning func ugh
     if allTerms:
-        df = pickLoad("/mnt/beegfs/projects/neo_scf_herron/stage/out/dump/combined_dfFinal.pickle")
-    else:
         df = pickLoad("/mnt/beegfs/projects/neo_scf_herron/stage/out/dump/wiktionnaire_df_allWords.pickle")
+    else:
+        df = pickLoad("/mnt/beegfs/projects/neo_scf_herron/stage/out/dump/combined_dfFinal.pickle")
     if opt.quickie == 1:
         df = df.sample(100);
     elif opt.quickie > 1:
