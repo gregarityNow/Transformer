@@ -19,7 +19,7 @@ class Encoder(nn.Module):
         self.norm = Norm(d_model)
     def forward(self, src, mask):
         x = self.embed(src)
-        print("embedded",x.shape, src.shape); #embedded torch.Size([2, 56, 768]) torch.Size([2, 56])
+        # print("embedded",x.shape, src.shape); #embedded torch.Size([2, 56, 768]) torch.Size([2, 56])
         try:
             x = self.pe(x)
         except Exception as e:
@@ -28,8 +28,7 @@ class Encoder(nn.Module):
         for i in range(self.N):
             x = self.layers[i](x, mask)
         norm = self.norm(x)
-        print("normus")
-        exit();
+        # print("normus")
         return norm
 
 
