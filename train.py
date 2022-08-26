@@ -389,7 +389,6 @@ def mainFelixCamemLayer():
     # create_dataset_spam()
     model = get_model(opt, len(SRC.vocab), len(TRG.vocab), camemModel = camemMod)
     print("moodely",model.state_dict().keys())
-    exit()
     dst = opt.weightSaveLoc
 
     opt.optimizer = torch.optim.Adam(model.parameters(), lr=opt.lr, betas=(0.9, 0.98), eps=1e-9)
@@ -410,7 +409,7 @@ def mainFelixCamemLayer():
     else:
         SRC = pickle.load(open(f'{dst}/SRC.pkl', 'rb'))
         TRG = pickle.load(open(f'{dst}/TRG.pkl', 'rb'))
-        model = get_model(opt, len(SRC.vocab), len(TRG.vocab))
+        model = get_model(opt, len(SRC.vocab), len(TRG.vocab), camemModel=camemMod)
     if opt.doEval:
         dfValid = df[df.subset == "valid"]
         df = evaluate(opt, model, SRC, TRG, dfValid, "_postTrain")
