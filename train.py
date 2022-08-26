@@ -57,14 +57,15 @@ def loadTokenizerAndModel(name, loadFinetunedModels = False, modelToo = False, h
     return tok, model
 
 def getPredsAndLoss(model, src,trg,  trg_input, src_mask, trg_mask, opt, isTrain = True, camemModel = None, camemTok = None):
-    print("norse",type(src),src.shape);
+    print("norse",type(src),src.shape,trg.shape);
     with open("norse.pickle","wb") as fp:
         pickle.dump(src,fp);
     if camemModel is not None:
         outputs = []
         with torch.no_grad():
-            output = camemModel()[1][-1].squeeze()
-            outputs.append(output)
+            for sampleIndex in range(len(src)):
+                output = camemModel(src[sampleIndex])[1][-1].squeeze()
+                outputs.append(output)
         srcCamem = torch.concat(outputs);
 
     print(src[0],src[:,0]);
