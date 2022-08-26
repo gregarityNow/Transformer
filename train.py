@@ -64,6 +64,7 @@ def getPredsAndLoss(model, src,trg,  trg_input, src_mask, trg_mask, opt, isTrain
     #         return output
     #
     #         df["camemLayer"] = df.defn.apply(getFinalLayer)
+    exit()
     preds = model(src, trg_input, src_mask, trg_mask)
     print("predis", preds.shape);
     ys = trg[:, 1:].contiguous().view(-1)
