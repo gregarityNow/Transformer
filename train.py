@@ -73,8 +73,8 @@ def getPredsAndLoss(model, src,trg,  trg_input, src_mask, trg_mask, opt, isTrain
                 outputs.append(output)
         srcCamem = torch.concat(outputs);
 
-    print(src[0],src[:,0]);
-    print(type(srcCamem),srcCamem.shape);
+
+    print("shmoyoho",srcCamem.shape,src.shape);
     exit()
     preds = model(src, trg_input, src_mask, trg_mask)
     print("predis", preds.shape);
