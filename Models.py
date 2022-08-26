@@ -3,6 +3,7 @@ import torch.nn as nn
 from .Layers import EncoderLayer, DecoderLayer
 from .Embed import Embedder, PositionalEncoder
 from .Sublayers import Norm
+from torch.autograd import Variable
 import copy
 
 def get_clones(module, N):
@@ -67,8 +68,9 @@ class EncoderCamemLayer(nn.Module):
         self.camemModel = camemModel
     def forward(self, src, mask):
         x = self.camemModel(src)[1][-1]
-        print("encoded x",x.shape);
-        exit()
+        print("bafore",x.shape)
+        x = Variable(x, requires_grad=False)
+        print("after",x.shape)
         for i in range(self.N):
             x = self.layers[i](x, mask)
         return self.norm(x)
