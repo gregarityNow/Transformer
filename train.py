@@ -385,6 +385,7 @@ def mainFelixCamemLayer():
     if opt.hack:
         runType += "_hack"
     opt.weightSaveLoc = "/mnt/beegfs/home/herron/neo_scf_herron/stage/out/dump/" + runType + "/weights"
+    pathlib.Path(opt.weightSaveLoc).mkdir(exist_ok=True,parents=True)
 
     opt.device = 0 if opt.no_cuda is False else -1
     if opt.device == 0:
