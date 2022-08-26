@@ -18,7 +18,7 @@ class Encoder(nn.Module):
         self.norm = Norm(d_model)
     def forward(self, src, mask):
         x = self.embed(src)
-        print("embedded",x.shape, src.shape);
+        print("embedded",x.shape, src.shape); #embedded torch.Size([2, 56, 768]) torch.Size([2, 56])
         try:
             x = self.pe(x)
         except Exception as e:
@@ -31,11 +31,14 @@ class Encoder(nn.Module):
         exit();
         return norm
 
+
+
+
 class TransformerCamembertLayer(nn.Module):
-    def __init__(self, trg_vocab, d_model, N, heads, dropout):
+    def __init__(self, trg_vocab, d_model, N, heads, dropout, camemModel):
         super().__init__()
         #(src_vocab, d_model, N, heads, dropout)
-        self.encoder = EncoderCamemLayer(768, d_model, N, heads, dropout)
+        self.encoder = EncoderCamemLayer(768, d_model, N, heads, dropout, camemModel=camemModel)
         self.decoder = Decoder(trg_vocab, d_model, N, heads, dropout)
         self.out = nn.Linear(d_model, trg_vocab)
     def forward(self, src, trg, src_mask, trg_mask):
@@ -54,16 +57,16 @@ class TransformerCamembertLayer(nn.Module):
         return output
 
 class EncoderCamemLayer(nn.Module):
-    def __init__(self, camemHiddenSize, d_model, N, heads, dropout):
+    def __init__(self, camemHiddenSize, d_model, N, heads, dropout, camemModel):
         super().__init__()
         assert camemHiddenSize==d_model
         self.N = N
         self.pe = PositionalEncoder(d_model, dropout=dropout)
         self.layers = get_clones(EncoderLayer(d_model, heads, dropout), N)
         self.norm = Norm(d_model)
-    def forward(self, camemInnerLayer, mask):
-        print("embedded",camemInnerLayer.shape)
-        x = camemInnerLayer
+        self.camemModel = camemModel
+    def forward(self, src, mask):
+        x = self.camemModel(src)[1][-1]
         for i in range(self.N):
             x = self.layers[i](x, mask)
         return self.norm(x)
@@ -99,13 +102,13 @@ class Transformer(nn.Module):
 
 
 
-def get_model(opt, src_vocab, trg_vocab, camLayer = False):
+def get_model(opt, src_vocab, trg_vocab, camemModel = None):
     
     assert opt.d_model % opt.heads == 0
     assert opt.dropout < 1
 
-    if camLayer:
-        model = TransformerCamembertLayer(trg_vocab, opt.d_model, opt.n_layers, opt.heads, opt.dropout)
+    if camemModel is not None:
+        model = TransformerCamembertLayer(trg_vocab, opt.d_model, opt.n_layers, opt.heads, opt.dropout, camemModel)
     else:
         model = Transformer(src_vocab, trg_vocab, opt.d_model, opt.n_layers, opt.heads, opt.dropout)
        

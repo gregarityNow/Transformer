@@ -402,7 +402,7 @@ def mainFelixCamemLayer():
     SRC, TRG = create_fields(opt, camOrLetterTokenizer)
     opt.train, opt.valid = create_dataset(opt, SRC, TRG)
     # create_dataset_spam()
-    model = get_model(opt, len(SRC.vocab), len(TRG.vocab), camLayer = True)
+    model = get_model(opt, len(SRC.vocab), len(TRG.vocab), camemModel = camemMod)
     print("moodely")
     dst = opt.weightSaveLoc
 
