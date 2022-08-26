@@ -79,7 +79,7 @@ def getPredsAndLoss(model, src,trg,  trg_input, src_mask, trg_mask, opt, isTrain
     return preds, loss
 
 
-def train_model(model, opt):
+def train_model(model, opt, camemMod = None, camemTok = None):
     
     print("training model...")
     model.train()
@@ -142,13 +142,13 @@ def train_model(model, opt):
             # src_mask, trg_mask = create_masks(src, trg_input, None)
             src_mask, trg_mask = create_masks(src, trg_input, opt)
 
-            preds, loss = getPredsAndLoss(model, src,trg, trg_input, src_mask, trg_mask,opt, isTrain = True)
+            preds, loss = getPredsAndLoss(model, src,trg, trg_input, src_mask, trg_mask,opt, isTrain = True, camemModel=camemMod, camemTok=camemTok)
             loss.backward()
             opt.optimizer.step()
             if opt.SGDR == True:
                 opt.sched.step()
 
-            _, validLoss = getPredsAndLoss(model, srcValid,trgValid, trg_inputValid, src_maskValid, trg_maskValid,opt, isTrain = False)
+            _, validLoss = getPredsAndLoss(model, srcValid,trgValid, trg_inputValid, src_maskValid, trg_maskValid,opt, isTrain = False, camemModel=camemMod, camemTok=camemTok)
             losses.append({"epoch":epoch + i/opt.train_len,"train_loss":loss.item(),"valid_loss":validLoss.item()})
             print("trainLoss",loss.item(),"walidLoss",validLoss.item());
             
@@ -390,9 +390,9 @@ def mainFelixCamemLayer():
     if opt.device == 0:
         assert torch.cuda.is_available()
 
-    tokenizer, mod = loadTokenizerAndModel("camem")
+    camemTok, camemMod = loadTokenizerAndModel("camem")
     df = read_data_felix(opt)
-    camOrLetterTokenizer = CamOrLetterTokenizer(tokenizer)
+    camOrLetterTokenizer = CamOrLetterTokenizer(camemTok)
     SRC, TRG = create_fields(opt, camOrLetterTokenizer)
     opt.train, opt.valid = create_dataset(opt, SRC, TRG)
     # create_dataset_spam()
@@ -413,7 +413,7 @@ def mainFelixCamemLayer():
         pickle.dump(TRG, open('weights/TRG.pkl', 'wb'))
 
     if opt.doTrain:
-        train_model(model, opt)
+        train_model(model, opt, camemMod=camemMod, camemTok=camemTok);
         saveModel(model, opt, SRC, TRG)
     else:
         SRC = pickle.load(open(f'{dst}/SRC.pkl', 'rb'))
