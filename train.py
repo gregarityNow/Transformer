@@ -409,6 +409,7 @@ def mainFelixCamemLayer():
     else:
         SRC = pickle.load(open(f'{dst}/SRC.pkl', 'rb'))
         TRG = pickle.load(open(f'{dst}/TRG.pkl', 'rb'))
+        print("srcy",dst)
         model = get_model(opt, len(SRC.vocab), len(TRG.vocab), camemModel=camemMod)
     if opt.doEval:
         dfValid = df[df.subset == "valid"]
