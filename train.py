@@ -388,7 +388,8 @@ def mainFelixCamemLayer():
     opt.train, opt.valid = create_dataset(opt, SRC, TRG)
     # create_dataset_spam()
     model = get_model(opt, len(SRC.vocab), len(TRG.vocab), camemModel = camemMod)
-    print("moodely")
+    print("moodely",model.state_dict().keys())
+    exit()
     dst = opt.weightSaveLoc
 
     opt.optimizer = torch.optim.Adam(model.parameters(), lr=opt.lr, betas=(0.9, 0.98), eps=1e-9)
@@ -430,7 +431,6 @@ def saveModel(model, opt, SRC, TRG):
 
     saved_once = 1 if opt.load_weights or opt.checkpoint > 0 else 0
     print("salvidor ramirez",saved_once, opt.load_weights, opt.checkpoint)
-
 
     dst = opt.weightSaveLoc
 
