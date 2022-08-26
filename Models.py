@@ -67,7 +67,7 @@ class EncoderCamemLayer(nn.Module):
         self.camemModel = camemModel
     def forward(self, src, mask):
         x = self.camemModel(src)[1][-1]
-        print("encoded x",x);
+        print("encoded x",x.shape);
         exit()
         for i in range(self.N):
             x = self.layers[i](x, mask)
