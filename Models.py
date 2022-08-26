@@ -26,7 +26,10 @@ class Encoder(nn.Module):
             raise Exception("wubble du" + str(e))
         for i in range(self.N):
             x = self.layers[i](x, mask)
-        return self.norm(x)
+        norm = self.norm(x)
+        print("normus")
+        exit();
+        return norm
 
 class TransformerCamembertLayer(nn.Module):
     def __init__(self, trg_vocab, d_model, N, heads, dropout):
