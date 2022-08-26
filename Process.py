@@ -28,9 +28,12 @@ def read_data(opt):
             print("error: '" + opt.trg_data + "' file not found")
             quit()
 
-def read_data_felix(opt):
+def read_data_felix(opt, allTerms = False):
     #todo@feh: create df cleaning func ugh
-    df = pickLoad("/mnt/beegfs/projects/neo_scf_herron/stage/out/dump/combined_dfFinal.pickle")
+    if allTerms:
+        df = pickLoad("/mnt/beegfs/projects/neo_scf_herron/stage/out/dump/combined_dfFinal.pickle")
+    else:
+        df = pickLoad("/mnt/beegfs/projects/neo_scf_herron/stage/out/dump/wiktionnaire_df_allWords.pickle")
     if opt.quickie == 1:
         df = df.sample(100);
     elif opt.quickie > 1:

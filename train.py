@@ -69,7 +69,7 @@ def getPredsAndLoss(model, src,trg,  trg_input, src_mask, trg_mask, opt, isTrain
     return preds, loss
 
 
-def train_model(model, opt, camemMod = None, camemTok = None):
+def train_model(model, opt, camemMod = None, camemTok = None, numEpochsShouldBreak = 3, bestLoss = np.inf):
     
     print("training model...")
     model.train()
@@ -106,7 +106,6 @@ def train_model(model, opt, camemMod = None, camemTok = None):
             return False
 
     outPath = opt.weightSaveLoc#"/mnt/beegfs/home/herron/neo_scf_herron/stage/out/dump/byChar"
-    bestLoss = np.inf
     epoch = 0;
     while True:
 
@@ -168,7 +167,7 @@ def train_model(model, opt, camemMod = None, camemTok = None):
 
         if shouldBreak([loss["train_loss"] for loss in losses if loss["epoch"] > epoch]):
             shouldBroke += 1
-            if shouldBroke == 5 or opt.quickie:
+            if shouldBroke == numEpochsShouldBreak or opt.quickie:
                 print("progress has stopped; breaking")
                 break;
         else:
@@ -181,6 +180,8 @@ def train_model(model, opt, camemMod = None, camemTok = None):
         ((time.time() - start)//60, epoch + 1, "".join('#'*(100//5)), "".join(' '*(20-(100//5))), 100, avg_loss, epoch + 1, avg_loss))
     with open(outPath + "/../losses" + ("_quickie" if opt.quickie else "") + ".pickle","wb") as fp:
         pickle.dump(losses, fp);
+
+    return bestLoss
 
 
 #
@@ -337,7 +338,7 @@ def mainFelix():
         pickle.dump(TRG, open('weights/TRG.pkl', 'wb'))
 
     if opt.doTrain:
-        train_model(model, opt)
+        train_model(model, opt, numEpochsShouldBreak = 5)
         saveModel(model, opt, SRC, TRG)
     else:
         SRC = pickle.load(open(f'{dst}/SRC.pkl', 'rb'))
@@ -365,7 +366,6 @@ def mainFelixCamemLayer():
     parser.add_argument('-printevery', type=int, default=10)
     parser.add_argument('-lr', type=int, default=0.0001)
     parser.add_argument('-k', type=int, default=3)
-    parser.add_argument("-weightSaveLoc",type=str,default = "/mnt/beegfs/home/herron/neo_scf_herron/stage/out/dump/byCharCamemLayer/weights")
     parser.add_argument('-load_weights', default=False)
     parser.add_argument('-create_valset', action='store_true')
     parser.add_argument('-max_len', type=int, default=80)
@@ -375,42 +375,60 @@ def mainFelixCamemLayer():
     parser.add_argument('-doTrain', type=int, default=1)
     parser.add_argument('-doEval', type=int, default=1)
     parser.add_argument('-camemLayer',type=int,default=1)
+    parser.add_argument("-hack",type=int,default=0)
     opt = parser.parse_args()
+
+    if opt.camemLayer:
+        runType = "byCharCamemLayer"
+    else:
+        runType = "byChar"
+    if opt.hack:
+        runType += "_hack"
+    opt.weightSaveLoc = "/mnt/beegfs/home/herron/neo_scf_herron/stage/out/dump/" + runType + "/weights"
 
     opt.device = 0 if opt.no_cuda is False else -1
     if opt.device == 0:
         assert torch.cuda.is_available()
 
     camemTok, camemMod = loadTokenizerAndModel("camem", modelToo=True, hiddenStates=True)
-    df = read_data_felix(opt)
     camOrLetterTokenizer = CamOrLetterTokenizer(camemTok)
-    SRC, TRG = create_fields(opt, camOrLetterTokenizer)
-    opt.train, opt.valid = create_dataset(opt, SRC, TRG)
-    # create_dataset_spam()
-    model = get_model(opt, len(SRC.vocab), len(TRG.vocab), camemModel = camemMod)
-    print("moodely",model.state_dict().keys())
+
     dst = opt.weightSaveLoc
-
-    opt.optimizer = torch.optim.Adam(model.parameters(), lr=opt.lr, betas=(0.9, 0.98), eps=1e-9)
-    if opt.SGDR == True:
-        opt.sched = CosineWithRestarts(opt.optimizer, T_max=opt.train_len)
-
     if opt.checkpoint > 0:
         print("model weights will be saved every %d minutes and at end of epoch to directory weights/" % (opt.checkpoint))
 
-    if opt.load_weights and opt.floyd is not None:
-        os.mkdir('weights')
-        pickle.dump(SRC, open('weights/SRC.pkl', 'wb'))
-        pickle.dump(TRG, open('weights/TRG.pkl', 'wb'))
 
     if opt.doTrain:
-        train_model(model, opt, camemMod=camemMod, camemTok=camemTok);
-        saveModel(model, opt, SRC, TRG)
+        read_data_felix(opt, allTerms=True)
+        SRC, TRG = create_fields(opt, camOrLetterTokenizer)
+        opt.train, opt.valid = create_dataset(opt, SRC, TRG)
+
+        pickle.dump(SRC, open(f'{dst}/SRC.pkl', 'wb'))
+        pickle.dump(TRG, open(f'{dst}/TRG.pkl', 'wb'))
+
+        model = get_model(opt, len(SRC.vocab), len(TRG.vocab), camemModel=(camemMod if opt.camemLayer else None))
+
+        opt.optimizer = torch.optim.Adam(model.parameters(), lr=opt.lr, betas=(0.9, 0.98), eps=1e-9)
+        if opt.SGDR == True:
+            opt.sched = CosineWithRestarts(opt.optimizer, T_max=opt.train_len)
+
+        print("moodely", model.state_dict().keys())
+
+        #train on all wiktionnaire data
+        bestLossInitialTraining = train_model(model, opt, camemMod=camemMod, camemTok=camemTok);
+
+        #finetune on neonyms
+        df = read_data_felix(opt, allTerms=False)
+        opt.optimizer = torch.optim.Adam(model.parameters(), lr=opt.lr*0.1, betas=(0.9, 0.98), eps=1e-9)
+        if opt.SGDR == True:
+            opt.sched = CosineWithRestarts(opt.optimizer, T_max=opt.train_len)
+        train_model(model, opt, camemMod=camemMod, camemTok=camemTok, bestLoss=bestLossInitialTraining);
     else:
         SRC = pickle.load(open(f'{dst}/SRC.pkl', 'rb'))
         TRG = pickle.load(open(f'{dst}/TRG.pkl', 'rb'))
         print("srcy",dst)
         model = get_model(opt, len(SRC.vocab), len(TRG.vocab), camemModel=camemMod)
+        df = read_data_felix(opt, allTerms=False)
     if opt.doEval:
         dfValid = df[df.subset == "valid"]
         df = evaluate(opt, model, SRC, TRG, dfValid, "_postTrain")
