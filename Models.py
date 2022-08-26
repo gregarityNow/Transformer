@@ -38,7 +38,7 @@ class TransformerCamembertLayer(nn.Module):
     def __init__(self, trg_vocab, d_model, N, heads, dropout, camemModel):
         super().__init__()
         #(src_vocab, d_model, N, heads, dropout)
-        self.encoder = EncoderCamemLayer(768, d_model, N, heads, dropout, camemModel=camemModel)
+        self.encoder = EncoderCamemLayer(768, d_model, 1, heads, dropout, camemModel=camemModel)
         self.decoder = Decoder(trg_vocab, d_model, N, heads, dropout)
         self.out = nn.Linear(d_model, trg_vocab)
     def forward(self, src, trg, src_mask, trg_mask):
@@ -67,6 +67,8 @@ class EncoderCamemLayer(nn.Module):
         self.camemModel = camemModel
     def forward(self, src, mask):
         x = self.camemModel(src)[1][-1]
+        print("encoded x",x);
+        exit()
         for i in range(self.N):
             x = self.layers[i](x, mask)
         return self.norm(x)
