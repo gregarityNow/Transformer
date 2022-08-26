@@ -168,7 +168,7 @@ def train_model(model, opt, camemMod = None, camemTok = None):
 
         if shouldBreak([loss["train_loss"] for loss in losses if loss["epoch"] > epoch]):
             shouldBroke += 1
-            if shouldBroke == 5:
+            if shouldBroke == 5 or opt.quickie:
                 print("progress has stopped; breaking")
                 break;
         else:
