@@ -365,7 +365,7 @@ def mainFelixCamemLayer():
     parser.add_argument('-printevery', type=int, default=10)
     parser.add_argument('-lr', type=int, default=0.0001)
     parser.add_argument('-k', type=int, default=3)
-    parser.add_argument("-weightSaveLoc",type=str,default = "/mnt/beegfs/home/herron/neo_scf_herron/stage/out/dump/byCharCamemLayer/camemLayer/weights")
+    parser.add_argument("-weightSaveLoc",type=str,default = "/mnt/beegfs/home/herron/neo_scf_herron/stage/out/dump/byCharCamemLayer/weights")
     parser.add_argument('-load_weights', default=False)
     parser.add_argument('-create_valset', action='store_true')
     parser.add_argument('-max_len', type=int, default=80)
