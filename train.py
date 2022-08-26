@@ -58,12 +58,15 @@ def loadTokenizerAndModel(name, loadFinetunedModels = False, modelToo = False, h
 
 def getPredsAndLoss(model, src,trg,  trg_input, src_mask, trg_mask, opt, isTrain = True, camemModel = None, camemTok = None):
     print("norse",type(src),src.shape);
+    with open("norse.pickle","wb") as fp:
+        pickle.dump(src,fp);
     # if camemModel is not None:
     #     with torch.no_grad():
     #         output = camemModel(token_ids.cuda())[1][-1].squeeze()
     #         return output
     #
     #         df["camemLayer"] = df.defn.apply(getFinalLayer)
+    print(src[0]);
     exit()
     preds = model(src, trg_input, src_mask, trg_mask)
     print("predis", preds.shape);
