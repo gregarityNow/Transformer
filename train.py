@@ -17,7 +17,7 @@ from .Tokenize import CamOrLetterTokenizer
 
 modelDim = 768
 
-def loadTokenizerAndModel(name, loadFinetunedModels = False, modelToo = False):
+def loadTokenizerAndModel(name, loadFinetunedModels = False, modelToo = False, hiddenStates = False):
     import torch
     techName = ""
     if name == "xlmRob":
@@ -41,14 +41,14 @@ def loadTokenizerAndModel(name, loadFinetunedModels = False, modelToo = False):
         checkpoints.sort(key = lambda cp: int(cp.split("-")[1]))
         latestCheckpoint = rootPath + "/" + checkpoints[-1]
         print("loading model from",latestCheckpoint)
-        model = AutoModelForMaskedLM.from_pretrained(latestCheckpoint)
+        model = AutoModelForMaskedLM.from_pretrained(latestCheckpoint, output_hidden_states=hiddenStates)
     else:
     # if name in tokModDict:
     #     return tokModDict[name]["tok"],tokModDict[name]["model"]
         try:
-            model = AutoModelForMaskedLM.from_pretrained(techName,proxies=proxDict)
+            model = AutoModelForMaskedLM.from_pretrained(techName,proxies=proxDict, output_hidden_states=hiddenStates)
         except:
-            model = AutoModelForMaskedLM.from_pretrained(techName)
+            model = AutoModelForMaskedLM.from_pretrained(techName, output_hidden_states=hiddenStates)
     device = "cuda:0" if torch.cuda.is_available() else "cpu"
     model = model.to(device)
     # tokModDict[techName] = {}
@@ -56,7 +56,14 @@ def loadTokenizerAndModel(name, loadFinetunedModels = False, modelToo = False):
     # tokModDict[techName]["model"] = model
     return tok, model
 
-def getPredsAndLoss(model, src,trg,  trg_input, src_mask, trg_mask, opt, isTrain = True):
+def getPredsAndLoss(model, src,trg,  trg_input, src_mask, trg_mask, opt, isTrain = True, camemModel = None, camemTok = None):
+    print("norse",type(src),src.shape);
+    # if camemModel is not None:
+    #     with torch.no_grad():
+    #         output = camemModel(token_ids.cuda())[1][-1].squeeze()
+    #         return output
+    #
+    #         df["camemLayer"] = df.defn.apply(getFinalLayer)
     preds = model(src, trg_input, src_mask, trg_mask)
     print("predis", preds.shape);
     ys = trg[:, 1:].contiguous().view(-1)
@@ -83,6 +90,7 @@ def train_model(model, opt):
         break;
 
     losses = []
+    shouldBroke = 0
 
 
     def shouldBreak(myl):
@@ -163,9 +171,12 @@ def train_model(model, opt):
                 bestLoss = validLoss
 
         if shouldBreak([loss["train_loss"] for loss in losses if loss["epoch"] > epoch]):
-            print("progress has stopped; breaking")
-            break;
+            shouldBroke += 1
+            if shouldBroke == 5:
+                print("progress has stopped; breaking")
+                break;
         else:
+            shouldBroke = 0;
             epoch += 1;
    
    
@@ -299,6 +310,7 @@ def mainFelix():
     parser.add_argument('-quickie', type=int, default=1)
     parser.add_argument('-doTrain', type=int, default=1)
     parser.add_argument('-doEval', type=int, default=1)
+    parser.add_argument('-camemLayer',type=int,default=0)
     opt = parser.parse_args()
 
     opt.device = 0 if opt.no_cuda is False else -1
@@ -312,6 +324,73 @@ def mainFelix():
     opt.train, opt.valid = create_dataset(opt, SRC, TRG)
     # create_dataset_spam()
     model = get_model(opt, len(SRC.vocab), len(TRG.vocab))
+    print("moodely")
+    dst = opt.weightSaveLoc
+
+    opt.optimizer = torch.optim.Adam(model.parameters(), lr=opt.lr, betas=(0.9, 0.98), eps=1e-9)
+    if opt.SGDR == True:
+        opt.sched = CosineWithRestarts(opt.optimizer, T_max=opt.train_len)
+
+    if opt.checkpoint > 0:
+        print("model weights will be saved every %d minutes and at end of epoch to directory weights/" % (opt.checkpoint))
+
+    if opt.load_weights and opt.floyd is not None:
+        os.mkdir('weights')
+        pickle.dump(SRC, open('weights/SRC.pkl', 'wb'))
+        pickle.dump(TRG, open('weights/TRG.pkl', 'wb'))
+
+    if opt.doTrain:
+        train_model(model, opt)
+        saveModel(model, opt, SRC, TRG)
+    else:
+        SRC = pickle.load(open(f'{dst}/SRC.pkl', 'rb'))
+        TRG = pickle.load(open(f'{dst}/TRG.pkl', 'rb'))
+        model = get_model(opt, len(SRC.vocab), len(TRG.vocab))
+    if opt.doEval:
+        dfValid = df[df.subset == "valid"]
+        df = evaluate(opt, model, SRC, TRG, dfValid, "_postTrain")
+
+        pickle.dump(df, open(f'{dst}/postTune' + ("_quickie" if opt.quickie else "") + '.pkl','wb'));
+        print("df is at",f'{dst}/postTune' + ("_quickie" if opt.quickie else "") + '.pkl')
+
+
+
+def mainFelixCamemLayer():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-no_cuda', action='store_true')
+    parser.add_argument('-SGDR', action='store_true')
+    parser.add_argument('-epochs', type=int, default=3)
+    parser.add_argument('-d_model', type=int, default=modelDim)
+    parser.add_argument('-n_layers', type=int, default=6)
+    parser.add_argument('-heads', type=int, default=8)
+    parser.add_argument('-dropout', type=int, default=0.1)
+    parser.add_argument('-batchsize', type=int, default=1500)
+    parser.add_argument('-printevery', type=int, default=10)
+    parser.add_argument('-lr', type=int, default=0.0001)
+    parser.add_argument('-k', type=int, default=3)
+    parser.add_argument("-weightSaveLoc",type=str,default = "/mnt/beegfs/home/herron/neo_scf_herron/stage/out/dump/byCharCamemLayer/camemLayer/weights")
+    parser.add_argument('-load_weights', default=False)
+    parser.add_argument('-create_valset', action='store_true')
+    parser.add_argument('-max_len', type=int, default=80)
+    parser.add_argument('-floyd', action='store_true')
+    parser.add_argument('-checkpoint', type=int, default=0)
+    parser.add_argument('-quickie', type=int, default=1)
+    parser.add_argument('-doTrain', type=int, default=1)
+    parser.add_argument('-doEval', type=int, default=1)
+    parser.add_argument('-camemLayer',type=int,default=1)
+    opt = parser.parse_args()
+
+    opt.device = 0 if opt.no_cuda is False else -1
+    if opt.device == 0:
+        assert torch.cuda.is_available()
+
+    tokenizer, mod = loadTokenizerAndModel("camem")
+    df = read_data_felix(opt)
+    camOrLetterTokenizer = CamOrLetterTokenizer(tokenizer)
+    SRC, TRG = create_fields(opt, camOrLetterTokenizer)
+    opt.train, opt.valid = create_dataset(opt, SRC, TRG)
+    # create_dataset_spam()
+    model = get_model(opt, len(SRC.vocab), len(TRG.vocab), camLayer = True)
     print("moodely")
     dst = opt.weightSaveLoc
 

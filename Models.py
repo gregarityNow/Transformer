@@ -27,6 +27,43 @@ class Encoder(nn.Module):
         for i in range(self.N):
             x = self.layers[i](x, mask)
         return self.norm(x)
+
+class TransformerCamembertLayer(nn.Module):
+    def __init__(self, trg_vocab, d_model, N, heads, dropout):
+        super().__init__()
+        #(src_vocab, d_model, N, heads, dropout)
+        self.encoder = EncoderCamemLayer(768, d_model, N, heads, dropout)
+        self.decoder = Decoder(trg_vocab, d_model, N, heads, dropout)
+        self.out = nn.Linear(d_model, trg_vocab)
+    def forward(self, src, trg, src_mask, trg_mask):
+        '''
+        What's the deal with this mask? todo@feh
+        :param src:
+        :param trg:
+        :param src_mask:
+        :param trg_mask:
+        :return:
+        '''
+        e_outputs = self.encoder(src, src_mask)
+        #print("DECODER")
+        d_output = self.decoder(trg, e_outputs, src_mask, trg_mask)
+        output = self.out(d_output)
+        return output
+
+class EncoderCamemLayer(nn.Module):
+    def __init__(self, camemHiddenSize, d_model, N, heads, dropout):
+        super().__init__()
+        assert camemHiddenSize==d_model
+        self.N = N
+        self.pe = PositionalEncoder(d_model, dropout=dropout)
+        self.layers = get_clones(EncoderLayer(d_model, heads, dropout), N)
+        self.norm = Norm(d_model)
+    def forward(self, camemInnerLayer, mask):
+        print("embedded",camemInnerLayer.shape)
+        x = camemInnerLayer
+        for i in range(self.N):
+            x = self.layers[i](x, mask)
+        return self.norm(x)
     
 class Decoder(nn.Module):
     def __init__(self, vocab_size, d_model, N, heads, dropout):
@@ -56,12 +93,18 @@ class Transformer(nn.Module):
         output = self.out(d_output)
         return output
 
-def get_model(opt, src_vocab, trg_vocab):
+
+
+
+def get_model(opt, src_vocab, trg_vocab, camLayer = False):
     
     assert opt.d_model % opt.heads == 0
     assert opt.dropout < 1
 
-    model = Transformer(src_vocab, trg_vocab, opt.d_model, opt.n_layers, opt.heads, opt.dropout)
+    if camLayer:
+        model = TransformerCamembertLayer(trg_vocab, opt.d_model, opt.n_layers, opt.heads, opt.dropout)
+    else:
+        model = Transformer(src_vocab, trg_vocab, opt.d_model, opt.n_layers, opt.heads, opt.dropout)
        
     if opt.load_weights:
         print("loading pretrained weights...")
@@ -88,3 +131,11 @@ class PreTrainedTokTransformer(nn.Module):
         d_output = self.decoder(trg, encoding, encoding_mask, trg_mask)
         output = self.out(d_output)
         return output
+
+
+'''
+todo@feh add a symbol at beginning (a n'importe-quoi for unknown)
+todo@feh: take the last layer of camembert
+todo@feh: pre-tune with Wiktionnaire
+perplexity w/ NLTK/Markov
+'''

@@ -35,6 +35,9 @@ def read_data_felix(opt):
         df = df.sample(100);
     elif opt.quickie > 1:
         df = df.sample(min(len(df),opt.quickie));
+
+
+    #todo@feh: if opt.camemLayer: modelCamem(df.defn)
     # df = df[df.defn.str.len() < np.percentile(df.defn.apply(lambda x: len(x)),3)]
     for subset in ("valid","train"):
         setattr(opt, "src_data_" + subset, list(df[df.subset==subset].defn.values))
@@ -52,7 +55,7 @@ def create_fields(opt, camOrLetterTokenizer):
             srcPath = f'{opt.weightSaveLoc}/SRC.pkl'
             trgPath = f'{opt.weightSaveLoc}/TRG.pkl'
             print("loading presaved fields...",srcPath)
-            print(os.path.exists(srcPath),srcPath)
+            print(os.path.exists(srcPath),srcPath)if eval
             SRC = pickle.load(open(srcPath, 'rb'))
             print(os.path.exists(trgPath), trgPath)
             TRG = pickle.load(open(trgPath, 'rb'))
