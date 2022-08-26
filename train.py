@@ -69,7 +69,7 @@ def getPredsAndLoss(model, src,trg,  trg_input, src_mask, trg_mask, opt, isTrain
     return preds, loss
 
 
-def train_model(model, opt, camemMod = None, camemTok = None, numEpochsShouldBreak = 3, bestLoss = np.inf):
+def train_model(model, opt, camemMod = None, camemTok = None, numEpochsShouldBreak = 3, bestLoss = np.inf, losses = [], epoch = 0):
     
     print("training model...")
     model.train()
@@ -85,9 +85,7 @@ def train_model(model, opt, camemMod = None, camemTok = None, numEpochsShouldBre
         src_maskValid, trg_maskValid = create_masks(srcValid, trg_inputValid, opt)
         break;
 
-    losses = []
     shouldBroke = 0
-
 
     def shouldBreak(myl):
         try:
@@ -106,7 +104,7 @@ def train_model(model, opt, camemMod = None, camemTok = None, numEpochsShouldBre
             return False
 
     outPath = opt.weightSaveLoc#"/mnt/beegfs/home/herron/neo_scf_herron/stage/out/dump/byChar"
-    epoch = 0;
+
     while True:
 
         total_loss = 0
@@ -178,10 +176,8 @@ def train_model(model, opt, camemMod = None, camemTok = None, numEpochsShouldBre
    
         print("%dm: epoch %d [%s%s]  %d%%  loss = %.3f\nepoch %d complete, loss = %.03f" %\
         ((time.time() - start)//60, epoch + 1, "".join('#'*(100//5)), "".join(' '*(20-(100//5))), 100, avg_loss, epoch + 1, avg_loss))
-    with open(outPath + "/../losses" + ("_quickie" if opt.quickie else "") + ".pickle","wb") as fp:
-        pickle.dump(losses, fp);
 
-    return bestLoss
+    return bestLoss, losses, epoch
 
 
 #
@@ -416,14 +412,17 @@ def mainFelixCamemLayer():
         print("moodely", model.state_dict().keys())
 
         #train on all wiktionnaire data
-        bestLossInitialTraining = train_model(model, opt, camemMod=camemMod, camemTok=camemTok);
+        bestLossInitialTraining, losses, lastEpoch = train_model(model, opt, camemMod=camemMod, camemTok=camemTok, numEpochsShouldBreak=5);
 
         #finetune on neonyms
         df = read_data_felix(opt, allTerms=False)
         opt.optimizer = torch.optim.Adam(model.parameters(), lr=opt.lr*0.1, betas=(0.9, 0.98), eps=1e-9)
         if opt.SGDR == True:
             opt.sched = CosineWithRestarts(opt.optimizer, T_max=opt.train_len)
-        train_model(model, opt, camemMod=camemMod, camemTok=camemTok, bestLoss=bestLossInitialTraining);
+        train_model(model, opt, camemMod=camemMod, camemTok=camemTok, bestLoss=bestLossInitialTraining, losses = losses, epoch = lastEpoch+1, numEpochsShouldBreak=2);
+
+        with open(dst + "/../losses" + ("_quickie" if opt.quickie else "") + ".pickle", "wb") as fp:
+            pickle.dump(losses, fp);
     else:
         SRC = pickle.load(open(f'{dst}/SRC.pkl', 'rb'))
         TRG = pickle.load(open(f'{dst}/TRG.pkl', 'rb'))
