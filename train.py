@@ -174,6 +174,7 @@ def train_model(model, opt, camemMod = None, camemTok = None):
         else:
             shouldBroke = 0;
             epoch += 1;
+            print("pssh we ain't brekaing!")
    
    
         print("%dm: epoch %d [%s%s]  %d%%  loss = %.3f\nepoch %d complete, loss = %.03f" %\
