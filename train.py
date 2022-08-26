@@ -72,7 +72,7 @@ def getPredsAndLoss(model, src,trg,  trg_input, src_mask, trg_mask, opt, isTrain
                 print(type(output))
                 outputs.append(output)
                 token_ids = camemTok.encode("bonjour oui", return_tensors='pt')
-                bonjour = camemModel(token_ids.cuda())[1][-1].squeeze()[0].squeeze()
+                bonjour = camemModel(token_ids.cuda())[1][-1].squeeze()
                 print("bonjour",bonjour.shape, len(token_ids));
         srcCamem = torch.concat(outputs);
 
