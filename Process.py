@@ -36,7 +36,6 @@ def read_data_felix(opt):
     elif opt.quickie > 1:
         df = df.sample(min(len(df),opt.quickie));
 
-
     #todo@feh: if opt.camemLayer: modelCamem(df.defn)
     # df = df[df.defn.str.len() < np.percentile(df.defn.apply(lambda x: len(x)),3)]
     for subset in ("valid","train"):
