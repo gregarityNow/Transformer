@@ -131,9 +131,9 @@ def create_dataset(opt, SRC, TRG, validBatchSize = -1):
         df = pd.DataFrame(raw_data, columns=["src", "trg"])
         print("deeyef",df);
 
-        if subset == "valid" and validBatchSize == -1:
-            validBatchSize = opt.batchsize#len(df);
-            print("validBatchSize",validBatchSize)
+        if True or subset == "valid" and validBatchSize == -1:
+            validBatchSize = 10#len(df);
+            print("validBatchSize",10)
 
         mask = (df['src'].str.count(' ') < opt.max_len) & (df['trg'].str.count(' ') < opt.max_len)
         df = df.loc[mask]
