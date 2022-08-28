@@ -124,14 +124,18 @@ def train_model(model, opt, camemMod = None, camemTok = None, numEpochsShouldBre
             trg_input = trg[:, :-1]
             # src_mask, trg_mask = create_masks(src, trg_input, None)
             src_mask, trg_mask = create_masks(src, trg_input, opt)
-
+            trainTime = time.time()
             preds, loss = getPredsAndLoss(model, src,trg, trg_input, src_mask, trg_mask,opt, isTrain = True, camemModel=camemMod, camemTok=camemTok)
             loss.backward()
             opt.optimizer.step()
             if opt.SGDR == True:
                 opt.sched.step()
+            trainTime = time.time() - trainTime
+            print("did training step",trainTime)
             totalValidLoss = 0
             totalSamps = 0;
+            print("beginning walidation")
+            walidTime = time.time()
             for validBatch in opt.valid:
                 srcValid = validBatch.src.transpose(0, 1)
                 trgValid = validBatch.trg.transpose(0, 1)
@@ -141,6 +145,8 @@ def train_model(model, opt, camemMod = None, camemTok = None, numEpochsShouldBre
                 thisLoss = validLoss.item()*srcValid.shape[0]
                 totalValidLoss += thisLoss
                 totalSamps += srcValid.shape[0]
+            walidTime = time.time()-walidTime
+            print("walid ending",walidTime)
                 # print("shaka smart", srcValid.shape, trgValid.shape, thisLoss)
 
             validLoss = totalValidLoss/totalSamps
@@ -422,7 +428,7 @@ def mainFelixCamemLayer():
         print("moodely", model.state_dict().keys())
 
         #train on all wiktionnaire data
-        bestLossInitialTraining, losses, lastEpoch = train_model(model, opt, camemMod=camemMod, camemTok=camemTok, numEpochsShouldBreak=5);
+        bestLossInitialTraining, losses, lastEpoch = train_model(model, opt, camemMod=camemMod, camemTok=camemTok, numEpochsShouldBreak=2);
 
         #finetune on neonyms
         df = read_data_felix(opt, allTerms=False)
