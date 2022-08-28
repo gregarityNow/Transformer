@@ -7,7 +7,19 @@ import os
 import dill as pickle
 import torch
 import numpy as np
+import re
 
+import unicodedata
+def strip_accents(s):
+    '''
+    from @oefe on stackoverflow
+    :param s:
+    :return:
+    '''
+    s = ''.join(c for c in unicodedata.normalize('NFD', s)
+                  if unicodedata.category(c) != 'Mn')
+    s = s.replace("œ","oe").replace("æ","ae");
+    return s;
 
 def clean_df(df):
     df = df[df.Domain != "Toponymie"];
