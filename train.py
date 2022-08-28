@@ -242,15 +242,19 @@ def translate(opt, model, SRC, TRG):
 
     return (' '.join(translated))
 
+def getBestModel(model, path):
+    model.load_state_dict(torch.load(f'{path}/model_weights_best'))
+
 def evaluate(opt, model, SRC, TRG, df, suffix):
     from tqdm import tqdm
     tqdm.pandas()
     try:
         print("tryna load",f'{opt.weightSaveLoc}/model_weights_best')
-        model.load_state_dict(torch.load(f'{opt.weightSaveLoc}/model_weights_best'))
+        getBestModel(model, opt.weightSaveLoc)
         print("the model now has (lowers sunglasses) best weights, ooo");
     except Exception as e:
         print("no best weights available, no worries hoss",e)
+        raise(e);
 
     df = df.reset_index()
     df["byChar_" + suffix] = df.progress_apply(lambda row: translate_sentence(row.defn, model, opt, SRC, TRG, gold = row.term),axis=1)
@@ -388,6 +392,7 @@ def mainFelixCamemLayer():
     parser.add_argument('-doEval', type=int, default=1)
     parser.add_argument('-camemLayer',type=int,default=1)
     parser.add_argument("-hack",type=int,default=0)
+    parser.add_argument("-startFromCheckpoint",type=int,default=0);
     opt = parser.parse_args()
 
     if opt.camemLayer:
@@ -435,6 +440,8 @@ def mainFelixCamemLayer():
         opt.optimizer = torch.optim.Adam(model.parameters(), lr=opt.lr*0.1, betas=(0.9, 0.98), eps=1e-9)
         if opt.SGDR == True:
             opt.sched = CosineWithRestarts(opt.optimizer, T_max=opt.train_len)
+        if opt.startFromCheckpoint:
+            getBestModel(model,opt.weightSaveLoc)
         train_model(model, opt, camemMod=camemMod, camemTok=camemTok, bestLoss=bestLossInitialTraining, losses = losses, epoch = lastEpoch+1, numEpochsShouldBreak=2);
 
         with open(dst + "/../losses" + ("_quickie" if opt.quickie else "") + ".pickle", "wb") as fp:
