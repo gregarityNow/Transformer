@@ -76,4 +76,7 @@ def batch_size_fn(new, count, sofar):
     # print("maxin and relaxin",max(src_elements, tgt_elements))
     return max(src_elements, tgt_elements)
 
+def batch_size_fn_valid(new, count, sofar):
+    return 25
+
 #grex tremendae

@@ -1,7 +1,7 @@
 import pandas as pd
 import torchtext
 from torchtext import data
-from .Batch import MyIterator, batch_size_fn
+from .Batch import MyIterator, batch_size_fn, batch_size_fn_valid
 from .Tokenize import tokenize, CamOrLetterTokenizer
 import os
 import dill as pickle
@@ -132,7 +132,7 @@ def create_dataset(opt, SRC, TRG, validBatchSize = -1):
         print("deeyef",df);
 
         if subset == "valid" and validBatchSize == -1:
-            validBatchSize = len(df);
+            validBatchSize = opt.batchsize#len(df);
             print("validBatchSize",validBatchSize)
 
         mask = (df['src'].str.count(' ') < opt.max_len) & (df['trg'].str.count(' ') < opt.max_len)
@@ -145,7 +145,7 @@ def create_dataset(opt, SRC, TRG, validBatchSize = -1):
         print("preit")
         myIter = MyIterator(dataset, batch_size=(opt.batchsize if subset == "train" else validBatchSize), device=torch.device('cuda'),
                             repeat=False, sort_key=lambda x: (len(x.src), len(x.trg)),
-                            batch_size_fn=batch_size_fn, train=True, shuffle=True)
+                            batch_size_fn=(batch_size_fn if subset== "train" else batch_size_fn_valid), train=True, shuffle=True)
         print("postit")
         os.remove('translate_transformer_temp.csv')
         datasets[subset] = {"iter":myIter, "ds":dataset}
