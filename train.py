@@ -1,4 +1,5 @@
 from torch.autograd import Variable
+import psutil
 from .Beam import beam_search
 import pathlib
 import argparse
@@ -117,6 +118,9 @@ def train_model(model, opt, camemMod = None, camemTok = None, numEpochsShouldBre
                     
         for i, batch in enumerate(opt.train):
             print("batch",i,epoch,opt.train_len,len(batch))
+
+            print("inTrain",psutil.virtual_memory())
+
             # for i, batch in enumerate(train_iter):
             #     if i == 1: break;
 
