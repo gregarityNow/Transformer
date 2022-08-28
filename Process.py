@@ -50,6 +50,7 @@ def read_data_felix(opt, allTerms = False):
     else:
         df = pickLoad("/mnt/beegfs/projects/neo_scf_herron/stage/out/dump/combined_dfFinal.pickle")
     df = clean_df(df);
+    df = df[["term","defn","subset"]];
     if opt.quickie == 1:
         df = df.sample(100);
     elif opt.quickie > 1:
