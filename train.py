@@ -141,7 +141,7 @@ def train_model(model, opt, camemMod = None, camemTok = None, numEpochsShouldBre
                 thisLoss = validLoss.item()*srcValid.shape[0]
                 totalValidLoss += thisLoss
                 totalSamps += srcValid.shape[0]
-                print("shaka smart", srcValid.shape, trgValid.shape, thisLoss)
+                # print("shaka smart", srcValid.shape, trgValid.shape, thisLoss)
 
             validLoss = totalValidLoss/totalSamps
 
