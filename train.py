@@ -138,7 +138,7 @@ def train_model(model, opt, camemMod = None, camemTok = None, numEpochsShouldBre
                 trg_inputValid = trgValid[:, :-1]
                 src_maskValid, trg_maskValid = create_masks(srcValid, trg_inputValid, opt)
                 _, validLoss = getPredsAndLoss(model, srcValid, trgValid, trg_inputValid, src_maskValid, trg_maskValid, opt, isTrain=False, camemModel=camemMod, camemTok=camemTok)
-                validLosses.append(validLosses.item())
+                validLosses.append(validLoss.item())
 
             validLoss = np.mean(validLosses)
 
