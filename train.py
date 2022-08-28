@@ -130,17 +130,20 @@ def train_model(model, opt, camemMod = None, camemTok = None, numEpochsShouldBre
             opt.optimizer.step()
             if opt.SGDR == True:
                 opt.sched.step()
-            validLosses = []
+            totalValidLoss = 0
+            totalSamps = 0;
             for validBatch in opt.valid:
                 srcValid = validBatch.src.transpose(0, 1)
                 trgValid = validBatch.trg.transpose(0, 1)
-                print("shaka smart", srcValid.shape, trgValid.shape)
                 trg_inputValid = trgValid[:, :-1]
                 src_maskValid, trg_maskValid = create_masks(srcValid, trg_inputValid, opt)
                 _, validLoss = getPredsAndLoss(model, srcValid, trgValid, trg_inputValid, src_maskValid, trg_maskValid, opt, isTrain=False, camemModel=camemMod, camemTok=camemTok)
-                validLosses.append(validLoss.item()/srcValid.shape[0])
+                thisLoss = validLoss.item()*srcValid.shape[0]
+                totalValidLoss += thisLoss
+                totalSamps += srcValid.shape[0]
+                print("shaka smart", srcValid.shape, trgValid.shape, thisLoss)
 
-            validLoss = np.mean(validLosses)
+            validLoss = totalValidLoss/totalSamps
 
             losses.append({"epoch":epoch + i/opt.train_len,"train_loss":loss.item(),"valid_loss":validLoss})
             print("trainLoss",loss.item(),"walidLoss",validLoss);
