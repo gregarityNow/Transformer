@@ -8,6 +8,21 @@ import dill as pickle
 import torch
 import numpy as np
 
+
+def clean_df(df):
+    df = df[df.Domain != "Toponymie"];
+    df = df[(~df.term.isna()) & (~df.defn.isna())]
+    df = df[df.term.apply(lambda x: len(x) > 3)]
+    df = df[df.defn.apply(lambda d: len(d) >= 25)]
+    df = df[(df.term.str[0] != "-") & (df.term.str[-1] != "-")]
+    df = df[(~df.defn.str.contains("{")) & (~df.defn.str.contains("}"))]
+    df = df[df.basic_pos!="UNKNOWN"]
+    df = df[df.term.apply(lambda term: re.match("^[a-zA-Z\-\s\'’]+$",strip_accents(term)) is not None)]
+    df.Domain = df.Domain.apply(lambda d: (d if len(d) > 0 else "None"))
+    df = df[df.Domain != "None"];
+    return df
+
+
 def pickLoad(pth):
     with open(pth,"rb") as fpp:
         return pickle.load(fpp)
@@ -34,6 +49,7 @@ def read_data_felix(opt, allTerms = False):
         df = pickLoad("/mnt/beegfs/projects/neo_scf_herron/stage/out/dump/wiktionnaire_df_allWords.pickle")
     else:
         df = pickLoad("/mnt/beegfs/projects/neo_scf_herron/stage/out/dump/combined_dfFinal.pickle")
+    df = clean_df(df);
     if opt.quickie == 1:
         df = df.sample(100);
     elif opt.quickie > 1:
