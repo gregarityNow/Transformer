@@ -137,6 +137,7 @@ def train_model(model, opt, camemMod = None, camemTok = None, numEpochsShouldBre
             print("beginning walidation")
             walidTime = time.time()
             for validBatch in opt.valid:
+                if np.random.rand() > 0.33: continue;
                 srcValid = validBatch.src.transpose(0, 1)
                 trgValid = validBatch.trg.transpose(0, 1)
                 trg_inputValid = trgValid[:, :-1]
