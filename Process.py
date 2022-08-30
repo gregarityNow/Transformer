@@ -62,7 +62,7 @@ def read_data_felix(opt, allTerms = False):
     else:
         df = pickLoad("/mnt/beegfs/projects/neo_scf_herron/stage/out/dump/combined_dfFinal.pickle")
     df = clean_df(df);
-    df = df[["term","defn","subset"]];
+    df = df[["term","defn","subset","daille_type"]];
     if opt.quickie == 1:
         df = df.sample(1000);
     elif opt.quickie > 1:
