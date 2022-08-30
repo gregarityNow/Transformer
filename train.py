@@ -178,6 +178,8 @@ def train_model(model, opt, trainDf, validDf, TRG, camemMod = None, camemTok = N
                 bestLoss = validLoss
 
             dumpLosses(losses, opt.weightSaveLoc)
+        else:
+            print("not computing the walidation this time soary")
         return bestLoss
 
     while True:
@@ -196,10 +198,11 @@ def train_model(model, opt, trainDf, validDf, TRG, camemMod = None, camemTok = N
         for trainBatchIndex in range(numBatchesTrain):
             if not opt.camemLayer: break;
             print("inTrain",psutil.virtual_memory())
-
+            batchCreateTime = time.time()
             batch = trainDf[trainBatchIndex*batchSizeStandard:(trainBatchIndex+1)*batchSizeStandard];
             src, trg = batchToSrcTrg(batch, TRG);
-            print("batch", epoch, trainBatchIndex, numBatchesTrain, batchSizeStandard, src.shape)
+            batchCreateTime = time.time()-batchCreateTime
+            print("batch", epoch, trainBatchIndex, numBatchesTrain, batchSizeStandard, src.shape, "batchCreateTime",batchCreateTime)
 
             bestLoss = handleTrain(src, trg, opt, losses, trainBatchIndex, bestLoss, fineTune)
         numBatches = opt.train_len
