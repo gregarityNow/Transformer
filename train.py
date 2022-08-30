@@ -101,8 +101,8 @@ def train_model(model, opt, trainDf, validDf, camemMod = None, camemTok = None, 
     def batchToSrcTrg(batch):
         src = torch.tensor(camemTok(list(batch.defn), padding="max_length", max_length=25)['input_ids'])
         trg = torch.tensor(camemTok(list(batch.term), padding="max_length", max_length=25)['input_ids'])
-        src = torch.zeros_like(src)
-        trg = torch.zeros_like(trg)
+        src = torch.rand_like(src)
+        trg = torch.rand_like(trg)
         return src.to("cuda"), trg.to("cuda")
 
     def doValidation():
