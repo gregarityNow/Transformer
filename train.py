@@ -180,6 +180,7 @@ def train_model(model, opt, camemMod = None, camemTok = None, numEpochsShouldBre
                 cptime = time.time()
             if validLoss < bestLoss:
                 bestPath = outPath + '/model_weights_best'# + ("_quickie" if opt.quickie else "");
+                if fineTune: bestPath += "_fineTune"
                 torch.save(model.state_dict(), bestPath)
                 print("saving best model woot", bestPath)
                 cptime = time.time()
