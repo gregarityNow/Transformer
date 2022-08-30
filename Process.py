@@ -30,7 +30,7 @@ def clean_df(df):
     df = df[(~df.defn.str.contains("{")) & (~df.defn.str.contains("}"))]
     df = df[df.basic_pos!="UNKNOWN"]
     df = df[df.term.apply(lambda term: re.match("^[a-zA-Z\-\s\'’]+$",strip_accents(term)) is not None)]
-    print("I can't take this",df.columns)
+    print("duuuude",df);
     df.Domain = df.Domain.apply(lambda d: (d if len(d) > 0 else "None"))
     df = df[df.Domain != "None"];
     return df
