@@ -108,7 +108,7 @@ def train_model(model, opt, trainDf, validDf, camemMod = None, camemTok = None, 
     def doValidation():
         totalValidLoss = 0
         totalSamps = 0
-        numBatches = len(validDf) // opt.batchsize
+        numBatches = max(len(validDf) // opt.batchsize,1)
         startIndex = 0
         for validBatchIndex in range(numBatches):
             if (not fineTune) and np.random.rand() > 0.33:continue;
@@ -136,7 +136,7 @@ def train_model(model, opt, trainDf, validDf, camemMod = None, camemTok = None, 
             print("each save")
             torch.save(model.state_dict(), outPath + '/model_weights')
 
-        numBatches = len(trainDf) // opt.batchsize
+        numBatches = max(len(trainDf) // opt.batchsize,1)
         batchsize = opt.batchsize
         trainDf = trainDf.sample(frac=1);
         print("sizes",numBatches, len(trainDf), batchsize)
@@ -179,7 +179,6 @@ def train_model(model, opt, trainDf, validDf, camemMod = None, camemTok = None, 
             print("trainLoss",loss.item(),"walidLoss",validLoss);
             
             total_loss += loss.item()
-            trainBatchIndex = 0
             if (trainBatchIndex + 1) % opt.printevery == 0 or trainBatchIndex == 0:
                  p = int(100 * (trainBatchIndex + 1) / opt.train_len)
                  avg_loss = total_loss/opt.printevery
@@ -310,7 +309,7 @@ def mainFelixCamemLayer():
     parser.add_argument('-n_layers', type=int, default=6)
     parser.add_argument('-heads', type=int, default=8)
     parser.add_argument('-dropout', type=int, default=0.1)
-    parser.add_argument('-batchsize', type=int, default=1500)
+    parser.add_argument('-batchsize', type=int, default=20)
     parser.add_argument('-printevery', type=int, default=10)
     parser.add_argument('-lr', type=int, default=0.0001)
     parser.add_argument('-k', type=int, default=3)
