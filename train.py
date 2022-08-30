@@ -111,7 +111,7 @@ def train_model(model, opt, trainDf, validDf, camemMod = None, camemTok = None, 
         numBatches = max(len(validDf) // opt.batchsize,1)
         startIndex = 0
         for validBatchIndex in range(numBatches):
-            if (not fineTune) and np.random.rand() > 0.33:continue;
+            if (not fineTune) and numBatches > 10 and np.random.rand() > 0.33:continue;
             batch = trainDf[trainBatchIndex * batchsize:trainBatchIndex * (batchsize + 1)];
             print("batchingWalid", batch);
             srcValid, trgValid = batchToSrcTrg(batch);
