@@ -157,6 +157,7 @@ def train_model(model, opt, trainDf, validDf, camemMod = None, camemTok = None, 
             # print("trainshape",src.shape, trg.shape)
             trg_input = trg[:, :-1]
 
+
             # src_mask, trg_mask = create_masks(src, trg_input, None)
             src_mask, trg_mask = create_masks(src, trg_input, opt)
             print("we're feeding", src.shape, trg.shape, trg_input.shape, src_mask.shape, trg_mask.shape)
@@ -314,7 +315,7 @@ def mainFelixCamemLayer():
     parser.add_argument('-n_layers', type=int, default=6)
     parser.add_argument('-heads', type=int, default=8)
     parser.add_argument('-dropout', type=int, default=0.1)
-    parser.add_argument('-batchsize', type=int, default=20)
+    parser.add_argument('-batchsize', type=int, default=1500)
     parser.add_argument('-printevery', type=int, default=10)
     parser.add_argument('-lr', type=int, default=0.0001)
     parser.add_argument('-k', type=int, default=3)
