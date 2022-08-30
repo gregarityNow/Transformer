@@ -112,6 +112,11 @@ def train_model(model, opt, trainDf, validDf, TRG, camemMod = None, camemTok = N
         thisLoss = validLoss.item() * src.shape[0]
         return thisLoss
 
+    meanCamemLen = pd.concat([trainDf, validDf]).camemDefnLen.mean()
+    batchSizeStandard = opt.batchsize // meanCamemLen
+    numBatchesValid = max(len(validDf) // batchSizeStandard, 1)
+    numBatchesTrain = max(len(trainDf) // batchSizeStandard, 1)
+
     def doValidation():
         totalValidLoss = 0
         totalSamps = 0
@@ -125,12 +130,10 @@ def train_model(model, opt, trainDf, validDf, TRG, camemMod = None, camemTok = N
             totalValidLoss += thisLoss
             totalSamps += srcValid.shape[0]
 
-        numBatches = max(len(validDf) // opt.batchsize, 1)
-        for validBatchIndex in range(numBatches):
+        for validBatchIndex in range(numBatchesValid):
             if not opt.camemLayer: break;
             if (not fineTune) and numBatches > 10 and np.random.rand() > 0.33:continue;
-            batch = trainDf[trainBatchIndex * batchsize:(trainBatchIndex+1) *batchsize];
-            print("batchingWalid", batch);
+            batch = trainDf[validBatchIndex * batchSizeStandard:(validBatchIndex+1) *batchSizeStandard];
             srcValid, trgValid = batchToSrcTrg(batch, TRG);
             trg_inputValid = trgValid[:, :-1]
             thisLoss = getLoss(srcValid, trgValid, trg_inputValid)
@@ -185,24 +188,20 @@ def train_model(model, opt, trainDf, validDf, TRG, camemMod = None, camemTok = N
             torch.save(model.state_dict(), outPath + '/model_weights')
 
         numBatches = max(len(trainDf) // opt.batchsize,1)
-        batchsize = opt.batchsize
         trainDf = trainDf.sample(frac=1);
-        print("sizes",numBatches, len(trainDf), batchsize)
-        for trainBatchIndex in range(numBatches):
+        print("sizes",numBatches, len(trainDf), numBatchesTrain)
+        for trainBatchIndex in range(numBatchesTrain):
             if not opt.camemLayer: break;
-            print("batch",epoch,trainBatchIndex,numBatches, batchsize)
-
             print("inTrain",psutil.virtual_memory())
 
-            batch = trainDf[trainBatchIndex*batchsize:(trainBatchIndex+1)*batchsize];
+            batch = trainDf[trainBatchIndex*batchSizeStandard:(trainBatchIndex+1)*batchSizeStandard];
             src, trg = batchToSrcTrg(batch, TRG);
+            print("batch", epoch, trainBatchIndex, numBatchesTrain, batchSizeStandard, src.shape)
 
             bestLoss = handleTrain(src, trg, opt, losses, trainBatchIndex, bestLoss)
         numBatches = opt.train_len
         for trainBatchIndex, batch in enumerate(opt.train):
             if opt.camemLayer: break;
-
-
             print("inTrain",psutil.virtual_memory())
 
             src = batch.src.transpose(0,1)
