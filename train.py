@@ -201,12 +201,13 @@ def train_model(model, opt, trainDf, validDf, TRG, camemMod = None, camemTok = N
         numBatches = opt.train_len
         for trainBatchIndex, batch in enumerate(opt.train):
             if opt.camemLayer: break;
-            print("batchNoCam",epoch,trainBatchIndex,numBatches, len(batch))
+
 
             print("inTrain",psutil.virtual_memory())
 
             src = batch.src.transpose(0,1)
             trg = batch.trg.transpose(0,1)
+            print("batchNoCam", epoch, trainBatchIndex, numBatches, len(batch), src.shape)
 
             bestLoss = handleTrain(src, trg, opt, losses, trainBatchIndex, bestLoss)
 
