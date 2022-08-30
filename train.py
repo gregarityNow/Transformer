@@ -130,7 +130,7 @@ def train_model(model, opt, trainDf, validDf, camemMod = None, camemTok = None, 
         if opt.floyd is False:
             print("   %dm: epoch %d [%s]  %d%%  loss = %s" %\
             ((time.time() - start)//60, epoch + 1, "".join(' '*20), 0, '...'), end='\r')
-        
+
         if opt.checkpoint > 0:
             print("each save")
             torch.save(model.state_dict(), outPath + '/model_weights')
@@ -164,7 +164,7 @@ def train_model(model, opt, trainDf, validDf, camemMod = None, camemTok = None, 
             print("we're feeding", src.shape, trg.shape, trg_input.shape, src_mask.shape, trg_mask.shape)
             trainTime = time.time()
             preds, loss = getPredsAndLoss(model, src,trg, trg_input, src_mask, trg_mask,opt, isTrain = True, camemModel=camemMod, camemTok=camemTok)
-            print("we got le loss", loss.shape);
+            print("we got le loss", loss.shape, loss);
             loss.backward()
             print("backwarded");
 
