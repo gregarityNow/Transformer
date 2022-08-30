@@ -69,7 +69,7 @@ def getPredsAndLoss(model, src,trg,  trg_input, src_mask, trg_mask, opt, isTrain
     return preds, loss
 
 
-def train_model(model, opt, camemMod = None, camemTok = None, numEpochsShouldBreak = 3, bestLoss = np.inf, losses = [], initialEpoch = 0, fineTune = False):
+def train_model(model, opt, df, camemMod = None, camemTok = None, numEpochsShouldBreak = 3, bestLoss = np.inf, losses = [], initialEpoch = 0, fineTune = False):
     
     print("training model...")
     model.train()
@@ -127,7 +127,8 @@ def train_model(model, opt, camemMod = None, camemTok = None, numEpochsShouldBre
         if opt.checkpoint > 0:
             print("each save")
             torch.save(model.state_dict(), outPath + '/model_weights')
-                    
+
+        numBatches = len(df) / opt.batchsize
         for i, batch in enumerate(opt.train):
             print("batch",epoch,i,opt.train_len,len(batch))
 

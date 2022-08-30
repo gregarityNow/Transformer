@@ -151,11 +151,11 @@ def create_dataset(opt, SRC, TRG, validBatchSize = -1, fineTune = False):
         data_fields = [('src', SRC), ('trg', TRG)]
 
         dataset = data.TabularDataset(csvPath, format='csv', fields=data_fields)
-        print("preit")
+        print("preit", dataset)
         myIter = MyIterator(dataset, batch_size=opt.batchsize, device=torch.device('cuda'),
                             repeat=False, sort_key=lambda x: (len(x.src), len(x.trg)),
                             batch_size_fn=batch_size_fn, train=True, shuffle=True)
-        print("postit")
+        print("postit", myIter, dataset)
         # os.remove(csvPath)
         datasets[subset] = {"iter":myIter, "ds":dataset}
 
