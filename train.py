@@ -344,7 +344,7 @@ def mainFelixCamemLayer():
         pickle.dump(SRC, open(f'{dst}/SRC.pkl', 'wb'))
         pickle.dump(TRG, open(f'{dst}/TRG.pkl', 'wb'))
 
-        model = get_model(opt, len(SRC.vocab), len(TRG.vocab), camemModel=(camemMod if opt.camemLayer else None))
+        model = get_model(opt, SRC, len(TRG.vocab), camemModel=(camemMod if opt.camemLayer else None))
 
         opt.optimizer = torch.optim.Adam(model.parameters(), lr=opt.lr, betas=(0.9, 0.98), eps=1e-9)
         if opt.SGDR == True:

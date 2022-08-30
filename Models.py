@@ -35,11 +35,11 @@ class Encoder(nn.Module):
 
 
 class TransformerCamembertLayer(nn.Module):
-    def __init__(self, trg_vocab, d_model, N, heads, dropout, camemModel):
+    def __init__(self, trg_vocab, d_model, N, heads, dropout, camemModel, reverseIntFunc):
         super().__init__()
         print("initializing the erweiteren model")
         #(src_vocab, d_model, N, heads, dropout)
-        self.encoder = EncoderCamemLayer(768, d_model, 1, heads, dropout, camemModel=camemModel)
+        self.encoder = EncoderCamemLayer(768, d_model, 1, heads, dropout, camemModel=camemModel, reverseIntFunc=reverseIntFunc)
         self.decoder = Decoder(trg_vocab, d_model, N, heads, dropout)
         self.out = nn.Linear(d_model, trg_vocab)
     def forward(self, src, trg, src_mask, trg_mask):
@@ -58,7 +58,7 @@ class TransformerCamembertLayer(nn.Module):
         return output
 
 class EncoderCamemLayer(nn.Module):
-    def __init__(self, camemHiddenSize, d_model, N, heads, dropout, camemModel):
+    def __init__(self, camemHiddenSize, d_model, N, heads, dropout, camemModel, reverseIntFunc):
         super().__init__()
         assert camemHiddenSize==d_model
         self.N = N
@@ -66,8 +66,15 @@ class EncoderCamemLayer(nn.Module):
         self.layers = get_clones(EncoderLayer(d_model, heads, dropout), N)
         self.norm = Norm(d_model)
         self.camemModel = camemModel
+        self.reverseIntFunc = reverseIntFunc
+
+    def reverseSrc(self,src):
+        return src.apply_(lambda x: int(self.reverseIntFunc[x]));
+
     def forward(self, src, mask):
         print("src horse",src.shape,src[0].shape, src[0]);
+        src = self.reverseIntFunc(src);
+        src = Variable(src, requires_grad=False)
         x = self.camemModel(src)[1][-1]
         x = Variable(x, requires_grad=False)
         for i in range(self.N):
@@ -105,16 +112,18 @@ class Transformer(nn.Module):
 
 
 
-def get_model(opt, src_vocab, trg_vocab, camemModel = None):
+def get_model(opt, SRC, trg_vocab, camemModel = None):
     
     assert opt.d_model % opt.heads == 0
     assert opt.dropout < 1
 
+    src_vocab_len = len(SRC.vocab)
+
     if camemModel is not None:
         print("getting extended model")
-        model = TransformerCamembertLayer(trg_vocab, opt.d_model, opt.n_layers, opt.heads, opt.dropout, camemModel)
+        model = TransformerCamembertLayer(trg_vocab, opt.d_model, opt.n_layers, opt.heads, opt.dropout, camemModel, reverseIntFunc=SRC.vocab.itos)
     else:
-        model = Transformer(src_vocab, trg_vocab, opt.d_model, opt.n_layers, opt.heads, opt.dropout)
+        model = Transformer(src_vocab_len, trg_vocab, opt.d_model, opt.n_layers, opt.heads, opt.dropout)
        
     if opt.load_weights:
         print("loading pretrained weights...")
