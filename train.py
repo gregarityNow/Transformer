@@ -69,7 +69,7 @@ def getPredsAndLoss(model, src,trg,  trg_input, src_mask, trg_mask, opt, isTrain
 
 def train_model(model, opt, trainDf, validDf, camemMod = None, camemTok = None, numEpochsShouldBreak = 3, bestLoss = np.inf, losses = [], initialEpoch = 0, fineTune = False):
     
-    print("training model...")
+    print("training model...",trainDf,validDf)
     model.train()
     start = time.time()
     if opt.checkpoint > 0:
