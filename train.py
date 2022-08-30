@@ -165,7 +165,7 @@ def train_model(model, opt, trainDf, validDf, camemMod = None, camemTok = None, 
             print("we're feeding", src.shape, trg.shape, trg_input.shape, src_mask.shape, trg_mask.shape)
             trainTime = time.time()
             preds, loss = getPredsAndLoss(model, src,trg, trg_input, src_mask, trg_mask,opt, isTrain = True, camemModel=camemMod, camemTok=camemTok)
-            print("we got le loss");
+            print("we got le loss", loss.shape);
             loss.backward()
             print("backwarded");
 
