@@ -128,7 +128,7 @@ def train_model(model, opt, camemMod = None, camemTok = None, numEpochsShouldBre
             torch.save(model.state_dict(), outPath + '/model_weights')
                     
         for i, batch in enumerate(opt.train):
-            print("batch",i,epoch,opt.train_len,len(batch))
+            print("batch",epoch,i,opt.train_len,len(batch))
 
             print("inTrain",psutil.virtual_memory())
 
