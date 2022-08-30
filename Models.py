@@ -52,7 +52,7 @@ class TransformerCamembertLayer(nn.Module):
         :return:
         '''
         e_outputs = self.encoder(src, src_mask)
-        #print("DECODER")
+        print("DECODER",self.decoder)
         d_output = self.decoder(trg, e_outputs, src_mask, trg_mask)
         output = self.out(d_output)
         return output
