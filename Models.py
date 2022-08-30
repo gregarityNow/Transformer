@@ -85,14 +85,11 @@ class Decoder(nn.Module):
         self.norm = Norm(d_model)
         print("nitializing",d_model, vocab_size);
     def forward(self, trg, e_outputs, src_mask, trg_mask):
-        print("given", trg.shape);
         x = self.embed(trg)
         x = self.pe(x)
-        print("ped",x)
         for i in range(self.N):
             x = self.layers[i](x, e_outputs, src_mask, trg_mask)
         norm = self.norm(x)
-        print("fin", norm.shape, norm)
         return norm
 
 class Transformer(nn.Module):
