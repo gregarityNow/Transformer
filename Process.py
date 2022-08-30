@@ -63,6 +63,7 @@ def read_data_felix(opt, allTerms = False):
         df = pickLoad("/mnt/beegfs/projects/neo_scf_herron/stage/out/dump/wiktionnaire_df_allWords.pickle")
     else:
         df = pickLoad("/mnt/beegfs/projects/neo_scf_herron/stage/out/dump/combined_dfFinal.pickle")
+    print("we got init df",df);
     df = clean_df(df);
     if allTerms:
         df = df[["term", "defn", "subset"]]
