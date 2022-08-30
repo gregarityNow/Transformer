@@ -143,21 +143,15 @@ def train_model(model, opt, trainDf, validDf, TRG, camemMod = None, camemTok = N
     def handleTrain(src, trg, opt, losses, batchIndex, bestLoss):
         trg_input = trg[:, :-1]
         src_mask, trg_mask = create_masks(src, trg_input, opt)
-        print("we're feeding", src.shape, trg.shape, trg_input.shape, src_mask.shape, trg_mask.shape)
         trainTime = time.time()
         preds, loss = getPredsAndLoss(model, src, trg, trg_input, src_mask, trg_mask, opt, isTrain=True, camemModel=camemMod, camemTok=camemTok)
-        print("we got le loss", loss.shape, loss);
         loss.backward()
-        print("backwarded");
 
         opt.optimizer.step()
-        print("stepped");
 
         if opt.SGDR == True:
             opt.sched.step()
         trainTime = time.time() - trainTime
-        print("did training step", trainTime)
-        print("beginning walidation")
         walidTime = time.time()
         validLoss = doValidation()
         walidTime = time.time() - walidTime
@@ -167,7 +161,6 @@ def train_model(model, opt, trainDf, validDf, TRG, camemMod = None, camemTok = N
         trainLoss = loss.item()
         losses.append({"epoch": epoch + trainBatchIndex / opt.train_len, "train_loss": trainLoss, "valid_loss": validLoss})
         print("trainLoss", trainLoss, "walidLoss", validLoss);
-
 
 
         if validLoss < bestLoss:
@@ -206,15 +199,15 @@ def train_model(model, opt, trainDf, validDf, TRG, camemMod = None, camemTok = N
             src, trg = batchToSrcTrg(batch, TRG);
 
             bestLoss = handleTrain(src, trg, opt, losses, trainBatchIndex, bestLoss)
+        numBatches = len(opt.train);
         for trainBatchIndex, batch in enumerate(opt.train):
             if opt.camemLayer: break;
-            print("batch",epoch,numBatches, batchsize)
+            print("batch",epoch,trainBatchIndex,numBatches, batchsize)
 
             print("inTrain",psutil.virtual_memory())
 
             src = batch.src.transpose(0,1)
             trg = batch.trg.transpose(0,1)
-            print("trg",trg.shape,trg);
 
             bestLoss = handleTrain(src, trg, opt, losses, trainBatchIndex, bestLoss)
 
