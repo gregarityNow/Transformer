@@ -40,7 +40,7 @@ class TransformerCamembertLayer(nn.Module):
         print("initializing the erweiteren model")
         #(src_vocab, d_model, N, heads, dropout)
         self.encoder = EncoderCamemLayer(768, d_model, 1, heads, dropout, camemModel=camemModel)
-        self.decoder = Decoder(trg_vocab, d_model, N, heads, dropout)
+        self.decoder = Decoder(trg_vocab, d_model + int(doDaille) , N, heads, dropout)
         self.out = nn.Linear(d_model, trg_vocab)
         self.doDaille = doDaille
     def forward(self, src, trg, src_mask, trg_mask, dailleVec = None):
@@ -54,7 +54,7 @@ class TransformerCamembertLayer(nn.Module):
         '''
         e_outputs = self.encoder(src, src_mask)
         print("davor",e_outputs.shape);
-        if not self.doDaille:
+        if self.doDaille:
             q = torch.ones(e_outputs.shape[:2]).reshape(list(e_outputs.shape[:2])+[1])
             e_outputs = torch.cat([e_outputs,q], dim=2);
         print("how do you like me now",e_outputs.shape)
@@ -124,7 +124,7 @@ def get_model(opt, SRC, trg_vocab, camemModel = None):
 
     if camemModel is not None:
         print("getting extended model")
-        model = TransformerCamembertLayer(trg_vocab, opt.d_model, opt.n_layers, opt.heads, opt.dropout, camemModel)
+        model = TransformerCamembertLayer(trg_vocab, opt.d_model, opt.n_layers, opt.heads, opt.dropout, camemModel, doDaille= opt.daillePrediction)
     else:
         model = Transformer(src_vocab_len, trg_vocab, opt.d_model, opt.n_layers, opt.heads, opt.dropout)
 
