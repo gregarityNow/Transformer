@@ -80,7 +80,8 @@ def train_model(model, opt, camemMod = None, camemTok = None, numEpochsShouldBre
 
     shouldBroke = 0
 
-    def shouldBreak(myl):
+    def shouldBreak(myl, epoch):
+        print("epoch over, deliberating break",epoch)
         try:
             percDiff = (myl[-1] - myl[0]) / myl[-1]
             if percDiff > 0:
@@ -185,7 +186,7 @@ def train_model(model, opt, camemMod = None, camemTok = None, numEpochsShouldBre
                 bestLoss = validLoss
             dumpLosses(losses, opt.weightSaveLoc)
 
-        if shouldBreak([loss["train_loss"] for loss in losses if loss["epoch"] > epoch]):
+        if shouldBreak([loss["train_loss"] for loss in losses if loss["epoch"] > epoch], epoch):
             shouldBroke += 1
             if shouldBroke == numEpochsShouldBreak or opt.quickie:
                 print("progress has stopped; breaking")
@@ -251,6 +252,7 @@ def translate(opt, model, SRC, TRG):
 
 def getBestModel(model, path):
     model.load_state_dict(torch.load(f'{path}/model_weights_best'))
+    print("the model now has (lowers sunglasses) best weights, ooo");
 
 def evaluate(opt, model, SRC, TRG, df, suffix):
     from tqdm import tqdm
@@ -258,7 +260,6 @@ def evaluate(opt, model, SRC, TRG, df, suffix):
     try:
         print("tryna load",f'{opt.weightSaveLoc}/model_weights_best')
         getBestModel(model, opt.weightSaveLoc)
-        print("the model now has (lowers sunglasses) best weights, ooo");
     except Exception as e:
         print("no best weights available, no worries hoss",e)
         raise(e);
