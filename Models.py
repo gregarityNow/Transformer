@@ -88,7 +88,9 @@ class Decoder(nn.Module):
         self.norm = Norm(d_model)
     def forward(self, trg, e_outputs, src_mask, trg_mask):
         x = self.embed(trg)
+        print("embedded",x);
         x = self.pe(x)
+        print("ped",x)
         for i in range(self.N):
             x = self.layers[i](x, e_outputs, src_mask, trg_mask)
         norm = self.norm(x)
