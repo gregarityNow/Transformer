@@ -353,7 +353,7 @@ def mainFelixCamemLayer():
 
 
     if opt.doTrain:
-        df = read_data_felix(opt, allTerms=True)
+        dfTrain, dfValid = read_data_felix(opt, allTerms=True)
         SRC, TRG = create_fields(opt, camOrLetterTokenizer)
         opt.train, opt.valid = create_dataset(opt, SRC, TRG)
 
@@ -370,19 +370,19 @@ def mainFelixCamemLayer():
 
         #train on all wiktionnaire data
         if opt.fullWiktPretune:
-            bestLossInitialTraining, losses, lastEpoch = train_model(model, opt,df, camemMod=camemMod, camemTok=camemTok, numEpochsShouldBreak=2);
+            bestLossInitialTraining, losses, lastEpoch = train_model(model, opt,dfTrain, dfValid, camemMod=camemMod, camemTok=camemTok, numEpochsShouldBreak=2);
         else:
             bestLossInitialTraining, losses, lastEpoch = np.inf, [], 0
 
         #finetune on neonyms
-        df = read_data_felix(opt, allTerms=False)
+        dfTrain, dfValid = read_data_felix(opt, allTerms=False)
         opt.train, opt.valid = create_dataset(opt, SRC, TRG, fineTune=True)
         opt.optimizer = torch.optim.Adam(model.parameters(), lr=opt.lr*0.1, betas=(0.9, 0.98), eps=1e-9)
         if opt.SGDR == True:
             opt.sched = CosineWithRestarts(opt.optimizer, T_max=opt.train_len)
         if opt.startFromCheckpoint:
             getBestModel(model,opt.weightSaveLoc)
-        train_model(model, opt, df, camemMod=camemMod, camemTok=camemTok, bestLoss=bestLossInitialTraining, losses = losses, initialEpoch = lastEpoch+1, numEpochsShouldBreak=2, fineTune = True);
+        train_model(model, opt, dfTrain, dfValid, camemMod=camemMod, camemTok=camemTok, bestLoss=bestLossInitialTraining, losses = losses, initialEpoch = lastEpoch+1, numEpochsShouldBreak=2, fineTune = True);
         dumpLosses(losses, dst)
     else:
         SRC = pickle.load(open(f'{dst}/SRC.pkl', 'rb'))

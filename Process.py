@@ -84,7 +84,7 @@ def read_data_felix(opt, allTerms = False):
     print("working with",df);
     with open("/mnt/beegfs/projects/neo_scf_herron/stage/out/dump/workinWith" + ("_camemLayer" if opt.camemLayer else "") + ".pickle","wb") as fp:
         pickle.dump(df,fp);
-    return df
+    return df[df.subset=="train"],df[df.subset=="valid"]
 
 
 
