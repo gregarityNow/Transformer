@@ -111,7 +111,7 @@ def train_model(model, opt, trainDf, validDf, camemMod = None, camemTok = None, 
         for validBatchIndex in range(numBatches):
             if (not fineTune) and np.random.rand() > 0.33:continue;
             batch = trainDf[trainBatchIndex * batchsize:trainBatchIndex * (batchsize + 1)];
-            print("batching", batch);
+            print("batchingWalid", batch);
             srcValid, trgValid = batchToSrcTrg(batch);
             trg_inputValid = trgValid[:, :-1]
             src_maskValid, trg_maskValid = create_masks(srcValid, trg_inputValid, opt)
@@ -147,19 +147,22 @@ def train_model(model, opt, trainDf, validDf, camemMod = None, camemTok = None, 
             # for i, batch in enumerate(train_iter):
             #     if i == 1: break;
             batch = trainDf[trainBatchIndex*batchsize:(trainBatchIndex+1)*batchsize];
-            print("batching",batch);
+            print("batchingTrain",batch);
             src, trg = batchToSrcTrg(batch);
 
             # src = batch.src.transpose(0,1)
             # trg = batch.trg.transpose(0,1)
-            print("what we need",type(src), type(trg),src.shape, trg.shape);
+
 
             # print("trainshape",src.shape, trg.shape)
             trg_input = trg[:, :-1]
+
             # src_mask, trg_mask = create_masks(src, trg_input, None)
             src_mask, trg_mask = create_masks(src, trg_input, opt)
+            print("we're feeding", src.shape, trg.shape, trg_input.shape, src_mask.shape, trg_mask.shape)
             trainTime = time.time()
             preds, loss = getPredsAndLoss(model, src,trg, trg_input, src_mask, trg_mask,opt, isTrain = True, camemModel=camemMod, camemTok=camemTok)
+            exit()
             print("we got le loss");
             loss.backward()
             print("backwarded");
