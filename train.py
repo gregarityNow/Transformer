@@ -147,7 +147,7 @@ def train_model(model, opt, trainDf, validDf, camemMod = None, camemTok = None, 
 
             # for i, batch in enumerate(train_iter):
             #     if i == 1: break;
-            batch = trainDf[trainBatchIndex*batchsize:trainBatchIndex*(batchsize+1)];
+            batch = trainDf[trainBatchIndex*batchsize:(trainBatchIndex+1)*batchsize];
             print("batching",batch);
             src, trg = batchToSrcTrg(batch);
 
