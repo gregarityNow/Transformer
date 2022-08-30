@@ -87,8 +87,8 @@ class Decoder(nn.Module):
         self.layers = get_clones(DecoderLayer(d_model, heads, dropout), N)
         self.norm = Norm(d_model)
     def forward(self, trg, e_outputs, src_mask, trg_mask):
+        print("given", trg);
         x = self.embed(trg)
-        print("embedded",x);
         x = self.pe(x)
         print("ped",x)
         for i in range(self.N):
