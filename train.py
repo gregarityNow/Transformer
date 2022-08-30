@@ -379,6 +379,7 @@ def dumpLosses(losses, dst, quickie=False):
 
 
 def mainFelixCamemLayer():
+    print("shabloimps")
     parser = argparse.ArgumentParser()
     parser.add_argument('-no_cuda', action='store_true')
     parser.add_argument('-SGDR', action='store_true')
