@@ -103,7 +103,8 @@ def train_model(model, opt, camemMod = None, camemTok = None, numEpochsShouldBre
         totalValidLoss = 0
         totalSamps = 0
         for validBatch in opt.valid:
-            if (not fineTune) and np.random.rand() > 0.33: continue;
+            if (not fineTune) and len(validBatch) > 10 and np.random.rand() > 0.33:continue;
+            else: print("takin that valid boi")
             srcValid = validBatch.src.transpose(0, 1)
             trgValid = validBatch.trg.transpose(0, 1)
             trg_inputValid = trgValid[:, :-1]
@@ -378,10 +379,9 @@ def mainFelix():
         pickle.dump(df, open(f'{dst}/postTune' + ("_quickie" if opt.quickie else "") + '.pkl','wb'));
         print("df is at",f'{dst}/postTune' + ("_quickie" if opt.quickie else "") + '.pkl')
 
-def dumpLosses(losses, dst, quickie=False):
-    with open(dst + "/../losses" + ("_quickie" if quickie else "") + ".pickle", "wb") as fp:
+def dumpLosses(losses, dst):
+    with open(dst + "/../losses.pickle", "wb") as fp:
         pickle.dump(losses, fp);
-
 
 def mainFelixCamemLayer():
     print("shabloimps")
@@ -415,8 +415,10 @@ def mainFelixCamemLayer():
         runType = "byCharCamemLayer"
     else:
         runType = "byChar"
-    if opt.hack:
-        runType += "_hack"
+
+    if opt.quickie:
+        runType += "_quickie";
+
     opt.weightSaveLoc = "/mnt/beegfs/home/herron/neo_scf_herron/stage/out/dump/" + runType + "/weights"
     pathlib.Path(opt.weightSaveLoc).mkdir(exist_ok=True,parents=True)
 
@@ -475,8 +477,8 @@ def mainFelixCamemLayer():
         dfValid = df[df.subset == "valid"]
         df = evaluate(opt, model, SRC, TRG, dfValid, "_postTrain")
 
-        pickle.dump(df, open(f'{dst}/postTuneCamemLayer' + ("_quickie" if opt.quickie else "") + '.pkl','wb'));
-        print("df is at",f'{dst}/postTuneCamemLayer' + ("_quickie" if opt.quickie else "") + '.pkl')
+        pickle.dump(df, open(f'{dst}/postTuneCamemLayer.pkl','wb'));
+        print("df is at",f'{dst}/postTuneCamemLayer.pkl')
 
 
 
@@ -496,7 +498,7 @@ def saveModel(model, opt, SRC, TRG):
 
     pathlib.Path(dst).mkdir(exist_ok=True,parents=True);
     print("saving weights to " + dst + "/...")
-    torch.save(model.state_dict(), f'{dst}/model_weights' + ("_quickie" if opt.quickie else ""))
+    torch.save(model.state_dict(), f'{dst}/model_weights')
     pickle.dump(SRC, open(f'{dst}/SRC.pkl', 'wb'))
     pickle.dump(TRG, open(f'{dst}/TRG.pkl', 'wb'))
 
