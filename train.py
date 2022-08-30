@@ -30,9 +30,9 @@ def loadTokenizerAndModel(name, loadFinetunedModels = False, modelToo = False, h
     proxDict = {"http": "http://webproxy.lab-ia.fr:8080", "https": "http://webproxy.lab-ia.fr:8080"}
     from transformers import AutoTokenizer, AutoModelForMaskedLM
     try:
-        tok = AutoTokenizer.from_pretrained(techName, padding="max_length", max_length=100)
+        tok = AutoTokenizer.from_pretrained(techName)
     except:
-        tok = AutoTokenizer.from_pretrained(techName, proxies=proxDict, padding="max_length", max_length=100)
+        tok = AutoTokenizer.from_pretrained(techName, proxies=proxDict)
     if not modelToo:
         return tok, None
     if loadFinetunedModels:
@@ -99,7 +99,7 @@ def train_model(model, opt, trainDf, validDf, TRG, camemMod = None, camemTok = N
     outPath = opt.weightSaveLoc#"/mnt/beegfs/home/herron/neo_scf_herron/stage/out/dump/byChar"
 
     def batchToSrcTrg(batch, TRG):
-        src = torch.tensor(camemTok(list(batch.defn), padding="max_length", max_length=100)['input_ids'])
+        src = torch.tensor(camemTok(list(batch.defn), padding="max_length", max_length=batch.camemDefnLen.max())['input_ids'])
         trg = torch.tensor(TRG.process(batch.term)).T.to("cuda")
         print("turg")
         # src = torch.ones_like(src);
@@ -201,7 +201,7 @@ def train_model(model, opt, trainDf, validDf, TRG, camemMod = None, camemTok = N
         numBatches = opt.train_len
         for trainBatchIndex, batch in enumerate(opt.train):
             if opt.camemLayer: break;
-            print("batch",epoch,trainBatchIndex,numBatches, batchsize)
+            print("batchNoCam",epoch,trainBatchIndex,numBatches, len(batch))
 
             print("inTrain",psutil.virtual_memory())
 
