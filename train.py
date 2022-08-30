@@ -100,9 +100,8 @@ def train_model(model, opt, trainDf, validDf, TRG, camemMod = None, camemTok = N
 
     def batchToSrcTrg(batch, TRG):
         src = torch.tensor(camemTok(list(batch.defn), padding="max_length", max_length=100)['input_ids'])
-        maxTrgLen = batch.term.apply(len).max()+2
-
-        trg = torch.tensor(TRG.process(batch.term)).to("cuda")
+        trg = torch.tensor(TRG.process(batch.term)).T.to("cuda")
+        print("turg")
         # src = torch.ones_like(src);
         # trg = torch.ones_like(trg);
         return src.to("cuda"), trg.to("cuda")
