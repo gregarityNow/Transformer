@@ -70,7 +70,7 @@ class EncoderCamemLayer(nn.Module):
 
     def forward(self, src, mask):
         print("norse",src[0])
-        x = Variable(self.camemModel(src)[1][-1], requires_grad=False).transpose(1,2);
+        x = Variable(self.camemModel(src)[1][-1], requires_grad=False)
         print("xmas jackson",x.shape);
         for i in range(self.N):
             x = self.layers[i](x, mask)
