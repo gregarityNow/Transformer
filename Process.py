@@ -67,10 +67,10 @@ def read_data_felix(opt, allTerms = False):
     print("we got init df",["|"+x + "|" for x in df.columns]);
     df = clean_df(df);
     if allTerms:
-        df = df[["term", "defn", "subset"]]
+        df = df[["term", "defn", "subset","camemDefnLen"]]
         df["daille_type"] = "UNKNOWN"
     else:
-        df = df[["term","defn","subset","daille_type"]];
+        df = df[["term","defn","subset","daille_type","camemDefnLen"]];
     if opt.quickie == 1:
         df = df.sample(1000);
     elif opt.quickie > 1:
