@@ -67,7 +67,7 @@ def getPredsAndLoss(model, src,trg,  trg_input, src_mask, trg_mask, opt, isTrain
     return preds, loss
 
 
-def train_model(model, opt, trainDf, validDf, camemMod = None, camemTok = None, numEpochsShouldBreak = 3, bestLoss = np.inf, losses = [], initialEpoch = 0, fineTune = False):
+def train_model(model, opt, trainDf, validDf, TRG, camemMod = None, camemTok = None, numEpochsShouldBreak = 3, bestLoss = np.inf, losses = [], initialEpoch = 0, fineTune = False):
     
     print("training model...",trainDf,validDf)
     model.train()
@@ -98,9 +98,11 @@ def train_model(model, opt, trainDf, validDf, camemMod = None, camemTok = None, 
 
     outPath = opt.weightSaveLoc#"/mnt/beegfs/home/herron/neo_scf_herron/stage/out/dump/byChar"
 
-    def batchToSrcTrg(batch):
-        src = torch.tensor(camemTok(list(batch.defn), padding="max_length", max_length=25)['input_ids'])
-        trg = torch.tensor(camemTok(list(batch.term), padding="max_length", max_length=25)['input_ids'])
+    def batchToSrcTrg(batch, TRG):
+        src = torch.tensor(camemTok(list(batch.defn), padding="max_length", max_length=100)['input_ids'])
+        maxTrgLen = batch.term.apply(len).max()+2
+
+        trg = torch.tensor(TRG.process(batch.term)).to("cuda")
         # src = torch.ones_like(src);
         # trg = torch.ones_like(trg);
         return src.to("cuda"), trg.to("cuda")
@@ -113,7 +115,7 @@ def train_model(model, opt, trainDf, validDf, camemMod = None, camemTok = None, 
             if (not fineTune) and numBatches > 10 and np.random.rand() > 0.33:continue;
             batch = trainDf[trainBatchIndex * batchsize:(trainBatchIndex+1) *batchsize];
             print("batchingWalid", batch);
-            srcValid, trgValid = batchToSrcTrg(batch);
+            srcValid, trgValid = batchToSrcTrg(batch, TRG);
             trg_inputValid = trgValid[:, :-1]
             src_maskValid, trg_maskValid = create_masks(srcValid, trg_inputValid, opt)
             _, validLoss = getPredsAndLoss(model, srcValid, trgValid, trg_inputValid, src_maskValid, trg_maskValid, opt, isTrain=False, camemModel=camemMod, camemTok=camemTok)
@@ -139,20 +141,20 @@ def train_model(model, opt, trainDf, validDf, camemMod = None, camemTok = None, 
         batchsize = opt.batchsize
         trainDf = trainDf.sample(frac=1);
         print("sizes",numBatches, len(trainDf), batchsize)
-        # for trainBatchIndex in range(numBatches):
-        for i, batch in enumerate(opt.train):
-            # print("batch",epoch,trainBatchIndex,numBatches, batchsize)
+        for trainBatchIndex in range(numBatches):
+        # for i, batch in enumerate(opt.train):
+            print("batch",epoch,trainBatchIndex,numBatches, batchsize)
 
             print("inTrain",psutil.virtual_memory())
 
             # for i, batch in enumerate(train_iter):
             #     if i == 1: break;
-            # batch = trainDf[trainBatchIndex*batchsize:(trainBatchIndex+1)*batchsize];
-            # print("batchingTrain",batch);
-            # src, trg = batchToSrcTrg(batch);
+            batch = trainDf[trainBatchIndex*batchsize:(trainBatchIndex+1)*batchsize];
+            print("batchingTrain",batch);
+            src, trg = batchToSrcTrg(batch);
 
-            src = batch.src.transpose(0,1)
-            trg = batch.trg.transpose(0,1)
+            # src = batch.src.transpose(0,1)
+            # trg = batch.trg.transpose(0,1)
             print("trg",trg.shape,trg);
 
 
@@ -378,7 +380,7 @@ def mainFelixCamemLayer():
 
         #train on all wiktionnaire data
         if opt.fullWiktPretune:
-            bestLossInitialTraining, losses, lastEpoch = train_model(model, opt,dfTrain, dfValid, camemMod=camemMod, camemTok=camemTok, numEpochsShouldBreak=2);
+            bestLossInitialTraining, losses, lastEpoch = train_model(model, opt,dfTrain, dfValid, TRG, camemMod=camemMod, camemTok=camemTok, numEpochsShouldBreak=2);
         else:
             bestLossInitialTraining, losses, lastEpoch = np.inf, [], 0
 
@@ -390,7 +392,7 @@ def mainFelixCamemLayer():
             opt.sched = CosineWithRestarts(opt.optimizer, T_max=opt.train_len)
         if opt.startFromCheckpoint:
             getBestModel(model,opt.weightSaveLoc)
-        train_model(model, opt, dfTrain, dfValid, camemMod=camemMod, camemTok=camemTok, bestLoss=bestLossInitialTraining, losses = losses, initialEpoch = lastEpoch+1, numEpochsShouldBreak=2, fineTune = True);
+        train_model(model, opt, dfTrain, dfValid, TRG, camemMod=camemMod, camemTok=camemTok, bestLoss=bestLossInitialTraining, losses = losses, initialEpoch = lastEpoch+1, numEpochsShouldBreak=2, fineTune = True);
         dumpLosses(losses, dst)
     else:
         SRC = pickle.load(open(f'{dst}/SRC.pkl', 'rb'))
