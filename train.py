@@ -189,21 +189,7 @@ def train_model(model, opt, trainDf, validDf, TRG, camemMod = None, camemTok = N
             print("trainLoss",loss.item(),"walidLoss",validLoss);
             
             total_loss += loss.item()
-            if (trainBatchIndex + 1) % opt.printevery == 0 or trainBatchIndex == 0:
-                 p = int(100 * (trainBatchIndex + 1) / opt.train_len)
-                 avg_loss = total_loss/opt.printevery
-                 if opt.floyd is False:
-                    print("   %dm: epoch %d [%s%s]  %d%%  loss = %.3f" %\
-                    ((time.time() - start)//60, epoch + 1, "".join('#'*(p//5)), "".join(' '*(20-(p//5))), p, avg_loss), end='\r')
-                 else:
-                    print("   %dm: epoch %d [%s%s]  %d%%  loss = %.3f" %\
-                    ((time.time() - start)//60, epoch + 1, "".join('#'*(p//5)), "".join(' '*(20-(p//5))), p, avg_loss))
-                 total_loss = 0
-            
-            if opt.checkpoint > 0 and ((time.time()-cptime)//60) // opt.checkpoint >= 1:
-                print("dumping model weights");
-                torch.save(model.state_dict(),  outPath + '/model_weights')
-                cptime = time.time()
+
             if validLoss < bestLoss:
                 bestPath = outPath + '/model_weights_best'# + ("_quickie" if opt.quickie else "");
                 if fineTune: bestPath += "_fineTune"
