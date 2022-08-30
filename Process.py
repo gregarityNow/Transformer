@@ -152,7 +152,7 @@ def create_dataset(opt, SRC, TRG, validBatchSize = -1, fineTune = False):
                             repeat=False, sort_key=lambda x: (len(x.src), len(x.trg)),
                             batch_size_fn=batch_size_fn, train=True, shuffle=True)
         print("postit")
-        os.remove(csvPath)
+        # os.remove(csvPath)
         datasets[subset] = {"iter":myIter, "ds":dataset}
 
     if not fineTune:
