@@ -140,7 +140,7 @@ def train_model(model, opt, trainDf, validDf, camemMod = None, camemTok = None, 
         print("sizes",numBatches, len(trainDf), batchsize)
         # for trainBatchIndex in range(numBatches):
         for i, batch in enumerate(opt.train):
-            print("batch",epoch,trainBatchIndex,numBatches, batchsize)
+            # print("batch",epoch,trainBatchIndex,numBatches, batchsize)
 
             print("inTrain",psutil.virtual_memory())
 
