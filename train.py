@@ -30,9 +30,9 @@ def loadTokenizerAndModel(name, loadFinetunedModels = False, modelToo = False, h
     proxDict = {"http": "http://webproxy.lab-ia.fr:8080", "https": "http://webproxy.lab-ia.fr:8080"}
     from transformers import AutoTokenizer, AutoModelForMaskedLM
     try:
-        tok = AutoTokenizer.from_pretrained(techName)
+        tok = AutoTokenizer.from_pretrained(techName, padding="max_length", max_length=100)
     except:
-        tok = AutoTokenizer.from_pretrained(techName, proxies=proxDict)
+        tok = AutoTokenizer.from_pretrained(techName, proxies=proxDict, padding="max_length", max_length=100)
     if not modelToo:
         return tok, None
     if loadFinetunedModels:
@@ -69,7 +69,7 @@ def getPredsAndLoss(model, src,trg,  trg_input, src_mask, trg_mask, opt, isTrain
     return preds, loss
 
 
-def train_model(model, opt, df, camemMod = None, camemTok = None, numEpochsShouldBreak = 3, bestLoss = np.inf, losses = [], initialEpoch = 0, fineTune = False):
+def train_model(model, opt, trainDf, validDf, camemMod = None, camemTok = None, numEpochsShouldBreak = 3, bestLoss = np.inf, losses = [], initialEpoch = 0, fineTune = False):
     
     print("training model...")
     model.train()
@@ -100,13 +100,21 @@ def train_model(model, opt, df, camemMod = None, camemTok = None, numEpochsShoul
 
     outPath = opt.weightSaveLoc#"/mnt/beegfs/home/herron/neo_scf_herron/stage/out/dump/byChar"
 
+    def batchToSrcTrg(batch):
+        src = camemTok(list(batch.defn), padding="max_length", max_length=100)['input_ids'].to("cuda")
+        trg = camemTok(list(batch.term), padding="max_length", max_length=100)['input_ids'].to("cuda")
+        return src, trg
+
     def doValidation():
         totalValidLoss = 0
         totalSamps = 0
-        for validBatch in opt.valid:
-            if (not fineTune) and len(validBatch) > 10 and np.random.rand() > 0.33:continue;
-            srcValid = validBatch.src.transpose(0, 1)
-            trgValid = validBatch.trg.transpose(0, 1)
+        numBatches = len(validDf) / opt.batchsize
+        startIndex = 0
+        for validBatchIndex in range(numBatches):
+            if (not fineTune) and np.random.rand() > 0.33:continue;
+            batch = trainDf[trainBatchIndex * batchsize:trainBatchIndex * (batchsize + 1)];
+            print("batching", batch);
+            srcValid, trgValid = batchToSrcTrg(batch);
             trg_inputValid = trgValid[:, :-1]
             src_maskValid, trg_maskValid = create_masks(srcValid, trg_inputValid, opt)
             _, validLoss = getPredsAndLoss(model, srcValid, trgValid, trg_inputValid, src_maskValid, trg_maskValid, opt, isTrain=False, camemModel=camemMod, camemTok=camemTok)
@@ -128,17 +136,23 @@ def train_model(model, opt, df, camemMod = None, camemTok = None, numEpochsShoul
             print("each save")
             torch.save(model.state_dict(), outPath + '/model_weights')
 
-        numBatches = len(df) / opt.batchsize
-        for i, batch in enumerate(opt.train):
-            print("batch",epoch,i,opt.train_len,len(batch))
+        numBatches = len(trainDf) / opt.batchsize
+        startIndex = 0
+        batchsize = opt.batchsize
+        trainDf = trainDf.sample(frac=1);
+        for trainBatchIndex in range(numBatches):
+            print("batch",epoch,trainBatchIndex,opt.train_len, opt.batchsize)
 
             print("inTrain",psutil.virtual_memory())
 
             # for i, batch in enumerate(train_iter):
             #     if i == 1: break;
+            batch = trainDf[trainBatchIndex*batchsize:trainBatchIndex*(batchsize+1)];
+            print("batching",batch);
+            src, trg = batchToSrcTrg(batch);
 
-            src = batch.src.transpose(0,1)
-            trg = batch.trg.transpose(0,1)
+            # src = batch.src.transpose(0,1)
+            # trg = batch.trg.transpose(0,1)
             print("what we need",type(src), type(trg),src.shape, trg.shape);
 
             # print("trainshape",src.shape, trg.shape)
@@ -339,7 +353,7 @@ def mainFelixCamemLayer():
 
 
     if opt.doTrain:
-        read_data_felix(opt, allTerms=True)
+        df = read_data_felix(opt, allTerms=True)
         SRC, TRG = create_fields(opt, camOrLetterTokenizer)
         opt.train, opt.valid = create_dataset(opt, SRC, TRG)
 
@@ -356,7 +370,7 @@ def mainFelixCamemLayer():
 
         #train on all wiktionnaire data
         if opt.fullWiktPretune:
-            bestLossInitialTraining, losses, lastEpoch = train_model(model, opt, camemMod=camemMod, camemTok=camemTok, numEpochsShouldBreak=2);
+            bestLossInitialTraining, losses, lastEpoch = train_model(model, opt,df, camemMod=camemMod, camemTok=camemTok, numEpochsShouldBreak=2);
         else:
             bestLossInitialTraining, losses, lastEpoch = np.inf, [], 0
 
@@ -368,7 +382,7 @@ def mainFelixCamemLayer():
             opt.sched = CosineWithRestarts(opt.optimizer, T_max=opt.train_len)
         if opt.startFromCheckpoint:
             getBestModel(model,opt.weightSaveLoc)
-        train_model(model, opt, camemMod=camemMod, camemTok=camemTok, bestLoss=bestLossInitialTraining, losses = losses, initialEpoch = lastEpoch+1, numEpochsShouldBreak=2, fineTune = True);
+        train_model(model, opt, df, camemMod=camemMod, camemTok=camemTok, bestLoss=bestLossInitialTraining, losses = losses, initialEpoch = lastEpoch+1, numEpochsShouldBreak=2, fineTune = True);
         dumpLosses(losses, dst)
     else:
         SRC = pickle.load(open(f'{dst}/SRC.pkl', 'rb'))
