@@ -39,10 +39,9 @@ class TransformerCamembertLayer(nn.Module):
         super().__init__()
         print("initializing the erweiteren model")
         #(src_vocab, d_model, N, heads, dropout)
-        self.encoder = EncoderCamemLayer(768, d_model, 1, heads, dropout, camemModel=camemModel)
-        self.decoder = Decoder(trg_vocab, d_model + int(doDaille)*2 , N, heads, dropout)
-        self.out = nn.Linear(d_model + int(doDaille), trg_vocab)
-        self.doDaille = doDaille
+        self.encoder = EncoderCamemLayer(768, d_model, 1, heads, dropout, camemModel=camemModel, doDaille = doDaille)
+        self.decoder = Decoder(trg_vocab, d_model , N, heads, dropout)
+        self.out = nn.Linear(d_model, trg_vocab)
     def forward(self, src, trg, src_mask, trg_mask, dailleVec = None):
         '''
         What's the deal with this mask? todo@feh
@@ -52,32 +51,40 @@ class TransformerCamembertLayer(nn.Module):
         :param trg_mask:
         :return:
         '''
-        e_outputs = self.encoder(src, src_mask)
-        print("davor",e_outputs.shape);
-        if self.doDaille:
-            q = torch.ones(e_outputs.shape[:2]).reshape(list(e_outputs.shape[:2])+[1])
-            e_outputs = torch.cat([e_outputs,q], dim=2);
-        print("how do you like me now",e_outputs.shape)
-        exit()
+        e_outputs = self.encoder(src, src_mask, dailleVec)
+        # print("davor",e_outputs.shape);
+        # if self.doDaille:
+        #     q = torch.ones(e_outputs.shape[:2]).reshape(list(e_outputs.shape[:2])+[1]).to("cuda");
+        #     e_outputs = torch.cat([e_outputs,q], dim=2);
+        # print("how do you like me now",e_outputs.shape)
+        # exit()
         # print("DECODER", e_outputs.shape, e_outputs.max(), e_outputs.min(), e_outputs)#,self.decoder)
         d_output = self.decoder(trg, e_outputs, src_mask, trg_mask)
         output = self.out(d_output)
         return output
 
 class EncoderCamemLayer(nn.Module):
-    def __init__(self, camemHiddenSize, d_model, N, heads, dropout, camemModel):
+    def __init__(self, camemHiddenSize, d_model, N, heads, dropout, camemModel, doDaille):
         super().__init__()
         assert camemHiddenSize==d_model
+        self.embed = Embedder(7, d_model)
         self.N = N
         self.pe = PositionalEncoder(d_model, dropout=dropout)
         self.layers = get_clones(EncoderLayer(d_model, heads, dropout), N)
         self.norm = Norm(d_model)
         self.camemModel = camemModel
+        self.doDaille = doDaille
 
 
-    def forward(self, src, mask):
+    def forward(self, src, mask, dailleVec = None):
         x = self.camemModel(src)[1][-1]
         x = Variable(x,requires_grad=False)
+        # q = torch.ones(e_outputs.shape[:2]).reshape(list(e_outputs.shape[:2]) + [1]).to("cuda");
+        print("xing",x.shape);
+        exit()
+        if self.doDaille:
+            dailleEmbedded = self.embed(dailleVec);
+            x = torch.cat([x, dailleEmbedded]);
         for i in range(self.N):
             x = self.layers[i](x, mask)
         return self.norm(x)
