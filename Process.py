@@ -57,7 +57,7 @@ def read_data(opt):
 
 def read_data_felix(opt, allTerms = False):
     #todo@feh: create df cleaning func ugh
-    if opt.fake:
+    if opt.daillePrediction:
         df = pickLoad("/mnt/beegfs/projects/neo_scf_herron/stage/out/dump/fake.pickle")
     elif allTerms:
         df = pickLoad("/mnt/beegfs/projects/neo_scf_herron/stage/out/dump/wiktionnaire_df_allWords.pickle")
@@ -88,7 +88,7 @@ def read_data_felix(opt, allTerms = False):
 
 def create_fields(opt, camOrLetterTokenizer):
     TRG = data.Field(lower=True, tokenize=camOrLetterTokenizer.letter_tokenize, init_token='<sos>', eos_token='<eos>')
-    SRC = data.Field(lower=True, tokenize=(camOrLetterTokenizer.cam_tokenize if not opt.fake else camOrLetterTokenizer.letter_tokenize))
+    SRC = data.Field(lower=True, tokenize=(camOrLetterTokenizer.cam_tokenize if not opt.daillePrediction else camOrLetterTokenizer.letter_tokenize))
     if opt.load_weights:
         try:
             srcPath = f'{opt.weightSaveLoc}/SRC.pkl'
