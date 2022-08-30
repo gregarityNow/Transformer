@@ -99,8 +99,8 @@ def train_model(model, opt, trainDf, validDf, camemMod = None, camemTok = None, 
     outPath = opt.weightSaveLoc#"/mnt/beegfs/home/herron/neo_scf_herron/stage/out/dump/byChar"
 
     def batchToSrcTrg(batch):
-        src = torch.tensor(camemTok(list(batch.defn), padding="max_length", max_length=100)['input_ids']).to("cuda")
-        trg = torch.tensor(camemTok(list(batch.term), padding="max_length", max_length=100)['input_ids']).to("cuda")
+        src = torch.tensor(camemTok(list(batch.defn), padding="max_length", max_length=25)['input_ids']).to("cuda")
+        trg = torch.tensor(camemTok(list(batch.term), padding="max_length", max_length=25)['input_ids']).to("cuda")
         return src, trg
 
     def doValidation():
@@ -138,20 +138,20 @@ def train_model(model, opt, trainDf, validDf, camemMod = None, camemTok = None, 
         batchsize = opt.batchsize
         trainDf = trainDf.sample(frac=1);
         print("sizes",numBatches, len(trainDf), batchsize)
-        # for trainBatchIndex in range(numBatches):
-        for i, batch in enumerate(opt.train):
+        for trainBatchIndex in range(numBatches):
+        # for i, batch in enumerate(opt.train):
             # print("batch",epoch,trainBatchIndex,numBatches, batchsize)
 
             print("inTrain",psutil.virtual_memory())
 
             # for i, batch in enumerate(train_iter):
             #     if i == 1: break;
-            # batch = trainDf[trainBatchIndex*batchsize:(trainBatchIndex+1)*batchsize];
-            # print("batching",batch);
-            # src, trg = batchToSrcTrg(batch);
+            batch = trainDf[trainBatchIndex*batchsize:(trainBatchIndex+1)*batchsize];
+            print("batching",batch);
+            src, trg = batchToSrcTrg(batch);
 
-            src = batch.src.transpose(0,1)
-            trg = batch.trg.transpose(0,1)
+            # src = batch.src.transpose(0,1)
+            # trg = batch.trg.transpose(0,1)
             print("what we need",type(src), type(trg),src.shape, trg.shape);
 
             # print("trainshape",src.shape, trg.shape)
@@ -311,7 +311,7 @@ def mainFelixCamemLayer():
     parser.add_argument('-n_layers', type=int, default=6)
     parser.add_argument('-heads', type=int, default=8)
     parser.add_argument('-dropout', type=int, default=0.1)
-    parser.add_argument('-batchsize', type=int, default=1500)
+    parser.add_argument('-batchsize', type=int, default=20)
     parser.add_argument('-printevery', type=int, default=10)
     parser.add_argument('-lr', type=int, default=0.0001)
     parser.add_argument('-k', type=int, default=3)
