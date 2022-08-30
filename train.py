@@ -108,7 +108,7 @@ def train_model(model, opt, trainDf, validDf, camemMod = None, camemTok = None, 
     def doValidation():
         totalValidLoss = 0
         totalSamps = 0
-        numBatches = len(validDf) / opt.batchsize
+        numBatches = len(validDf) // opt.batchsize
         startIndex = 0
         for validBatchIndex in range(numBatches):
             if (not fineTune) and np.random.rand() > 0.33:continue;
@@ -136,12 +136,12 @@ def train_model(model, opt, trainDf, validDf, camemMod = None, camemTok = None, 
             print("each save")
             torch.save(model.state_dict(), outPath + '/model_weights')
 
-        numBatches = len(trainDf) / opt.batchsize
+        numBatches = len(trainDf) // opt.batchsize
         startIndex = 0
         batchsize = opt.batchsize
         trainDf = trainDf.sample(frac=1);
         for trainBatchIndex in range(numBatches):
-            print("batch",epoch,trainBatchIndex,opt.train_len, opt.batchsize)
+            print("batch",epoch,trainBatchIndex,numBatches, batchsize)
 
             print("inTrain",psutil.virtual_memory())
 
