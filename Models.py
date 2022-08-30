@@ -92,7 +92,7 @@ class Decoder(nn.Module):
         for i in range(self.N):
             x = self.layers[i](x, e_outputs, src_mask, trg_mask)
         norm = self.norm(x)
-        print("fin")
+        print("fin", norm.shape, norm)
         return norm
 
 class Transformer(nn.Module):
