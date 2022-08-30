@@ -72,6 +72,7 @@ class EncoderCamemLayer(nn.Module):
         return src.apply_(lambda x: int(self.reverseIntFunc[x]));
 
     def forward(self, src, mask):
+        print("norse",src)
         revertedSrc = Variable(self.reverseSrc(src), requires_grad=False)
         print("src horse", src.shape, src[0].shape, src[0]);
         x = Variable(self.camemModel(revertedSrc)[1][-1], requires_grad=False)
