@@ -113,7 +113,7 @@ def train_model(model, opt, trainDf, validDf, TRG, camemMod = None, camemTok = N
         return thisLoss
 
     meanCamemLen = pd.concat([trainDf, validDf]).camemDefnLen.mean()
-    batchSizeStandard = opt.batchsize // meanCamemLen
+    batchSizeStandard = int(opt.batchsize // meanCamemLen)
     numBatchesValid = int(max(len(validDf) // batchSizeStandard, 1))
     numBatchesTrain = int(max(len(trainDf) // batchSizeStandard, 1))
 
