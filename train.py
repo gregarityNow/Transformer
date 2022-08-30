@@ -83,7 +83,7 @@ def train_model(model, opt, camemMod = None, camemTok = None, numEpochsShouldBre
     def shouldBreak(myl):
         try:
             percDiff = (myl[-1] - myl[0]) / myl[-1]
-            if percDiff > 0.05:
+            if percDiff > 0:
             #loss at end of epoch was significantly greater than beginning of epoch; that's no good at all!
                 print("endingLoss",myl[-1]," was greater than beginning loss",myl[0],"percDiff",percDiff)
                 return True;
@@ -97,6 +97,22 @@ def train_model(model, opt, camemMod = None, camemTok = None, numEpochsShouldBre
             return False
 
     outPath = opt.weightSaveLoc#"/mnt/beegfs/home/herron/neo_scf_herron/stage/out/dump/byChar"
+
+    def doValidation():
+        totalValidLoss = 0
+        totalSamps = 0
+        for validBatch in opt.valid:
+            if np.random.rand() > 0.33: continue;
+            srcValid = validBatch.src.transpose(0, 1)
+            trgValid = validBatch.trg.transpose(0, 1)
+            trg_inputValid = trgValid[:, :-1]
+            src_maskValid, trg_maskValid = create_masks(srcValid, trg_inputValid, opt)
+            _, validLoss = getPredsAndLoss(model, srcValid, trgValid, trg_inputValid, src_maskValid, trg_maskValid, opt, isTrain=False, camemModel=camemMod, camemTok=camemTok)
+            thisLoss = validLoss.item() * srcValid.shape[0]
+            totalValidLoss += thisLoss
+            totalSamps += srcValid.shape[0]
+        validLoss = totalValidLoss / totalSamps
+        return validLoss
 
     while True:
 
@@ -132,25 +148,14 @@ def train_model(model, opt, camemMod = None, camemTok = None, numEpochsShouldBre
                 opt.sched.step()
             trainTime = time.time() - trainTime
             print("did training step",trainTime)
-            totalValidLoss = 0
-            totalSamps = 0;
             print("beginning walidation")
             walidTime = time.time()
-            for validBatch in opt.valid:
-                if np.random.rand() > 0.33: continue;
-                srcValid = validBatch.src.transpose(0, 1)
-                trgValid = validBatch.trg.transpose(0, 1)
-                trg_inputValid = trgValid[:, :-1]
-                src_maskValid, trg_maskValid = create_masks(srcValid, trg_inputValid, opt)
-                _, validLoss = getPredsAndLoss(model, srcValid, trgValid, trg_inputValid, src_maskValid, trg_maskValid, opt, isTrain=False, camemModel=camemMod, camemTok=camemTok)
-                thisLoss = validLoss.item()*srcValid.shape[0]
-                totalValidLoss += thisLoss
-                totalSamps += srcValid.shape[0]
+            validLoss = doValidation()
             walidTime = time.time()-walidTime
             print("walid ending",walidTime)
                 # print("shaka smart", srcValid.shape, trgValid.shape, thisLoss)
 
-            validLoss = totalValidLoss/totalSamps
+
 
             losses.append({"epoch":epoch + i/opt.train_len,"train_loss":loss.item(),"valid_loss":validLoss})
             print("trainLoss",loss.item(),"walidLoss",validLoss);
