@@ -86,8 +86,9 @@ class Decoder(nn.Module):
         self.pe = PositionalEncoder(d_model, dropout=dropout)
         self.layers = get_clones(DecoderLayer(d_model, heads, dropout), N)
         self.norm = Norm(d_model)
+        print("nitializing",d_model, vocab_size);
     def forward(self, trg, e_outputs, src_mask, trg_mask):
-        print("given", self.vocab_size)
+        print("given");
         x = self.embed(trg)
         x = self.pe(x)
         print("ped",x)
