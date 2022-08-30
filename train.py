@@ -183,6 +183,7 @@ def train_model(model, opt, camemMod = None, camemTok = None, numEpochsShouldBre
                 print("saving best model woot", bestPath)
                 cptime = time.time()
                 bestLoss = validLoss
+            dumpLosses(losses, opt.weightSaveLoc)
 
         if shouldBreak([loss["train_loss"] for loss in losses if loss["epoch"] > epoch]):
             shouldBroke += 1
@@ -372,7 +373,9 @@ def mainFelix():
         pickle.dump(df, open(f'{dst}/postTune' + ("_quickie" if opt.quickie else "") + '.pkl','wb'));
         print("df is at",f'{dst}/postTune' + ("_quickie" if opt.quickie else "") + '.pkl')
 
-
+def dumpLosses(losses, dst, quickie=False):
+    with open(dst + "/../losses" + ("_quickie" if quickie else "") + ".pickle", "wb") as fp:
+        pickle.dump(losses, fp);
 
 
 def mainFelixCamemLayer():
@@ -399,6 +402,7 @@ def mainFelixCamemLayer():
     parser.add_argument('-camemLayer',type=int,default=1)
     parser.add_argument("-hack",type=int,default=0)
     parser.add_argument("-startFromCheckpoint",type=int,default=0);
+    parser.add_argument("-fullWiktPretune", type=int, default=1);
     opt = parser.parse_args()
 
     if opt.camemLayer:
@@ -439,7 +443,10 @@ def mainFelixCamemLayer():
         print("moodely", model.state_dict().keys())
 
         #train on all wiktionnaire data
-        bestLossInitialTraining, losses, lastEpoch = train_model(model, opt, camemMod=camemMod, camemTok=camemTok, numEpochsShouldBreak=2);
+        if opt.fullWiktPretune:
+            bestLossInitialTraining, losses, lastEpoch = train_model(model, opt, camemMod=camemMod, camemTok=camemTok, numEpochsShouldBreak=2);
+        else:
+            bestLossInitialTraining, losses, lastEpoch = np.inf, [], 0
 
         #finetune on neonyms
         df = read_data_felix(opt, allTerms=False)
@@ -450,8 +457,7 @@ def mainFelixCamemLayer():
             getBestModel(model,opt.weightSaveLoc)
         train_model(model, opt, camemMod=camemMod, camemTok=camemTok, bestLoss=bestLossInitialTraining, losses = losses, epoch = lastEpoch+1, numEpochsShouldBreak=2);
 
-        with open(dst + "/../losses" + ("_quickie" if opt.quickie else "") + ".pickle", "wb") as fp:
-            pickle.dump(losses, fp);
+        dumpLosses(losses, dst)
     else:
         SRC = pickle.load(open(f'{dst}/SRC.pkl', 'rb'))
         TRG = pickle.load(open(f'{dst}/TRG.pkl', 'rb'))
