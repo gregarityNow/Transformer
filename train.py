@@ -161,7 +161,9 @@ def train_model(model, opt, trainDf, validDf, camemMod = None, camemTok = None, 
             preds, loss = getPredsAndLoss(model, src,trg, trg_input, src_mask, trg_mask,opt, isTrain = True, camemModel=camemMod, camemTok=camemTok)
             print("we got le loss");
             loss.backward()
+            print("backwarded");
             opt.optimizer.step()
+            print("stepped");
             if opt.SGDR == True:
                 opt.sched.step()
             trainTime = time.time() - trainTime
