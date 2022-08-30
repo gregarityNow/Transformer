@@ -106,24 +106,80 @@ def train_model(model, opt, trainDf, validDf, TRG, camemMod = None, camemTok = N
         # trg = torch.ones_like(trg);
         return src.to("cuda"), trg.to("cuda")
 
+    def getLoss(src, trg, trg_input):
+        src_maskValid, trg_maskValid = create_masks(src, trg_input, opt)
+        _, validLoss = getPredsAndLoss(model, src, trg, trg_input, src_maskValid, trg_maskValid, opt, isTrain=False, camemModel=camemMod, camemTok=camemTok)
+        thisLoss = validLoss.item() * src.shape[0]
+        return thisLoss
+
     def doValidation():
         totalValidLoss = 0
         totalSamps = 0
-        numBatches = max(len(validDf) // opt.batchsize,1)
+        for validBatch in opt.valid:
+            if opt.camemLayer: continue;
+            if np.random.rand() > 0.33: continue;
+            srcValid = validBatch.src.transpose(0, 1)
+            trgValid = validBatch.trg.transpose(0, 1)
+            trg_inputValid = trgValid[:, :-1]
+            thisLoss = getLoss(srcValid, trgValid, trg_inputValid)
+            totalValidLoss += thisLoss
+            totalSamps += srcValid.shape[0]
+
+        numBatches = max(len(validDf) // opt.batchsize, 1)
         for validBatchIndex in range(numBatches):
+            if not opt.camemLayer: continue;
             if (not fineTune) and numBatches > 10 and np.random.rand() > 0.33:continue;
             batch = trainDf[trainBatchIndex * batchsize:(trainBatchIndex+1) *batchsize];
             print("batchingWalid", batch);
             srcValid, trgValid = batchToSrcTrg(batch, TRG);
             trg_inputValid = trgValid[:, :-1]
-            src_maskValid, trg_maskValid = create_masks(srcValid, trg_inputValid, opt)
-            _, validLoss = getPredsAndLoss(model, srcValid, trgValid, trg_inputValid, src_maskValid, trg_maskValid, opt, isTrain=False, camemModel=camemMod, camemTok=camemTok)
-            thisLoss = validLoss.item() * srcValid.shape[0]
+            thisLoss = getLoss(srcValid, trgValid, trg_inputValid)
             totalValidLoss += thisLoss
             totalSamps += srcValid.shape[0]
         validLoss = totalValidLoss / totalSamps
         print("validated on",totalSamps)
         return validLoss
+
+    def handleTrain(src, trg, opt, losses, batchIndex, bestLoss):
+        trg_input = trg[:, :-1]
+        src_mask, trg_mask = create_masks(src, trg_input, opt)
+        print("we're feeding", src.shape, trg.shape, trg_input.shape, src_mask.shape, trg_mask.shape)
+        trainTime = time.time()
+        preds, loss = getPredsAndLoss(model, src, trg, trg_input, src_mask, trg_mask, opt, isTrain=True, camemModel=camemMod, camemTok=camemTok)
+        print("we got le loss", loss.shape, loss);
+        loss.backward()
+        print("backwarded");
+
+        opt.optimizer.step()
+        print("stepped");
+
+        if opt.SGDR == True:
+            opt.sched.step()
+        trainTime = time.time() - trainTime
+        print("did training step", trainTime)
+        print("beginning walidation")
+        walidTime = time.time()
+        validLoss = doValidation()
+        walidTime = time.time() - walidTime
+        print("walid ending", walidTime)
+        # print("shaka smart", srcValid.shape, trgValid.shape, thisLoss)
+
+        trainLoss = loss.item()
+        losses.append({"epoch": epoch + trainBatchIndex / opt.train_len, "train_loss": trainLoss, "valid_loss": validLoss})
+        print("trainLoss", trainLoss, "walidLoss", validLoss);
+
+
+
+        if validLoss < bestLoss:
+            bestPath = outPath + '/model_weights_best'  # + ("_quickie" if opt.quickie else "");
+            if fineTune: bestPath += "_fineTune"
+            torch.save(model.state_dict(), bestPath)
+            print("saving best model woot", bestPath)
+            cptime = time.time()
+            bestLoss = validLoss
+        if batchIndex % 10 == 0:
+            dumpLosses(losses, opt.weightSaveLoc)
+        return bestLoss
 
     while True:
 
@@ -141,63 +197,29 @@ def train_model(model, opt, trainDf, validDf, TRG, camemMod = None, camemTok = N
         trainDf = trainDf.sample(frac=1);
         print("sizes",numBatches, len(trainDf), batchsize)
         for trainBatchIndex in range(numBatches):
-        # for i, batch in enumerate(opt.train):
+            if not opt.camemLayer: break;
             print("batch",epoch,trainBatchIndex,numBatches, batchsize)
 
             print("inTrain",psutil.virtual_memory())
 
-            # for i, batch in enumerate(train_iter):
-            #     if i == 1: break;
             batch = trainDf[trainBatchIndex*batchsize:(trainBatchIndex+1)*batchsize];
             print("batchingTrain",batch);
             src, trg = batchToSrcTrg(batch, TRG);
 
-            # src = batch.src.transpose(0,1)
-            # trg = batch.trg.transpose(0,1)
             print("trg",trg.shape,trg);
 
+            bestLoss = handleTrain(src, trg, opt, losses, trainBatchIndex, bestLoss)
+        for trainBatchIndex, batch in enumerate(opt.train):
+            if opt.camemLayer: break;
+            print("batch",epoch,numBatches, batchsize)
 
-            # print("trainshape",src.shape, trg.shape)
-            trg_input = trg[:, :-1]
+            print("inTrain",psutil.virtual_memory())
 
+            src = batch.src.transpose(0,1)
+            trg = batch.trg.transpose(0,1)
+            print("trg",trg.shape,trg);
 
-            # src_mask, trg_mask = create_masks(src, trg_input, None)
-            src_mask, trg_mask = create_masks(src, trg_input, opt)
-            print("we're feeding", src.shape, trg.shape, trg_input.shape, src_mask.shape, trg_mask.shape)
-            trainTime = time.time()
-            preds, loss = getPredsAndLoss(model, src,trg, trg_input, src_mask, trg_mask,opt, isTrain = True, camemModel=camemMod, camemTok=camemTok)
-            print("we got le loss", loss.shape, loss);
-            loss.backward()
-            print("backwarded");
-
-            opt.optimizer.step()
-            print("stepped");
-
-            if opt.SGDR == True:
-                opt.sched.step()
-            trainTime = time.time() - trainTime
-            print("did training step",trainTime)
-            print("beginning walidation")
-            walidTime = time.time()
-            validLoss = doValidation()
-            walidTime = time.time()-walidTime
-            print("walid ending",walidTime)
-                # print("shaka smart", srcValid.shape, trgValid.shape, thisLoss)
-
-
-            losses.append({"epoch":epoch + trainBatchIndex/opt.train_len,"train_loss":loss.item(),"valid_loss":validLoss})
-            print("trainLoss",loss.item(),"walidLoss",validLoss);
-            
-            total_loss += loss.item()
-
-            if validLoss < bestLoss:
-                bestPath = outPath + '/model_weights_best'# + ("_quickie" if opt.quickie else "");
-                if fineTune: bestPath += "_fineTune"
-                torch.save(model.state_dict(), bestPath)
-                print("saving best model woot", bestPath)
-                cptime = time.time()
-                bestLoss = validLoss
-            dumpLosses(losses, opt.weightSaveLoc)
+            bestLoss = handleTrain(src, trg, opt, losses, trainBatchIndex, bestLoss)
 
         if shouldBreak([loss["train_loss"] for loss in losses if loss["epoch"] > epoch], epoch):
             shouldBroke += 1
@@ -207,14 +229,14 @@ def train_model(model, opt, trainDf, validDf, TRG, camemMod = None, camemTok = N
         elif epoch == 7:
             print("already done 8 epochs, that seems to be quite enough")
             break;
+        elif opt.quickie:
+            print("quickie breaking",shouldBroke, epoch);
+            break;
         else:
             shouldBroke = 0;
             epoch += 1;
             print("pssh we ain't brekaing!")
-   
-   
-        print("%dm: epoch %d [%s%s]  %d%%  loss = %.3f\nepoch %d complete, loss = %.03f" %\
-        ((time.time() - start)//60, epoch + 1, "".join('#'*(100//5)), "".join(' '*(20-(100//5))), 100, avg_loss, epoch + 1, avg_loss))
+
 
     return bestLoss, losses, epoch
 
