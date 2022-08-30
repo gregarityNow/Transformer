@@ -137,9 +137,9 @@ def train_model(model, opt, trainDf, validDf, camemMod = None, camemTok = None, 
             torch.save(model.state_dict(), outPath + '/model_weights')
 
         numBatches = len(trainDf) // opt.batchsize
-        startIndex = 0
         batchsize = opt.batchsize
         trainDf = trainDf.sample(frac=1);
+        print("sizes",numBatches, len(trainDf), batchsize)
         for trainBatchIndex in range(numBatches):
             print("batch",epoch,trainBatchIndex,numBatches, batchsize)
 
@@ -175,13 +175,13 @@ def train_model(model, opt, trainDf, validDf, camemMod = None, camemTok = None, 
                 # print("shaka smart", srcValid.shape, trgValid.shape, thisLoss)
 
 
-            losses.append({"epoch":epoch + i/opt.train_len,"train_loss":loss.item(),"valid_loss":validLoss})
+            losses.append({"epoch":epoch + trainBatchIndex/opt.train_len,"train_loss":loss.item(),"valid_loss":validLoss})
             print("trainLoss",loss.item(),"walidLoss",validLoss);
             
             total_loss += loss.item()
-            
-            if (i + 1) % opt.printevery == 0 or i == 0:
-                 p = int(100 * (i + 1) / opt.train_len)
+            trainBatchIndex = 0
+            if (trainBatchIndex + 1) % opt.printevery == 0 or trainBatchIndex == 0:
+                 p = int(100 * (trainBatchIndex + 1) / opt.train_len)
                  avg_loss = total_loss/opt.printevery
                  if opt.floyd is False:
                     print("   %dm: epoch %d [%s%s]  %d%%  loss = %.3f" %\
