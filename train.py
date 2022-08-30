@@ -116,7 +116,7 @@ def train_model(model, opt, trainDf, validDf, TRG, camemMod = None, camemTok = N
         totalValidLoss = 0
         totalSamps = 0
         for validBatch in opt.valid:
-            if opt.camemLayer: continue;
+            if opt.camemLayer: break;
             if np.random.rand() > 0.33: continue;
             srcValid = validBatch.src.transpose(0, 1)
             trgValid = validBatch.trg.transpose(0, 1)
@@ -127,7 +127,7 @@ def train_model(model, opt, trainDf, validDf, TRG, camemMod = None, camemTok = N
 
         numBatches = max(len(validDf) // opt.batchsize, 1)
         for validBatchIndex in range(numBatches):
-            if not opt.camemLayer: continue;
+            if not opt.camemLayer: break;
             if (not fineTune) and numBatches > 10 and np.random.rand() > 0.33:continue;
             batch = trainDf[trainBatchIndex * batchsize:(trainBatchIndex+1) *batchsize];
             print("batchingWalid", batch);
@@ -176,7 +176,6 @@ def train_model(model, opt, trainDf, validDf, TRG, camemMod = None, camemTok = N
 
     while True:
 
-        total_loss = 0
         if opt.floyd is False:
             print("   %dm: epoch %d [%s]  %d%%  loss = %s" %\
             ((time.time() - start)//60, epoch + 1, "".join(' '*20), 0, '...'), end='\r')
@@ -199,7 +198,7 @@ def train_model(model, opt, trainDf, validDf, TRG, camemMod = None, camemTok = N
             src, trg = batchToSrcTrg(batch, TRG);
 
             bestLoss = handleTrain(src, trg, opt, losses, trainBatchIndex, bestLoss)
-        numBatches = len(opt.train);
+        numBatches = opt.train_len
         for trainBatchIndex, batch in enumerate(opt.train):
             if opt.camemLayer: break;
             print("batch",epoch,trainBatchIndex,numBatches, batchsize)
