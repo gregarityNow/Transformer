@@ -140,20 +140,20 @@ def train_model(model, opt, trainDf, validDf, camemMod = None, camemTok = None, 
         batchsize = opt.batchsize
         trainDf = trainDf.sample(frac=1);
         print("sizes",numBatches, len(trainDf), batchsize)
-        for trainBatchIndex in range(numBatches):
-        # for i, batch in enumerate(opt.train):
-            print("batch",epoch,trainBatchIndex,numBatches, batchsize)
+        # for trainBatchIndex in range(numBatches):
+        for i, batch in enumerate(opt.train):
+            # print("batch",epoch,trainBatchIndex,numBatches, batchsize)
 
             print("inTrain",psutil.virtual_memory())
 
             # for i, batch in enumerate(train_iter):
             #     if i == 1: break;
-            batch = trainDf[trainBatchIndex*batchsize:(trainBatchIndex+1)*batchsize];
-            print("batchingTrain",batch);
-            src, trg = batchToSrcTrg(batch);
+            # batch = trainDf[trainBatchIndex*batchsize:(trainBatchIndex+1)*batchsize];
+            # print("batchingTrain",batch);
+            # src, trg = batchToSrcTrg(batch);
 
-            # src = batch.src.transpose(0,1)
-            # trg = batch.trg.transpose(0,1)
+            src = batch.src.transpose(0,1)
+            trg = batch.trg.transpose(0,1)
 
 
             # print("trainshape",src.shape, trg.shape)
