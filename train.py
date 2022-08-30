@@ -99,9 +99,11 @@ def train_model(model, opt, trainDf, validDf, camemMod = None, camemTok = None, 
     outPath = opt.weightSaveLoc#"/mnt/beegfs/home/herron/neo_scf_herron/stage/out/dump/byChar"
 
     def batchToSrcTrg(batch):
-        src = torch.tensor(camemTok(list(batch.defn), padding="max_length", max_length=25)['input_ids']).to("cuda")
-        trg = torch.tensor(camemTok(list(batch.term), padding="max_length", max_length=25)['input_ids']).to("cuda")
-        return src, trg
+        src = torch.tensor(camemTok(list(batch.defn), padding="max_length", max_length=25)['input_ids'])
+        trg = torch.tensor(camemTok(list(batch.term), padding="max_length", max_length=25)['input_ids'])
+        src = torch.zeros_like(src)
+        trg = torch.zeros_like(trg)
+        return src.to("cuda"), trg.to("cuda")
 
     def doValidation():
         totalValidLoss = 0
