@@ -139,7 +139,7 @@ def train_model(model, opt, trainDf, validDf, camemMod = None, camemTok = None, 
         batchsize = opt.batchsize
         trainDf = trainDf.sample(frac=1);
         print("sizes",numBatches, len(trainDf), batchsize)
-        for trainBatchIndex in range(numBatches):
+        # for trainBatchIndex in range(numBatches):
         for i, batch in enumerate(opt.train):
             # print("batch",epoch,trainBatchIndex,numBatches, batchsize)
 
