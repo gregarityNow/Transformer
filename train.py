@@ -220,6 +220,8 @@ def train_model(model, opt, trainDf, validDf, TRG, camemMod = None, camemTok = N
             if shouldBroke == numEpochsShouldBreak or opt.quickie:
                 print("progress has stopped; breaking")
                 break;
+            else:
+                print("ok you get another chance to do better next time")
         elif epoch == 7:
             print("already done 8 epochs, that seems to be quite enough")
             break;
