@@ -151,7 +151,7 @@ def train_model(model, opt, trainDf, validDf, TRG, camemMod = None, camemTok = N
             #     if i == 1: break;
             batch = trainDf[trainBatchIndex*batchsize:(trainBatchIndex+1)*batchsize];
             print("batchingTrain",batch);
-            src, trg = batchToSrcTrg(batch);
+            src, trg = batchToSrcTrg(batch, TRG);
 
             # src = batch.src.transpose(0,1)
             # trg = batch.trg.transpose(0,1)
