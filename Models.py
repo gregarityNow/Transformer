@@ -40,7 +40,7 @@ class TransformerCamembertLayer(nn.Module):
         print("initializing the erweiteren model")
         #(src_vocab, d_model, N, heads, dropout)
         self.encoder = EncoderCamemLayer(768, d_model, 1, heads, dropout, camemModel=camemModel)
-        self.decoder = Decoder(trg_vocab, d_model + int(doDaille) , N, heads, dropout)
+        self.decoder = Decoder(trg_vocab, d_model + int(doDaille)*2 , N, heads, dropout)
         self.out = nn.Linear(d_model + int(doDaille), trg_vocab)
         self.doDaille = doDaille
     def forward(self, src, trg, src_mask, trg_mask, dailleVec = None):

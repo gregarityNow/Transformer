@@ -20,8 +20,10 @@ class PositionalEncoder(nn.Module):
         # pos and i
         print("dima d",d_model)
         pe = torch.zeros(max_seq_len, d_model)
+        print("shapely",pe.shape)
         for pos in range(max_seq_len):
             for i in range(0, d_model, 2):
+                print("i of the tiger",i);
                 pe[pos, i] = \
                 math.sin(pos / (10000 ** ((2 * i)/d_model)))
                 pe[pos, i + 1] = \
