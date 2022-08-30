@@ -67,7 +67,7 @@ class EncoderCamemLayer(nn.Module):
         self.norm = Norm(d_model)
         self.camemModel = camemModel
     def forward(self, src, mask):
-        print("src horse",src.shape);
+        print("src horse",src.shape,src[0].shape, src[0]);
         x = self.camemModel(src)[1][-1]
         x = Variable(x, requires_grad=False)
         for i in range(self.N):
