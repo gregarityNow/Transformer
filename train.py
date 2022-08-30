@@ -117,7 +117,7 @@ def train_model(model, opt, trainDf, validDf, TRG, camemMod = None, camemTok = N
         totalSamps = 0
         for validBatch in opt.valid:
             if opt.camemLayer: break;
-            if np.random.rand() > 0.33: continue;
+            if opt.valid_len > 10 and np.random.rand() > 0.33: continue;
             srcValid = validBatch.src.transpose(0, 1)
             trgValid = validBatch.trg.transpose(0, 1)
             trg_inputValid = trgValid[:, :-1]
