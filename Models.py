@@ -75,7 +75,7 @@ class EncoderCamemLayer(nn.Module):
         print("xmas jackson",x.shape);
         for i in range(self.N):
             x = self.layers[i](x, mask)
-        print("the end!",x);
+        print("the end!")
         return self.norm(x)
 
 class Decoder(nn.Module):
