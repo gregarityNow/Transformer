@@ -137,6 +137,7 @@ def train_model(model, opt, camemMod = None, camemTok = None, numEpochsShouldBre
             #     if i == 1: break;
 
             src = batch.src.transpose(0,1)
+            print("device status? ",src.device);
             trg = batch.trg.transpose(0,1)
 
             # print("trainshape",src.shape, trg.shape)
