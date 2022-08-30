@@ -69,7 +69,7 @@ def getPredsAndLoss(model, src,trg,  trg_input, src_mask, trg_mask, opt, isTrain
     return preds, loss
 
 
-def train_model(model, opt, camemMod = None, camemTok = None, numEpochsShouldBreak = 3, bestLoss = np.inf, losses = [], epoch = 0, fineTune = False):
+def train_model(model, opt, camemMod = None, camemTok = None, numEpochsShouldBreak = 3, bestLoss = np.inf, losses = [], initialEpoch = 0, fineTune = False):
     
     print("training model...")
     model.train()
@@ -79,6 +79,7 @@ def train_model(model, opt, camemMod = None, camemTok = None, numEpochsShouldBre
 
 
     shouldBroke = 0
+    epoch = initialEpoch
 
     def shouldBreak(myl, epoch):
         print("epoch over, deliberating break",epoch)
@@ -104,7 +105,6 @@ def train_model(model, opt, camemMod = None, camemTok = None, numEpochsShouldBre
         totalSamps = 0
         for validBatch in opt.valid:
             if (not fineTune) and len(validBatch) > 10 and np.random.rand() > 0.33:continue;
-            else: print("takin that valid boi")
             srcValid = validBatch.src.transpose(0, 1)
             trgValid = validBatch.trg.transpose(0, 1)
             trg_inputValid = trgValid[:, :-1]
@@ -114,6 +114,7 @@ def train_model(model, opt, camemMod = None, camemTok = None, numEpochsShouldBre
             totalValidLoss += thisLoss
             totalSamps += srcValid.shape[0]
         validLoss = totalValidLoss / totalSamps
+        print("validated on",totalSamps)
         return validLoss
 
     while True:
@@ -156,7 +157,6 @@ def train_model(model, opt, camemMod = None, camemTok = None, numEpochsShouldBre
             walidTime = time.time()-walidTime
             print("walid ending",walidTime)
                 # print("shaka smart", srcValid.shape, trgValid.shape, thisLoss)
-
 
 
             losses.append({"epoch":epoch + i/opt.train_len,"train_loss":loss.item(),"valid_loss":validLoss})
@@ -255,16 +255,19 @@ def translate(opt, model, SRC, TRG):
 
     return (' '.join(translated))
 
-def getBestModel(model, path):
-    model.load_state_dict(torch.load(f'{path}/model_weights_best'))
+def getBestModel(model, path, fineTune = True):
+    bestPath = f'{path}/model_weights_best'
+    if fineTune:
+        bestPath += "_fineTune"
+    model.load_state_dict(torch.load(bestPath))
     print("the model now has (lowers sunglasses) best weights, ooo");
 
-def evaluate(opt, model, SRC, TRG, df, suffix):
+def evaluate(opt, model, SRC, TRG, df, suffix, fineTune = True):
     from tqdm import tqdm
     tqdm.pandas()
     try:
         print("tryna load",f'{opt.weightSaveLoc}/model_weights_best')
-        getBestModel(model, opt.weightSaveLoc)
+        getBestModel(model, opt.weightSaveLoc, fineTune = fineTune)
     except Exception as e:
         print("no best weights available, no worries hoss",e)
         raise(e);
@@ -380,8 +383,10 @@ def mainFelix():
         print("df is at",f'{dst}/postTune' + ("_quickie" if opt.quickie else "") + '.pkl')
 
 def dumpLosses(losses, dst):
-    with open(dst + "/../losses.pickle", "wb") as fp:
+    dumpPath = dst + "/../losses.pickle"
+    with open(dumpPath, "wb") as fp:
         pickle.dump(losses, fp);
+    print("dumped to",dumpPath)
 
 def mainFelixCamemLayer():
     print("shabloimps")
@@ -464,8 +469,7 @@ def mainFelixCamemLayer():
             opt.sched = CosineWithRestarts(opt.optimizer, T_max=opt.train_len)
         if opt.startFromCheckpoint:
             getBestModel(model,opt.weightSaveLoc)
-        train_model(model, opt, camemMod=camemMod, camemTok=camemTok, bestLoss=bestLossInitialTraining, losses = losses, epoch = lastEpoch+1, numEpochsShouldBreak=2, fineTune = True);
-
+        train_model(model, opt, camemMod=camemMod, camemTok=camemTok, bestLoss=bestLossInitialTraining, losses = losses, initialEpoch = lastEpoch+1, numEpochsShouldBreak=2, fineTune = True);
         dumpLosses(losses, dst)
     else:
         SRC = pickle.load(open(f'{dst}/SRC.pkl', 'rb'))
@@ -475,7 +479,8 @@ def mainFelixCamemLayer():
         df = read_data_felix(opt, allTerms=False)
     if opt.doEval:
         dfValid = df[df.subset == "valid"]
-        df = evaluate(opt, model, SRC, TRG, dfValid, "_postTrain")
+        dfPreFinetune = evaluate(opt, model, SRC, TRG, dfValid, "_postTrain")
+        df = evaluate(opt, model, SRC, TRG, dfValid, "_postFinetune", fineTune = True)
 
         pickle.dump(df, open(f'{dst}/postTuneCamemLayer.pkl','wb'));
         print("df is at",f'{dst}/postTuneCamemLayer.pkl')
