@@ -138,20 +138,20 @@ def train_model(model, opt, trainDf, validDf, camemMod = None, camemTok = None, 
         batchsize = opt.batchsize
         trainDf = trainDf.sample(frac=1);
         print("sizes",numBatches, len(trainDf), batchsize)
-        # for trainBatchIndex in range(numBatches):
-        for i, batch in enumerate(opt.train):
-            # print("batch",epoch,trainBatchIndex,numBatches, batchsize)
+        for trainBatchIndex in range(numBatches):
+        # for i, batch in enumerate(opt.train):
+            print("batch",epoch,trainBatchIndex,numBatches, batchsize)
 
             print("inTrain",psutil.virtual_memory())
 
             # for i, batch in enumerate(train_iter):
             #     if i == 1: break;
-            # batch = trainDf[trainBatchIndex*batchsize:(trainBatchIndex+1)*batchsize];
-            # print("batchingTrain",batch);
-            # src, trg = batchToSrcTrg(batch);
+            batch = trainDf[trainBatchIndex*batchsize:(trainBatchIndex+1)*batchsize];
+            print("batchingTrain",batch);
+            src, trg = batchToSrcTrg(batch);
 
-            src = batch.src.transpose(0,1)
-            trg = batch.trg.transpose(0,1)
+            # src = batch.src.transpose(0,1)
+            # trg = batch.trg.transpose(0,1)
 
 
             # print("trainshape",src.shape, trg.shape)
@@ -163,12 +163,12 @@ def train_model(model, opt, trainDf, validDf, camemMod = None, camemTok = None, 
             print("we're feeding", src.shape, trg.shape, trg_input.shape, src_mask.shape, trg_mask.shape)
             trainTime = time.time()
             preds, loss = getPredsAndLoss(model, src,trg, trg_input, src_mask, trg_mask,opt, isTrain = True, camemModel=camemMod, camemTok=camemTok)
-            exit()
             print("we got le loss");
             loss.backward()
             print("backwarded");
             opt.optimizer.step()
             print("stepped");
+            exit()
             if opt.SGDR == True:
                 opt.sched.step()
             trainTime = time.time() - trainTime
