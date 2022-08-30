@@ -41,7 +41,7 @@ class TransformerCamembertLayer(nn.Module):
         #(src_vocab, d_model, N, heads, dropout)
         self.encoder = EncoderCamemLayer(768, d_model, 1, heads, dropout, camemModel=camemModel)
         self.decoder = Decoder(trg_vocab, d_model + int(doDaille) , N, heads, dropout)
-        self.out = nn.Linear(d_model, trg_vocab)
+        self.out = nn.Linear(d_model + int(doDaille), trg_vocab)
         self.doDaille = doDaille
     def forward(self, src, trg, src_mask, trg_mask, dailleVec = None):
         '''
