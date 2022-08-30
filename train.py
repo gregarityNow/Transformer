@@ -69,7 +69,7 @@ def getPredsAndLoss(model, src,trg,  trg_input, src_mask, trg_mask, opt, isTrain
     return preds, loss
 
 
-def train_model(model, opt, camemMod = None, camemTok = None, numEpochsShouldBreak = 3, bestLoss = np.inf, losses = [], epoch = 0):
+def train_model(model, opt, camemMod = None, camemTok = None, numEpochsShouldBreak = 3, bestLoss = np.inf, losses = [], epoch = 0, fineTune = False):
     
     print("training model...")
     model.train()
@@ -103,7 +103,7 @@ def train_model(model, opt, camemMod = None, camemTok = None, numEpochsShouldBre
         totalValidLoss = 0
         totalSamps = 0
         for validBatch in opt.valid:
-            if np.random.rand() > 0.33: continue;
+            if (not fineTune) and np.random.rand() > 0.33: continue;
             srcValid = validBatch.src.transpose(0, 1)
             trgValid = validBatch.trg.transpose(0, 1)
             trg_inputValid = trgValid[:, :-1]
@@ -191,6 +191,9 @@ def train_model(model, opt, camemMod = None, camemTok = None, numEpochsShouldBre
             if shouldBroke == numEpochsShouldBreak or opt.quickie:
                 print("progress has stopped; breaking")
                 break;
+        elif epoch == 7:
+            print("already done 8 epochs, that seems to be quite enough")
+            break;
         else:
             shouldBroke = 0;
             epoch += 1;
@@ -458,7 +461,7 @@ def mainFelixCamemLayer():
             opt.sched = CosineWithRestarts(opt.optimizer, T_max=opt.train_len)
         if opt.startFromCheckpoint:
             getBestModel(model,opt.weightSaveLoc)
-        train_model(model, opt, camemMod=camemMod, camemTok=camemTok, bestLoss=bestLossInitialTraining, losses = losses, epoch = lastEpoch+1, numEpochsShouldBreak=2);
+        train_model(model, opt, camemMod=camemMod, camemTok=camemTok, bestLoss=bestLossInitialTraining, losses = losses, epoch = lastEpoch+1, numEpochsShouldBreak=2, fineTune = True);
 
         dumpLosses(losses, dst)
     else:
