@@ -52,7 +52,7 @@ class TransformerCamembertLayer(nn.Module):
         :return:
         '''
         e_outputs = self.encoder(src, src_mask)
-        print("DECODER", e_outputs)#,self.decoder)
+        print("DECODER", e_outputs.shape, e_outputs.max(), e_outputs.min(), e_outputs)#,self.decoder)
         d_output = self.decoder(trg, e_outputs, src_mask, trg_mask)
         output = self.out(d_output)
         return output
@@ -88,7 +88,7 @@ class Decoder(nn.Module):
         self.norm = Norm(d_model)
         print("nitializing",d_model, vocab_size);
     def forward(self, trg, e_outputs, src_mask, trg_mask):
-        print("given");
+        print("given", trg.shape);
         x = self.embed(trg)
         x = self.pe(x)
         print("ped",x)
