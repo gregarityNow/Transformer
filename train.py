@@ -56,10 +56,9 @@ def loadTokenizerAndModel(name, loadFinetunedModels = False, modelToo = False, h
     # tokModDict[techName]["model"] = model
     return tok, model
 
-def getPredsAndLoss(model, src,trg,  trg_input, src_mask, trg_mask, opt, isTrain = True, camemModel = None, camemTok = None):
+def getPredsAndLoss(model, src,trg,  trg_input, src_mask, trg_mask, opt, isTrain = True, dailleVec = None):
 
-
-    preds = model(src, trg_input, src_mask, trg_mask)
+    preds = model(src, trg_input, src_mask, trg_mask, dailleVec)
     ys = trg[:, 1:].contiguous().view(-1)
     if isTrain:
         opt.optimizer.zero_grad()
