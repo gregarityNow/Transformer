@@ -35,14 +35,15 @@ class Encoder(nn.Module):
 
 
 class TransformerCamembertLayer(nn.Module):
-    def __init__(self, trg_vocab, d_model, N, heads, dropout, camemModel):
+    def __init__(self, trg_vocab, d_model, N, heads, dropout, camemModel, doDaille = True):
         super().__init__()
         print("initializing the erweiteren model")
         #(src_vocab, d_model, N, heads, dropout)
-        self.encoder = EncoderCamemLayer(768, d_model, 1, heads, dropout, camemModel=camemModel)
+        self.encoder = EncoderCamemLayer(768, d_model, 1, heads, dropout, camemModel=camemModel, doDaille = doDaille)
         self.decoder = Decoder(trg_vocab, d_model, N, heads, dropout)
         self.out = nn.Linear(d_model, trg_vocab)
-    def forward(self, src, trg, src_mask, trg_mask):
+        self.doDaille = doDaille
+    def forward(self, src, trg, src_mask, trg_mask, dailleVec = None):
         '''
         What's the deal with this mask? todo@feh
         :param src:
@@ -51,7 +52,9 @@ class TransformerCamembertLayer(nn.Module):
         :param trg_mask:
         :return:
         '''
-        e_outputs = self.encoder(src, src_mask)
+        e_outputs = self.encoder(src, src_mask, dailleVec)
+        print("e_outputs",e_outputs.shape);
+        exit()
         # print("DECODER", e_outputs.shape, e_outputs.max(), e_outputs.min(), e_outputs)#,self.decoder)
         d_output = self.decoder(trg, e_outputs, src_mask, trg_mask)
         output = self.out(d_output)
@@ -76,7 +79,7 @@ class EncoderCamemLayer(nn.Module):
         return self.norm(x)
 
 class Decoder(nn.Module):
-    def __init__(self, vocab_size, d_model, N, heads, dropout):
+    def __init__(self, vocab_size, d_model, N, heads, dropout, doDaille = True):
         super().__init__()
         self.N = N
         self.embed = Embedder(vocab_size, d_model)
@@ -84,7 +87,7 @@ class Decoder(nn.Module):
         self.layers = get_clones(DecoderLayer(d_model, heads, dropout), N)
         self.norm = Norm(d_model)
         print("nitializing",d_model, vocab_size);
-    def forward(self, trg, e_outputs, src_mask, trg_mask):
+    def forward(self, trg, e_outputs, src_mask, trg_mask, dailleVec):
         x = self.embed(trg)
         x = self.pe(x)
         for i in range(self.N):

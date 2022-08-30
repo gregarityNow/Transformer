@@ -22,7 +22,7 @@ class EncoderLayer(nn.Module):
 # build a decoder layer with two multi-head attention layers and
 # one feed-forward layer
 class DecoderLayer(nn.Module):
-    def __init__(self, d_model, heads, dropout=0.1):
+    def __init__(self, d_model, heads, dropout=0.1, doDaille = True):
         super().__init__()
         self.norm_1 = Norm(d_model)
         self.norm_2 = Norm(d_model)
@@ -43,5 +43,6 @@ class DecoderLayer(nn.Module):
         x = x + self.dropout_2(self.attn_2(x2, e_outputs, e_outputs, \
         src_mask))
         x2 = self.norm_3(x)
+
         x = x + self.dropout_3(self.ff(x2))
         return x

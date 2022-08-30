@@ -174,7 +174,6 @@ def train_model(model, opt, trainDf, validDf, TRG, camemMod = None, camemTok = N
                 if fineTune: bestPath += "_fineTune"
                 torch.save(model.state_dict(), bestPath)
                 print("saving best model woot", bestPath)
-                cptime = time.time()
                 bestLoss = validLoss
 
             dumpLosses(losses, opt.weightSaveLoc)
