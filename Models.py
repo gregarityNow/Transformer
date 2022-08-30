@@ -53,8 +53,12 @@ class TransformerCamembertLayer(nn.Module):
         :return:
         '''
         e_outputs = self.encoder(src, src_mask)
-        e_outputs = e_outputs.cat([torch.ones(e_outputs.shape[2])], dim=2);
+        print("davor",e_outputs.shape);
+        if not self.doDaille:
+            q = torch.ones(e_outputs.shape[:2]).reshape(list(e_outputs.shape[:2])+[1])
+            e_outputs = torch.cat([e_outputs,q], dim=2);
         print("how do you like me now",e_outputs.shape)
+        exit()
         # print("DECODER", e_outputs.shape, e_outputs.max(), e_outputs.min(), e_outputs)#,self.decoder)
         d_output = self.decoder(trg, e_outputs, src_mask, trg_mask)
         output = self.out(d_output)
