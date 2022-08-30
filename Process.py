@@ -119,7 +119,7 @@ def create_dataset_spam():
     return train_iter
 
 
-def create_dataset(opt, SRC, TRG, validBatchSize = -1):
+def create_dataset(opt, SRC, TRG, validBatchSize = -1, fineTune = False):
 
     print("creating dataset and iterator... ")
 
@@ -151,7 +151,7 @@ def create_dataset(opt, SRC, TRG, validBatchSize = -1):
         os.remove(csvPath)
         datasets[subset] = {"iter":myIter, "ds":dataset}
 
-    if not opt.load_weights:
+    if not fineTune:
         SRC.build_vocab(datasets["train"]["ds"])
         TRG.build_vocab(datasets["train"]["ds"])
         if opt.checkpoint > 0:

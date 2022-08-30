@@ -458,7 +458,7 @@ def mainFelixCamemLayer():
 
         #finetune on neonyms
         df = read_data_felix(opt, allTerms=False)
-        opt.train, opt.valid = create_dataset(opt, SRC, TRG)
+        opt.train, opt.valid = create_dataset(opt, SRC, TRG, fineTune=True)
         opt.optimizer = torch.optim.Adam(model.parameters(), lr=opt.lr*0.1, betas=(0.9, 0.98), eps=1e-9)
         if opt.SGDR == True:
             opt.sched = CosineWithRestarts(opt.optimizer, T_max=opt.train_len)
