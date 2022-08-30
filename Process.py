@@ -64,7 +64,7 @@ def read_data_felix(opt, allTerms = False):
     df = clean_df(df);
     df = df[["term","defn","subset"]];
     if opt.quickie == 1:
-        df = df.sample(100);
+        df = df.sample(1000);
     elif opt.quickie > 1:
         df = df.sample(min(len(df),opt.quickie));
 
