@@ -83,7 +83,7 @@ class EncoderCamemLayer(nn.Module):
         return self.norm(x)
 
 class Decoder(nn.Module):
-    def __init__(self, vocab_size, d_model, N, heads, dropout, doDaille = True):
+    def __init__(self, vocab_size, d_model, N, heads, dropout):
         super().__init__()
         self.N = N
         self.embed = Embedder(vocab_size, d_model)

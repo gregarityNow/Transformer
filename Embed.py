@@ -18,6 +18,7 @@ class PositionalEncoder(nn.Module):
         self.dropout = nn.Dropout(dropout)
         # create constant 'pe' matrix with values dependant on 
         # pos and i
+        print("dima d",d_model)
         pe = torch.zeros(max_seq_len, d_model)
         for pos in range(max_seq_len):
             for i in range(0, d_model, 2):
