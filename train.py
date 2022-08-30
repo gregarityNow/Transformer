@@ -203,10 +203,7 @@ def train_model(model, opt, trainDf, validDf, TRG, camemMod = None, camemTok = N
             print("inTrain",psutil.virtual_memory())
 
             batch = trainDf[trainBatchIndex*batchsize:(trainBatchIndex+1)*batchsize];
-            print("batchingTrain",batch);
             src, trg = batchToSrcTrg(batch, TRG);
-
-            print("trg",trg.shape,trg);
 
             bestLoss = handleTrain(src, trg, opt, losses, trainBatchIndex, bestLoss)
         for trainBatchIndex, batch in enumerate(opt.train):
@@ -406,13 +403,13 @@ def mainFelixCamemLayer():
         TRG = pickle.load(open(f'{dst}/TRG.pkl', 'rb'))
         print("srcy",dst)
         model = get_model(opt, len(SRC.vocab), len(TRG.vocab), camemModel=camemMod)
-        df = read_data_felix(opt, allTerms=False)
+        dfTrain, dfValid = read_data_felix(opt, allTerms=False)
     if opt.doEval:
-        dfValid = df[df.subset == "valid"]
         dfPreFinetune = evaluate(opt, model, SRC, TRG, dfValid, "_postTrain")
         df = evaluate(opt, model, SRC, TRG, dfValid, "_postFinetune", fineTune = True)
 
         pickle.dump(df, open(f'{dst}/postTuneCamemLayer.pkl','wb'));
+        pickle.dump(dfPreFinetune, open(f'{dst}/postTrainCamemLayer.pkl', 'wb'));
         print("df is at",f'{dst}/postTuneCamemLayer.pkl')
 
 
