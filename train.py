@@ -57,9 +57,7 @@ def loadTokenizerAndModel(name, loadFinetunedModels = False, modelToo = False, h
     return tok, model
 
 def getPredsAndLoss(model, src,trg,  trg_input, src_mask, trg_mask, opt, isTrain = True, camemModel = None, camemTok = None):
-    # print("norse",type(src),src.shape,trg.shape);
-    # with open("norse.pickle","wb") as fp:
-    #     pickle.dump(src,fp);
+
 
     preds = model(src, trg_input, src_mask, trg_mask)
     ys = trg[:, 1:].contiguous().view(-1)
