@@ -142,7 +142,7 @@ def train_model(model, opt, trainDf, validDf, TRG, camemMod = None, camemTok = N
         print("validated on",totalSamps)
         return validLoss
 
-    def handleTrain(src, trg, opt, losses, batchIndex, bestLoss):
+    def handleTrain(src, trg, opt, losses, batchIndex, bestLoss, finetune):
         trg_input = trg[:, :-1]
         src_mask, trg_mask = create_masks(src, trg_input, opt)
         trainTime = time.time()
@@ -154,25 +154,29 @@ def train_model(model, opt, trainDf, validDf, TRG, camemMod = None, camemTok = N
         if opt.SGDR == True:
             opt.sched.step()
         trainTime = time.time() - trainTime
-        walidTime = time.time()
-        validLoss = doValidation()
-        walidTime = time.time() - walidTime
-        print("walid ending", walidTime)
-        # print("shaka smart", srcValid.shape, trgValid.shape, thisLoss)
+        print("trainTime",trainTime)
 
-        trainLoss = loss.item()
-        losses.append({"epoch": epoch + trainBatchIndex / opt.train_len, "train_loss": trainLoss, "valid_loss": validLoss})
-        print("trainLoss", trainLoss, "walidLoss", validLoss);
+        validEvery = 2 if finetune else 10
+        if batchIndex % validEvery == 0:
 
+            walidTime = time.time()
+            validLoss = doValidation()
+            walidTime = time.time() - walidTime
+            print("walid ending", walidTime)
+            # print("shaka smart", srcValid.shape, trgValid.shape, thisLoss)
 
-        if validLoss < bestLoss:
-            bestPath = outPath + '/model_weights_best'  # + ("_quickie" if opt.quickie else "");
-            if fineTune: bestPath += "_fineTune"
-            torch.save(model.state_dict(), bestPath)
-            print("saving best model woot", bestPath)
-            cptime = time.time()
-            bestLoss = validLoss
-        if batchIndex % 10 == 0:
+            trainLoss = loss.item()
+            losses.append({"epoch": epoch + trainBatchIndex / opt.train_len, "train_loss": trainLoss, "valid_loss": validLoss})
+            print("trainLoss", trainLoss, "walidLoss", validLoss);
+
+            if validLoss < bestLoss:
+                bestPath = outPath + '/model_weights_best'  # + ("_quickie" if opt.quickie else "");
+                if fineTune: bestPath += "_fineTune"
+                torch.save(model.state_dict(), bestPath)
+                print("saving best model woot", bestPath)
+                cptime = time.time()
+                bestLoss = validLoss
+
             dumpLosses(losses, opt.weightSaveLoc)
         return bestLoss
 
@@ -197,7 +201,7 @@ def train_model(model, opt, trainDf, validDf, TRG, camemMod = None, camemTok = N
             src, trg = batchToSrcTrg(batch, TRG);
             print("batch", epoch, trainBatchIndex, numBatchesTrain, batchSizeStandard, src.shape)
 
-            bestLoss = handleTrain(src, trg, opt, losses, trainBatchIndex, bestLoss)
+            bestLoss = handleTrain(src, trg, opt, losses, trainBatchIndex, bestLoss, fineTune)
         numBatches = opt.train_len
         for trainBatchIndex, batch in enumerate(opt.train):
             if opt.camemLayer: break;
@@ -207,7 +211,7 @@ def train_model(model, opt, trainDf, validDf, TRG, camemMod = None, camemTok = N
             trg = batch.trg.transpose(0,1)
             print("batchNoCam", epoch, trainBatchIndex, numBatches, len(batch), src.shape)
 
-            bestLoss = handleTrain(src, trg, opt, losses, trainBatchIndex, bestLoss)
+            bestLoss = handleTrain(src, trg, opt, losses, trainBatchIndex, bestLoss, fineTune)
 
         if shouldBreak([loss["train_loss"] for loss in losses if loss["epoch"] > epoch], epoch):
             shouldBroke += 1
