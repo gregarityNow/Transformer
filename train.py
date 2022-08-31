@@ -139,7 +139,7 @@ def train_model(model, opt, trainDf, validDf, TRG, camemMod = None, camemTok = N
             if not opt.camemLayer: break;
             if (not fineTune) and numBatches > 10 and np.random.rand() > 0.33:continue;
             batch = trainDf[validBatchIndex * batchSizeStandard:(validBatchIndex+1) *batchSizeStandard];
-            srcValid, trgValid, dailleVec = batchToSrcTrg(batch, TRG);
+            srcValid, trgValid, dailleVec = batchToSrcTrg(batch, TRG, opt.daillePrediction);
             trg_inputValid = trgValid[:, :-1]
             thisLoss = getLoss(srcValid, trgValid, trg_inputValid)
             totalValidLoss += thisLoss
@@ -205,9 +205,10 @@ def train_model(model, opt, trainDf, validDf, TRG, camemMod = None, camemTok = N
             print("inTrain",psutil.virtual_memory())
             batchCreateTime = time.time()
             batch = trainDf[trainBatchIndex*batchSizeStandard:(trainBatchIndex+1)*batchSizeStandard];
-            src, trg, dailleVec = batchToSrcTrg(batch, TRG);
+            src, trg, dailleVec = batchToSrcTrg(batch, TRG, opt.daillePrediction);
             batchCreateTime = time.time()-batchCreateTime
             print("batch", epoch, trainBatchIndex, numBatchesTrain, batchSizeStandard, src.shape, "batchCreateTime",batchCreateTime)
+            print("dailleVec",dailleVec)
 
             bestLoss = handleTrain(src, trg, opt, losses, trainBatchIndex, bestLoss, fineTune, dailleVec)
         numBatches = opt.train_len
