@@ -83,9 +83,9 @@ class EncoderCamemLayer(nn.Module):
         print("xing", x.shape);
         dailleVec = torch.randint(low=0, high=6, size=x.shape[:1]).to("cuda");
         if self.doDaille:
-            dailleEmbedded = self.embed(dailleVec);
+            dailleEmbedded = self.embed(dailleVec).reshape([x.shape[0],1,x.shape[2]]);
             print("dailledEmb",dailleEmbedded.shape);
-            x = torch.cat([x, dailleEmbedded]);
+            x = torch.cat([x, dailleEmbedded],dim=1);
         print("xing",x.shape);
         exit()
         for i in range(self.N):
