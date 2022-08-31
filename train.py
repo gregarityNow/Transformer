@@ -77,7 +77,7 @@ def tensorCamemEncode(inputs, camemTok, maxLen):
         camEnc = torch.tensor(camemTok(inputs, padding="max_length", max_length=maxLen)['input_ids'])
     return camEnc.to("cuda");
 
-def train_model(model, opt, trainDf, validDf, TRG, camemMod = None, camemTok = None, numEpochsShouldBreak = 3, bestLoss = np.inf, losses = [], initialEpoch = 0, fineTune = False):
+def train_model(model, opt, trainDf, validDf, TRG, camemMod = None, camemTok = None, numEpochsShouldBreak = 3, bestLoss = np.inf, losses = [], initialEpoch = 0,initialBatchNumber = 0, fineTune = False):
     
     print("training model...",trainDf,validDf)
     model.train()
@@ -213,6 +213,9 @@ def train_model(model, opt, trainDf, validDf, TRG, camemMod = None, camemTok = N
         print("sizes",numBatches, len(trainDf), numBatchesTrain)
         for trainBatchIndex in range(numBatchesTrain):
             if not opt.camemLayer: break;
+            if initialBatchNumber > 0:
+                initialBatchNumber += -1;
+                continue;
             print("inTrain",psutil.virtual_memory())
             batchCreateTime = time.time()
             batch = trainDf[trainBatchIndex*batchSizeStandard:(trainBatchIndex+1)*batchSizeStandard];
@@ -335,6 +338,13 @@ def dumpLosses(losses, dst):
     dumpTime = time.time()-dumpTime
     print("dumped to",dumpPath,dumpTime)
 
+def fetchLosses(dst):
+    dumpPath = dst + "/../losses.pickle"
+    with open(dumpPath, "rb") as fp:
+        losses = pickle.load(fp);
+    return losses
+
+
 def mainFelixCamemLayer():
     print("shabloimps")
     parser = argparse.ArgumentParser()
@@ -405,9 +415,21 @@ def mainFelixCamemLayer():
 
         print("moodely", model.state_dict().keys())
 
+        if opt.startFromCheckpoint:
+            getBestModel(model,opt.weightSaveLoc)
+            initialEpoch = 1
+            initialBatchNumber = 2304
+            losses = fetchLosses(dst)
+            bestLoss = 1.9449306922416165
+        else:
+            losses = []
+            initialEpoch = 0
+            initialBatchNumber = 0
+            bestLoss = np.inf
+
         #train on all wiktionnaire data
         if opt.fullWiktPretune:
-            bestLossInitialTraining, losses, lastEpoch = train_model(model, opt,dfTrain, dfValid, TRG, camemMod=camemMod, camemTok=camemTok, numEpochsShouldBreak=2);
+            bestLossInitialTraining, losses, lastEpoch = train_model(model, opt,dfTrain, dfValid, TRG, camemMod=camemMod, camemTok=camemTok, numEpochsShouldBreak=2, losses=losses, initialEpoch=initialEpoch, initialBatchNumber=initialBatchNumber);
         else:
             bestLossInitialTraining, losses, lastEpoch = np.inf, [], 0
 
@@ -417,8 +439,7 @@ def mainFelixCamemLayer():
         opt.optimizer = torch.optim.Adam(model.parameters(), lr=opt.lr*0.1, betas=(0.9, 0.98), eps=1e-9)
         if opt.SGDR == True:
             opt.sched = CosineWithRestarts(opt.optimizer, T_max=opt.train_len)
-        if opt.startFromCheckpoint:
-            getBestModel(model,opt.weightSaveLoc)
+
         train_model(model, opt, dfTrain, dfValid, TRG, camemMod=camemMod, camemTok=camemTok, bestLoss=bestLossInitialTraining, losses = losses, initialEpoch = lastEpoch+1, numEpochsShouldBreak=2, fineTune = True);
         dumpLosses(losses, dst)
     else:
