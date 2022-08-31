@@ -418,10 +418,10 @@ def mainFelixCamemLayer():
 
         if opt.startFromCheckpoint:
             getBestModel(model,opt.weightSaveLoc, fineTune=False)
-            initialEpoch = 1
-            initialBatchNumber = 2304
+            initialEpoch = 7
+            initialBatchNumber = 0
             losses = fetchLosses(dst)
-            bestLoss = 1.9449306922416165
+            bestLoss = 1.1336695605443619
         else:
             losses = []
             initialEpoch = 0
@@ -430,7 +430,11 @@ def mainFelixCamemLayer():
 
         #train on all wiktionnaire data
         if opt.fullWiktPretune:
-            bestLossInitialTraining, losses, lastEpoch = train_model(model, opt,dfTrain, dfValid, TRG, camemMod=camemMod, camemTok=camemTok, numEpochsShouldBreak=2, losses=losses, initialEpoch=initialEpoch, initialBatchNumber=initialBatchNumber);
+            bestLossInitialTraining, losses, lastEpoch = train_model(model, opt,dfTrain, dfValid, TRG, camemMod=camemMod, camemTok=camemTok, numEpochsShouldBreak=2, losses=losses, initialEpoch=initialEpoch, initialBatchNumber=initialBatchNumber, bestLoss=bestLoss);
+        elif opt.startFromCheckpoint:
+            bestLossInitialTraining = 1.1336695605443619
+            losses = fetchLosses(dst)
+            lastEpoch=7
         else:
             bestLossInitialTraining, losses, lastEpoch = np.inf, [], 0
 
