@@ -79,7 +79,6 @@ class EncoderCamemLayer(nn.Module):
     def forward(self, src, mask, dailleVec = None):
         x = self.camemModel(src)[1][-1]
         x = Variable(x,requires_grad=False)
-        # q = torch.ones(e_outputs.shape[:2]).reshape(list(e_outputs.shape[:2]) + [1]).to("cuda");
         if self.doDaille:
             dailleEmbedded = self.embed(dailleVec).reshape([x.shape[0],1,x.shape[2]]);
             x = torch.cat([x, dailleEmbedded],dim=1);

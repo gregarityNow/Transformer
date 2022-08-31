@@ -28,7 +28,9 @@ def nopeak_mask(size):
 def create_masks(src, trg, opt):
     src_mask = (src != opt.src_pad).unsqueeze(-2)
     print("src_mask",src_mask.shape,src_mask);
-    exit()
+    if opt.camemLayer:
+        q = torch.zeros(list(src_mask.shape[:2])+[1], dtype=bool).to("cuda");
+        src_mask = torch.cat([src_mask, q],dim=2);
 
     if trg is not None:
         trg_mask = (trg != opt.trg_pad).unsqueeze(-2)
