@@ -364,10 +364,12 @@ def mainFelixCamemLayer():
     parser.add_argument("-daillePrediction", type=int, default=1);
     opt = parser.parse_args()
 
+    runType = "byChar"
     if opt.camemLayer:
-        runType = "byCharCamemLayer"
-    else:
-        runType = "byChar"
+        runType += "_camemLayer"
+    if opt.daillePrediction:
+        runType += "_daillePrediction";
+
 
     if opt.quickie:
         runType += "_quickie";
