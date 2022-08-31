@@ -435,6 +435,7 @@ def mainFelixCamemLayer():
             bestLossInitialTraining = 1.1336695605443619
             losses = fetchLosses(dst)
             lastEpoch=7
+            getBestModel(model, opt.weightSaveLoc, fineTune=False)
         else:
             bestLossInitialTraining, losses, lastEpoch = np.inf, [], 0
 
