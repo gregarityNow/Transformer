@@ -5,7 +5,7 @@ from torch.autograd import Variable
 
 def getSrcMask(src, opt):
     src_mask = (src != opt.src_pad).unsqueeze(-2)
-    if opt.camemLayer:
+    if opt.daillePrediction and opt.camemLayer:
         q = torch.zeros(list(src_mask.shape[:2])+[1], dtype=bool).to("cuda");
         src_mask = torch.cat([src_mask, q],dim=2);
     return src_mask
