@@ -96,13 +96,19 @@ def train_model(model, opt, trainDf, validDf, TRG, camemMod = None, camemTok = N
             return False
 
     outPath = opt.weightSaveLoc#"/mnt/beegfs/home/herron/neo_scf_herron/stage/out/dump/byChar"
+    dailleType = sorted(list(set(trainDf.daille_type)));
+    dailleEncoder = {i: dailleType[i] for i in range(len(dailleType))}
 
-    def batchToSrcTrg(batch, TRG):
+    def batchToSrcTrg(batch, TRG, doDaille = True):
         src = torch.tensor(camemTok(list(batch.defn), padding="max_length", max_length=batch.camemDefnLen.max())['input_ids'])
         trg = torch.tensor(TRG.process(batch.term)).T.to("cuda")
+        if doDaille:
+            dailleVec = torch.tensor([dailleEncoder[x] for x in list(batch.daille_type)]).to("cuda");
+        else:
+            dailleVec = None
         # src = torch.ones_like(src);
         # trg = torch.ones_like(trg);
-        return src.to("cuda"), trg.to("cuda")
+        return src.to("cuda"), trg.to("cuda"), dailleVec
 
     def getLoss(src, trg, trg_input):
         src_maskValid, trg_maskValid = create_masks(src, trg_input, opt)
@@ -132,7 +138,7 @@ def train_model(model, opt, trainDf, validDf, TRG, camemMod = None, camemTok = N
             if not opt.camemLayer: break;
             if (not fineTune) and numBatches > 10 and np.random.rand() > 0.33:continue;
             batch = trainDf[validBatchIndex * batchSizeStandard:(validBatchIndex+1) *batchSizeStandard];
-            srcValid, trgValid = batchToSrcTrg(batch, TRG);
+            srcValid, trgValid, dailleVec = batchToSrcTrg(batch, TRG);
             trg_inputValid = trgValid[:, :-1]
             thisLoss = getLoss(srcValid, trgValid, trg_inputValid)
             totalValidLoss += thisLoss
@@ -141,11 +147,11 @@ def train_model(model, opt, trainDf, validDf, TRG, camemMod = None, camemTok = N
         print("validated on",totalSamps)
         return validLoss
 
-    def handleTrain(src, trg, opt, losses, batchIndex, bestLoss, finetune):
+    def handleTrain(src, trg, opt, losses, batchIndex, bestLoss, finetune, dailleVec):
         trg_input = trg[:, :-1]
         src_mask, trg_mask = create_masks(src, trg_input, opt)
         trainTime = time.time()
-        preds, loss = getPredsAndLoss(model, src, trg, trg_input, src_mask, trg_mask, opt, isTrain=True)
+        preds, loss = getPredsAndLoss(model, src, trg, trg_input, src_mask, trg_mask, opt, isTrain=True, dailleVec=dailleVec)
         loss.backward()
 
         opt.optimizer.step()
@@ -198,11 +204,11 @@ def train_model(model, opt, trainDf, validDf, TRG, camemMod = None, camemTok = N
             print("inTrain",psutil.virtual_memory())
             batchCreateTime = time.time()
             batch = trainDf[trainBatchIndex*batchSizeStandard:(trainBatchIndex+1)*batchSizeStandard];
-            src, trg = batchToSrcTrg(batch, TRG);
+            src, trg, dailleVec = batchToSrcTrg(batch, TRG);
             batchCreateTime = time.time()-batchCreateTime
             print("batch", epoch, trainBatchIndex, numBatchesTrain, batchSizeStandard, src.shape, "batchCreateTime",batchCreateTime)
 
-            bestLoss = handleTrain(src, trg, opt, losses, trainBatchIndex, bestLoss, fineTune)
+            bestLoss = handleTrain(src, trg, opt, losses, trainBatchIndex, bestLoss, fineTune, dailleVec)
         numBatches = opt.train_len
         for trainBatchIndex, batch in enumerate(opt.train):
             if opt.camemLayer: break;
