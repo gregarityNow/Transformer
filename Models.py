@@ -17,7 +17,7 @@ class Encoder(nn.Module):
         self.pe = PositionalEncoder(d_model, dropout=dropout)
         self.layers = get_clones(EncoderLayer(d_model, heads, dropout), N)
         self.norm = Norm(d_model)
-    def forward(self, src, mask):
+    def forward(self, src, mask, dailleVec = None):
         x = self.embed(src)
         # print("embedded",x.shape, src.shape); #embedded torch.Size([2, 56, 768]) torch.Size([2, 56])
         try:
@@ -30,7 +30,6 @@ class Encoder(nn.Module):
         norm = self.norm(x)
         # print("normus")
         return norm
-
 
 
 
@@ -111,7 +110,7 @@ class Transformer(nn.Module):
         self.encoder = Encoder(src_vocab, d_model, N, heads, dropout)
         self.decoder = Decoder(trg_vocab, d_model, N, heads, dropout)
         self.out = nn.Linear(d_model, trg_vocab)
-    def forward(self, src, trg, src_mask, trg_mask, dailleVec):
+    def forward(self, src, trg, src_mask, trg_mask):
         e_outputs = self.encoder(src, src_mask)
         #print("DECODER")
         d_output = self.decoder(trg, e_outputs, src_mask, trg_mask)
