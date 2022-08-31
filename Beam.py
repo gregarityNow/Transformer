@@ -1,5 +1,5 @@
 import torch
-from .Batch import nopeak_mask
+from .Batch import nopeak_mask, getSrcMask
 import torch.nn.functional as F
 import math
 from numpy import inf
@@ -7,7 +7,7 @@ from numpy import inf
 def init_vars(src, model, SRC, TRG, opt):
     
     init_tok = TRG.vocab.stoi['<sos>']
-    src_mask = (src != SRC.vocab.stoi['<pad>']).unsqueeze(-2)
+    src_mask = getSrcMask(src, opt);
     e_output = model.encoder(src, src_mask)
     
     outputs = torch.LongTensor([[init_tok]])
@@ -56,10 +56,11 @@ def outputAndLengthToTerm(TRG, output, length):
     return ''.join([TRG.vocab.itos[tok] for tok in output[1:length]])
 
 
+
 def beam_search(src, model, SRC, TRG, opt, gold = ""):
     outputs, e_outputs, log_scores = init_vars(src, model, SRC, TRG, opt)
     eos_tok = TRG.vocab.stoi['<eos>']
-    src_mask = (src != SRC.vocab.stoi['<pad>']).unsqueeze(-2)
+    src_mask = getSrcMask(src, opt)
 
     constructionsAndLikelihoods = []
     seenWords = set()

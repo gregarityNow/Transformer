@@ -3,6 +3,12 @@ from torchtext import data
 import numpy as np
 from torch.autograd import Variable
 
+def getSrcMask(src, opt):
+    src_mask = (src != opt.src_pad).unsqueeze(-2)
+    if opt.camemLayer:
+        q = torch.zeros(list(src_mask.shape[:2])+[1], dtype=bool).to("cuda");
+        src_mask = torch.cat([src_mask, q],dim=2);
+    return src_mask
 
 def nopeak_mask(size):
     np_mask = np.triu(np.ones((1, size, size)),
@@ -26,11 +32,7 @@ def nopeak_mask(size):
 #     return src_mask, trg_mask
 
 def create_masks(src, trg, opt):
-    src_mask = (src != opt.src_pad).unsqueeze(-2)
-    print("src_mask",src_mask.shape,src_mask);
-    if opt.camemLayer:
-        q = torch.zeros(list(src_mask.shape[:2])+[1], dtype=bool).to("cuda");
-        src_mask = torch.cat([src_mask, q],dim=2);
+    src_mask = getSrcMask(src, opt);
 
     if trg is not None:
         trg_mask = (trg != opt.trg_pad).unsqueeze(-2)

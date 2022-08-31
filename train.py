@@ -276,6 +276,7 @@ def translate_sentence(sentence, model, opt, SRC, TRG, gold = ""):
     sentence = Variable(torch.LongTensor([indexed]))
     if opt.device == 0:
         sentence = sentence.cuda()
+    print("sentence",sentence);
 
     sentence = beam_search(sentence, model, SRC, TRG, opt, gold = gold)
 
