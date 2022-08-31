@@ -243,8 +243,8 @@ def train_model(model, opt, trainDf, validDf, TRG, camemMod = None, camemTok = N
                 break;
             else:
                 print("ok you get another chance to do better next time")
-        elif epoch == 7:
-            print("already done 8 epochs, that seems to be quite enough")
+        elif (fineTune and epoch == 14) or (not fineTune and epoch == 7):
+            print("already done a lot of epochs, that seems to be quite enough")
             break;
         elif opt.quickie:
             print("quickie breaking",shouldBroke, epoch);
