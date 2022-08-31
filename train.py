@@ -76,7 +76,7 @@ def tensorCamemEncode(inputs, camemTok, maxLen):
         camEnc = torch.tensor(camemTok(inputs)['input_ids'])
     else:
         camEnc = torch.tensor(camemTok(inputs, padding="max_length", max_length=maxLen)['input_ids'])
-    return camEnc
+    return camEnc.to("cuda");
 
 def train_model(model, opt, trainDf, validDf, TRG, camemMod = None, camemTok = None, numEpochsShouldBreak = 3, bestLoss = np.inf, losses = [], initialEpoch = 0, fineTune = False):
     
