@@ -111,9 +111,9 @@ def train_model(model, opt, trainDf, validDf, TRG, camemMod = None, camemTok = N
         # trg = torch.ones_like(trg);
         return src.to("cuda"), trg.to("cuda"), dailleVec
 
-    def getLoss(src, trg, trg_input):
+    def getLoss(src, trg, trg_input, dailleVec = None):
         src_maskValid, trg_maskValid = create_masks(src, trg_input, opt)
-        _, validLoss = getPredsAndLoss(model, src, trg, trg_input, src_maskValid, trg_maskValid, opt, isTrain=False)
+        _, validLoss = getPredsAndLoss(model, src, trg, trg_input, src_maskValid, trg_maskValid, opt, isTrain=False, dailleVec=dailleVec)
         thisLoss = validLoss.item() * src.shape[0]
         return thisLoss
 
@@ -141,7 +141,7 @@ def train_model(model, opt, trainDf, validDf, TRG, camemMod = None, camemTok = N
             batch = trainDf[validBatchIndex * batchSizeStandard:(validBatchIndex+1) *batchSizeStandard];
             srcValid, trgValid, dailleVec = batchToSrcTrg(batch, TRG, opt.daillePrediction);
             trg_inputValid = trgValid[:, :-1]
-            thisLoss = getLoss(srcValid, trgValid, trg_inputValid)
+            thisLoss = getLoss(srcValid, trgValid, trg_inputValid, dailleVec)
             totalValidLoss += thisLoss
             totalSamps += srcValid.shape[0]
         validLoss = totalValidLoss / totalSamps
