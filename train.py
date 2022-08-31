@@ -72,7 +72,11 @@ def getDailleVec(daille_types):
     return dailleVec
 
 def tensorCamemEncode(inputs, camemTok, maxLen):
-    return torch.tensor(camemTok(inputs, padding="max_length", max_length=maxLen)['input_ids'])
+    if maxLen == -1:
+        camEnc = torch.tensor(camemTok(inputs)['input_ids'])
+    else:
+        camEnc = torch.tensor(camemTok(inputs, padding="max_length", max_length=maxLen)['input_ids'])
+    return camEnc
 
 def train_model(model, opt, trainDf, validDf, TRG, camemMod = None, camemTok = None, numEpochsShouldBreak = 3, bestLoss = np.inf, losses = [], initialEpoch = 0, fineTune = False):
     
@@ -287,7 +291,7 @@ def translate_sentence(sentence, model, opt, SRC, TRG, gold = "", daille_type = 
             sentence = sentence.cuda()
         print("sentence",sentence);
     else:
-        sentence = tensorCamemEncode([sentence], camemTok, batch.camemDefnLen.max())
+        sentence = tensorCamemEncode([sentence], camemTok, -1)
 
     dailleVec = getDailleVec([daille_type,])
     sentence = beam_search(sentence, model, SRC, TRG, opt, gold = gold, dailleVec = dailleVec)
