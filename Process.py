@@ -61,7 +61,7 @@ def read_data(opt):
 
 def read_data_felix(opt, allTerms = False):
     #todo@feh: create df cleaning func ugh
-    if opt.daillePrediction:
+    if False and opt.daillePrediction:
         df = pickLoad("/mnt/beegfs/projects/neo_scf_herron/stage/out/dump/fakeSmall.pickle")
     elif allTerms:
         df = pickLoad("/mnt/beegfs/projects/neo_scf_herron/stage/out/dump/wiktionnaire_df_allWords.pickle")
