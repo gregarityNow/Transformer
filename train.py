@@ -16,8 +16,7 @@ import dill as pickle
 from .Tokenize import CamOrLetterTokenizer
 
 modelDim = 768
-dailleTypes = ['syntag', 'conv', 'borrow', 'native', 'UNKNOWN', 'neoClass', 'affix']
-dailleEncoder = {dailleTypes[i]:i for i in range(len(dailleTypes))}
+
 
 def loadTokenizerAndModel(name, loadFinetunedModels = False, modelToo = False, hiddenStates = False):
     import torch
