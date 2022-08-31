@@ -87,7 +87,6 @@ class EncoderCamemLayer(nn.Module):
             print("dailledEmb",dailleEmbedded.shape);
             x = torch.cat([x, dailleEmbedded],dim=1);
         print("xing",x.shape);
-        exit()
         for i in range(self.N):
             x = self.layers[i](x, mask)
         return self.norm(x)
