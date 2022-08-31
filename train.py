@@ -98,7 +98,7 @@ def train_model(model, opt, trainDf, validDf, TRG, camemMod = None, camemTok = N
 
     outPath = opt.weightSaveLoc#"/mnt/beegfs/home/herron/neo_scf_herron/stage/out/dump/byChar"
 
-    dailleEncoder = {i: dailleTypes[i] for i in range(len(dailleTypes))}
+    dailleEncoder = {dailleTypes[i]:i for i in range(len(dailleTypes))}
 
     def batchToSrcTrg(batch, TRG, doDaille = True):
         src = torch.tensor(camemTok(list(batch.defn), padding="max_length", max_length=batch.camemDefnLen.max())['input_ids'])
