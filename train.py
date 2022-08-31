@@ -17,6 +17,7 @@ from .Tokenize import CamOrLetterTokenizer
 
 modelDim = 768
 dailleTypes = ['syntag', 'conv', 'borrow', 'native', 'UNKNOWN', 'neoClass', 'affix']
+dailleEncoder = {dailleTypes[i]:i for i in range(len(dailleTypes))}
 
 def loadTokenizerAndModel(name, loadFinetunedModels = False, modelToo = False, hiddenStates = False):
     import torch
@@ -66,6 +67,9 @@ def getPredsAndLoss(model, src,trg,  trg_input, src_mask, trg_mask, opt, isTrain
     loss = F.cross_entropy(preds.view(-1, preds.size(-1)), ys, ignore_index=opt.trg_pad)
     return preds, loss
 
+def getDailleVec(daille_types):
+    dailleVec = torch.tensor([dailleEncoder[x] for x in daille_types]).to("cuda");
+    return dailleVec
 
 def train_model(model, opt, trainDf, validDf, TRG, camemMod = None, camemTok = None, numEpochsShouldBreak = 3, bestLoss = np.inf, losses = [], initialEpoch = 0, fineTune = False):
     
@@ -98,13 +102,13 @@ def train_model(model, opt, trainDf, validDf, TRG, camemMod = None, camemTok = N
 
     outPath = opt.weightSaveLoc#"/mnt/beegfs/home/herron/neo_scf_herron/stage/out/dump/byChar"
 
-    dailleEncoder = {dailleTypes[i]:i for i in range(len(dailleTypes))}
+
 
     def batchToSrcTrg(batch, TRG, doDaille = True):
         src = torch.tensor(camemTok(list(batch.defn), padding="max_length", max_length=batch.camemDefnLen.max())['input_ids'])
         trg = torch.tensor(TRG.process(batch.term)).T.to("cuda")
         if doDaille:
-            dailleVec = torch.tensor([dailleEncoder[x] for x in list(batch.daille_type)]).to("cuda");
+            getDailleVec(list(batch.daille_type))
         else:
             dailleVec = None
         # src = torch.ones_like(src);
@@ -264,7 +268,7 @@ def multiple_replace(dict, text):
     return regex.sub(lambda mo: dict[mo.string[mo.start():mo.end()]], text)
 
 
-def translate_sentence(sentence, model, opt, SRC, TRG, gold = ""):
+def translate_sentence(sentence, model, opt, SRC, TRG, gold = "", daille_type = None):
     model.eval()
     indexed = []
     sentence = SRC.preprocess(sentence)
@@ -278,7 +282,8 @@ def translate_sentence(sentence, model, opt, SRC, TRG, gold = ""):
         sentence = sentence.cuda()
     print("sentence",sentence);
 
-    sentence = beam_search(sentence, model, SRC, TRG, opt, gold = gold)
+    dailleVec = getDailleVec([daille_type,])
+    sentence = beam_search(sentence, model, SRC, TRG, opt, gold = gold, dailleVec = dailleVec)
 
     return multiple_replace({' ?': '?', ' !': '!', ' .': '.', '\' ': '\'', ' ,': ','}, sentence)
 
@@ -310,7 +315,7 @@ def evaluate(opt, model, SRC, TRG, df, suffix, fineTune = True):
         raise(e);
 
     df = df.reset_index()
-    df["byChar_" + suffix] = df.progress_apply(lambda row: translate_sentence(row.defn, model, opt, SRC, TRG, gold = row.term),axis=1)
+    df["byChar_" + suffix] = df.progress_apply(lambda row: translate_sentence(row.defn, model, opt, SRC, TRG, gold = row.term, daille_type = row.daille_type),axis=1)
     return df
 
 def dumpLosses(losses, dst):
