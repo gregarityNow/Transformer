@@ -243,6 +243,7 @@ def train_model(model, opt, trainDf, validDf, TRG, camemMod = None, camemTok = N
                 break;
             else:
                 print("ok you get another chance to do better next time")
+                epoch += 1;
         elif (fineTune and epoch == 14) or (not fineTune and epoch == 7):
             print("already done a lot of epochs, that seems to be quite enough")
             break;
@@ -484,3 +485,7 @@ def saveModel(model, opt, SRC, TRG):
     # for asking about further training use while true loop, and return
 if __name__ == "__main__":
     mainFelix()
+
+
+#check out skim?
+#https://direct.mit.edu/coli/article/37/2/309/2099/Unsupervised-Learning-of-Morphology
