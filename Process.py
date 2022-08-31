@@ -81,7 +81,7 @@ def read_data_felix(opt, allTerms = False):
 
     if opt.daillePrediction and not opt.camemLayer:
         print("dude",df);
-        df["defn"] = df.apply(lambda row: str(dailleEncoder[row.daille_type]) + row.defn)
+        df["defn"] = df.apply(lambda row: str(dailleEncoder[row.daille_type]) + row.defn,axis=1)
         print("augmenting", df.defn);
 
     #todo@feh: if opt.camemLayer: modelCamem(df.defn)
