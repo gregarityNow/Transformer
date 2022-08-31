@@ -85,7 +85,7 @@ def read_data_felix(opt, allTerms = False):
     #todo@feh: if opt.camemLayer: modelCamem(df.defn)
     # df = df[df.defn.str.len() < np.percentile(df.defn.apply(lambda x: len(x)),3)]
     for subset in ("valid","train"):
-        setattr(opt, "src_data_" + subset, list(df[df.subset==subset].defnAug.values))
+        setattr(opt, "src_data_" + subset, list(df[df.subset==subset].defn.values))
         setattr(opt, "trg_data_" + subset, list(df[df.subset==subset].term.values))
     print("working with",df);
     with open("/mnt/beegfs/projects/neo_scf_herron/stage/out/dump/workinWith" + ("_camemLayer" if opt.camemLayer else "") + ".pickle","wb") as fp:
