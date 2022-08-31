@@ -416,7 +416,7 @@ def mainFelixCamemLayer():
         print("moodely", model.state_dict().keys())
 
         if opt.startFromCheckpoint:
-            getBestModel(model,opt.weightSaveLoc)
+            getBestModel(model,opt.weightSaveLoc, fineTune=False)
             initialEpoch = 1
             initialBatchNumber = 2304
             losses = fetchLosses(dst)
