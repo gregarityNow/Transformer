@@ -160,7 +160,7 @@ def train_model(model, opt, trainDf, validDf, TRG, camemMod = None, camemTok = N
         print("validated on",totalSamps)
         return validLoss
 
-    def handleTrain(src, trg, opt, losses, batchIndex, bestLoss, finetune, dailleVec):
+    def handleTrain(src, trg, opt, losses, batchIndex, bestLoss, finetune, dailleVec = None):
         trg_input = trg[:, :-1]
         src_mask, trg_mask = create_masks(src, trg_input, opt)
         trainTime = time.time()
@@ -251,7 +251,6 @@ def train_model(model, opt, trainDf, validDf, TRG, camemMod = None, camemTok = N
             shouldBroke = 0;
             epoch += 1;
             print("pssh we ain't brekaing!")
-
 
     return bestLoss, losses, epoch
 

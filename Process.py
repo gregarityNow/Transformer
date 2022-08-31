@@ -148,7 +148,7 @@ def create_dataset(opt, SRC, TRG, validBatchSize = -1, fineTune = False, camemTo
 
         csvPath = opt.weightSaveLoc + '/translate_transformer_temp.csv'
         df.to_csv(csvPath, index=False)
-        data_fields = [('src', SRC), ('trg', TRG)]
+        data_fields = [('src', SRC), ('trg', TRG)];
 
         dataset = data.TabularDataset(csvPath, format='csv', fields=data_fields)
         print("preit", dataset)
