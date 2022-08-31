@@ -219,7 +219,7 @@ def train_model(model, opt, trainDf, validDf, TRG, camemMod = None, camemTok = N
             src, trg, dailleVec = batchToSrcTrg(batch, TRG, opt.daillePrediction);
             batchCreateTime = time.time()-batchCreateTime
             print("batch", epoch, trainBatchIndex, numBatchesTrain, batchSizeStandard, src.shape, "batchCreateTime",batchCreateTime)
-            print("dailleVec",dailleVec)
+            # print("dailleVec",dailleVec)
 
             bestLoss = handleTrain(src, trg, opt, losses, trainBatchIndex, bestLoss, fineTune, dailleVec)
         numBatches = opt.train_len
