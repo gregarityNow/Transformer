@@ -374,7 +374,7 @@ def mainFelixCamemLayer():
     if opt.doTrain:
         dfTrain, dfValid = read_data_felix(opt, allTerms=True)
         SRC, TRG = create_fields(opt, camOrLetterTokenizer)
-        opt.train, opt.valid = create_dataset(opt, SRC, TRG, camemTok)
+        opt.train, opt.valid = create_dataset(opt, SRC, TRG, camemTok=camemTok)
 
         pickle.dump(SRC, open(f'{dst}/SRC.pkl', 'wb'))
         pickle.dump(TRG, open(f'{dst}/TRG.pkl', 'wb'))
@@ -395,7 +395,7 @@ def mainFelixCamemLayer():
 
         #finetune on neonyms
         dfTrain, dfValid = read_data_felix(opt, allTerms=False)
-        opt.train, opt.valid = create_dataset(opt, SRC, TRG, fineTune=True)
+        opt.train, opt.valid = create_dataset(opt, SRC, TRG, fineTune=True, camemTok=camemTok)
         opt.optimizer = torch.optim.Adam(model.parameters(), lr=opt.lr*0.1, betas=(0.9, 0.98), eps=1e-9)
         if opt.SGDR == True:
             opt.sched = CosineWithRestarts(opt.optimizer, T_max=opt.train_len)
