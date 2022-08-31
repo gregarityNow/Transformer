@@ -16,6 +16,7 @@ import dill as pickle
 from .Tokenize import CamOrLetterTokenizer
 
 modelDim = 768
+dailleTypes = ['syntag', 'conv', 'borrow', 'native', 'UNKNOWN', 'neoClass', 'affix']
 
 def loadTokenizerAndModel(name, loadFinetunedModels = False, modelToo = False, hiddenStates = False):
     import torch
@@ -96,8 +97,8 @@ def train_model(model, opt, trainDf, validDf, TRG, camemMod = None, camemTok = N
             return False
 
     outPath = opt.weightSaveLoc#"/mnt/beegfs/home/herron/neo_scf_herron/stage/out/dump/byChar"
-    dailleType = sorted(list(set(trainDf.daille_type)));
-    dailleEncoder = {i: dailleType[i] for i in range(len(dailleType))}
+
+    dailleEncoder = {i: dailleTypes[i] for i in range(len(dailleTypes))}
 
     def batchToSrcTrg(batch, TRG, doDaille = True):
         src = torch.tensor(camemTok(list(batch.defn), padding="max_length", max_length=batch.camemDefnLen.max())['input_ids'])
