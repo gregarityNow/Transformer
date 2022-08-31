@@ -71,6 +71,9 @@ def getDailleVec(daille_types):
     dailleVec = torch.tensor([dailleEncoder[x] for x in daille_types]).to("cuda");
     return dailleVec
 
+def tensorCamemEncode(inputs, camemTok, maxLen):
+    return torch.tensor(camemTok(inputs, padding="max_length", max_length=maxLen)['input_ids'])
+
 def train_model(model, opt, trainDf, validDf, TRG, camemMod = None, camemTok = None, numEpochsShouldBreak = 3, bestLoss = np.inf, losses = [], initialEpoch = 0, fineTune = False):
     
     print("training model...",trainDf,validDf)
@@ -105,10 +108,11 @@ def train_model(model, opt, trainDf, validDf, TRG, camemMod = None, camemTok = N
 
 
     def batchToSrcTrg(batch, TRG, doDaille = True):
-        src = torch.tensor(camemTok(list(batch.defn), padding="max_length", max_length=batch.camemDefnLen.max())['input_ids'])
+        inputs = list(batch.defn)
+        src = tensorCamemEncode(inputs, camemTok, batch.camemDefnLen.max())
         trg = torch.tensor(TRG.process(batch.term)).T.to("cuda")
         if doDaille:
-            getDailleVec(list(batch.daille_type))
+            dailleVec = getDailleVec(list(batch.daille_type))
         else:
             dailleVec = None
         # src = torch.ones_like(src);
@@ -268,19 +272,22 @@ def multiple_replace(dict, text):
     return regex.sub(lambda mo: dict[mo.string[mo.start():mo.end()]], text)
 
 
-def translate_sentence(sentence, model, opt, SRC, TRG, gold = "", daille_type = None):
+def translate_sentence(sentence, model, opt, SRC, TRG, gold = "", daille_type = None, camemTok = None):
     model.eval()
-    indexed = []
-    sentence = SRC.preprocess(sentence)
-    for tok in sentence:
-        if SRC.vocab.stoi[tok] != 0 or opt.floyd == True:
-            indexed.append(SRC.vocab.stoi[tok])
-        else:
-            indexed.append(get_synonym(tok, SRC))
-    sentence = Variable(torch.LongTensor([indexed]))
-    if opt.device == 0:
-        sentence = sentence.cuda()
-    print("sentence",sentence);
+    if not opt.camemLayer:
+        indexed = []
+        sentence = SRC.preprocess(sentence)
+        for tok in sentence:
+            if SRC.vocab.stoi[tok] != 0 or opt.floyd == True:
+                indexed.append(SRC.vocab.stoi[tok])
+            else:
+                indexed.append(get_synonym(tok, SRC))
+        sentence = Variable(torch.LongTensor([indexed]))
+        if opt.device == 0:
+            sentence = sentence.cuda()
+        print("sentence",sentence);
+    else:
+        sentence = tensorCamemEncode([sentence], camemTok, batch.camemDefnLen.max())
 
     dailleVec = getDailleVec([daille_type,])
     sentence = beam_search(sentence, model, SRC, TRG, opt, gold = gold, dailleVec = dailleVec)
@@ -304,7 +311,7 @@ def getBestModel(model, path, fineTune = True):
     model.load_state_dict(torch.load(bestPath))
     print("the model now has (lowers sunglasses) best weights, ooo");
 
-def evaluate(opt, model, SRC, TRG, df, suffix, fineTune = True):
+def evaluate(opt, model, SRC, TRG, df, suffix, fineTune = True, camemTok = None):
     from tqdm import tqdm
     tqdm.pandas()
     try:
@@ -315,7 +322,7 @@ def evaluate(opt, model, SRC, TRG, df, suffix, fineTune = True):
         raise(e);
 
     df = df.reset_index()
-    df["byChar_" + suffix] = df.progress_apply(lambda row: translate_sentence(row.defn, model, opt, SRC, TRG, gold = row.term, daille_type = row.daille_type),axis=1)
+    df["byChar_" + suffix] = df.progress_apply(lambda row: translate_sentence(row.defn, model, opt, SRC, TRG, gold = row.term, daille_type = row.daille_type, camemTok=camemTok),axis=1)
     return df
 
 def dumpLosses(losses, dst):
@@ -417,8 +424,8 @@ def mainFelixCamemLayer():
         model = get_model(opt, len(SRC.vocab), len(TRG.vocab), camemModel=camemMod)
         dfTrain, dfValid = read_data_felix(opt, allTerms=False)
     if opt.doEval:
-        dfPreFinetune = evaluate(opt, model, SRC, TRG, dfValid, "_postTrain")
-        df = evaluate(opt, model, SRC, TRG, dfValid, "_postFinetune", fineTune = True)
+        dfPreFinetune = evaluate(opt, model, SRC, TRG, dfValid, "_postTrain", camemTok=camemTok)
+        df = evaluate(opt, model, SRC, TRG, dfValid, "_postFinetune", fineTune = True, camemTok=camemTok)
 
         pickle.dump(df, open(f'{dst}/postTuneCamemLayer.pkl','wb'));
         pickle.dump(dfPreFinetune, open(f'{dst}/postTrainCamemLayer.pkl', 'wb'));
