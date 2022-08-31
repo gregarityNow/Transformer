@@ -291,7 +291,7 @@ def translate_sentence(sentence, model, opt, SRC, TRG, gold = "", daille_type = 
         sentence = Variable(torch.LongTensor([indexed]))
         if opt.device == 0:
             sentence = sentence.cuda()
-        print("sentence",sentence);
+        # print("sentence",sentence);
     else:
         sentence = tensorCamemEncode([sentence], camemTok, -1)
 
