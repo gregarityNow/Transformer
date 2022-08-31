@@ -127,7 +127,7 @@ def create_dataset_spam():
     return train_iter
 
 
-def create_dataset(opt, SRC, TRG, validBatchSize = -1, fineTune = False):
+def create_dataset(opt, SRC, TRG, validBatchSize = -1, fineTune = False, camemTok = None):
 
     print("creating dataset and iterator... ")
 
@@ -171,7 +171,10 @@ def create_dataset(opt, SRC, TRG, validBatchSize = -1, fineTune = False):
             pickle.dump(SRC, open('weights/SRC.pkl', 'wb'))
             pickle.dump(TRG, open('weights/TRG.pkl', 'wb'))
 
-    opt.src_pad = SRC.vocab.stoi['<pad>']
+    if opt.camemLayer:
+        opt.src_pad = camemTok.pad_token_id
+    else:
+        opt.src_pad = SRC.vocab.stoi['<pad>']
     opt.trg_pad = TRG.vocab.stoi['<pad>']
 
     opt.train_len = get_len(datasets["train"]["iter"])
