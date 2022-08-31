@@ -79,8 +79,8 @@ def read_data_felix(opt, allTerms = False):
     elif opt.quickie > 1:
         df = df.sample(min(len(df),opt.quickie));
 
-    if opt.daillePrediction:
-        df["defnAug"] = df.apply(lambda row: str(dailleEncoder[row.daille_type]) + row.defn)
+    if opt.daillePrediction and not opt.camemLayer:
+        df["defn"] = df.apply(lambda row: str(dailleEncoder[row.daille_type]) + row.defn)
 
     #todo@feh: if opt.camemLayer: modelCamem(df.defn)
     # df = df[df.defn.str.len() < np.percentile(df.defn.apply(lambda x: len(x)),3)]
