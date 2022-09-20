@@ -453,7 +453,7 @@ def mainFelixCamemLayer():
         SRC = pickle.load(open(f'{dst}/SRC.pkl', 'rb'))
         TRG = pickle.load(open(f'{dst}/TRG.pkl', 'rb'))
         print("srcy",dst)
-        model = get_model(opt, len(SRC.vocab), len(TRG.vocab), camemModel=camemMod)
+        model = get_model(opt, SRC, len(TRG.vocab), camemModel=camemMod)
         dfTrain, dfValid = read_data_felix(opt, allTerms=False)
     if opt.doEval:
         # dfPreFinetune = evaluate(opt, model, SRC, TRG, dfValid, "_postTrain", camemTok=camemTok)
