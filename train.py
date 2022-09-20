@@ -199,7 +199,7 @@ def train_model(model, opt, trainDf, validDf, SRC, TRG, camemMod = None, camemTo
         else:
             print("not computing the walidation this time soary")
         print("commencing testTrans");
-        translation = translate_sentence(testSentence, model, opt, SRC, TRG, gold="", daille_type=None, camemTok=None)
+        translation = translate_sentence(testSentence, model, opt, SRC, TRG, gold="", daille_type=None, camemTok=camemTok)
         print("test translation",translation)
         return bestLoss
 
