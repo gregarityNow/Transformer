@@ -127,7 +127,7 @@ def get_model(opt, SRC, trg_vocabLen, camemModel = None):
 
     src_vocab_len = len(SRC.vocab)
 
-    if camemModel is not None:
+    if opt.camemLayer:
         print("getting extended model")
         model = TransformerCamembertLayer(trg_vocabLen, opt.d_model, opt.n_layers, opt.heads, opt.dropout, camemModel, doDaille= opt.daillePrediction)
     else:
