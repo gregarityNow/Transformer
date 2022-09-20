@@ -17,6 +17,8 @@ from .Tokenize import CamOrLetterTokenizer
 
 modelDim = 768
 
+testSentence = "Appareil électronique capable, en appliquant des instructions prédéfinies (programme), d’effectuer des traitements automatisés de données et d’interagir avec l’environnement grâce à des périphériques (écran, clavier...)."
+
 
 def loadTokenizerAndModel(name, loadFinetunedModels = False, modelToo = False, hiddenStates = False):
     import torch
@@ -77,7 +79,7 @@ def tensorCamemEncode(inputs, camemTok, maxLen):
         camEnc = torch.tensor(camemTok(inputs, padding="max_length", max_length=maxLen)['input_ids'])
     return camEnc.to("cuda");
 
-def train_model(model, opt, trainDf, validDf, TRG, camemMod = None, camemTok = None, numEpochsShouldBreak = 3, bestLoss = np.inf, losses = [], initialEpoch = 0,initialBatchNumber = 0, fineTune = False):
+def train_model(model, opt, trainDf, validDf, SRC, TRG, camemMod = None, camemTok = None, numEpochsShouldBreak = 3, bestLoss = np.inf, losses = [], initialEpoch = 0,initialBatchNumber = 0, fineTune = False):
     
     print("training model...",trainDf,validDf)
     model.train()
@@ -196,6 +198,9 @@ def train_model(model, opt, trainDf, validDf, TRG, camemMod = None, camemTok = N
             dumpLosses(losses, opt.weightSaveLoc)
         else:
             print("not computing the walidation this time soary")
+        print("commencing testTrans");
+        translation = translate_sentence(testSentence, model, opt, SRC, TRG, gold="", daille_type=None, camemTok=None)
+        print("test translation",translation)
         return bestLoss
 
     while True:
@@ -377,6 +382,7 @@ def mainFelixCamemLayer():
     parser.add_argument("-startFromCheckpoint",type=int,default=0);
     parser.add_argument("-fullWiktPretune", type=int, default=1);
     parser.add_argument("-daillePrediction", type=int, default=1);
+    parser.add_argument("-revise", type=int, default=1);
     opt = parser.parse_args()
 
     runType = "byChar"
@@ -384,6 +390,9 @@ def mainFelixCamemLayer():
         runType += "_camemLayer"
     if opt.daillePrediction:
         runType += "_daillePrediction";
+
+    if opt.revise:
+        runType += "_revise"
 
 
     if opt.quickie:
@@ -434,7 +443,7 @@ def mainFelixCamemLayer():
 
         #train on all wiktionnaire data
         if opt.fullWiktPretune:
-            bestLossInitialTraining, losses, lastEpoch = train_model(model, opt,dfTrain, dfValid, TRG, camemMod=camemMod, camemTok=camemTok, numEpochsShouldBreak=2, losses=losses, initialEpoch=initialEpoch, initialBatchNumber=initialBatchNumber, bestLoss=bestLoss);
+            bestLossInitialTraining, losses, lastEpoch = train_model(model, opt,dfTrain, dfValid, SRC, TRG, camemMod=camemMod, camemTok=camemTok, numEpochsShouldBreak=2, losses=losses, initialEpoch=initialEpoch, initialBatchNumber=initialBatchNumber, bestLoss=bestLoss);
         elif opt.startFromCheckpoint:
             bestLossInitialTraining = 1.1336695605443619
             losses = fetchLosses(dst)
@@ -451,7 +460,7 @@ def mainFelixCamemLayer():
         if opt.SGDR == True:
             opt.sched = CosineWithRestarts(opt.optimizer, T_max=opt.train_len)
 
-        train_model(model, opt, dfTrain, dfValid, TRG, camemMod=camemMod, camemTok=camemTok, bestLoss=bestLossInitialTraining, losses = losses, initialEpoch = lastEpoch+1, numEpochsShouldBreak=2, fineTune = True);
+        train_model(model, opt, dfTrain, dfValid, SRC, TRG, camemMod=camemMod, camemTok=camemTok, bestLoss=bestLossInitialTraining, losses = losses, initialEpoch = lastEpoch+1, numEpochsShouldBreak=2, fineTune = True);
         dumpLosses(losses, dst)
     else:
         SRC = pickle.load(open(f'{dst}/SRC.pkl', 'rb'))
