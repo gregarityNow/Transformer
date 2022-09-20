@@ -297,7 +297,9 @@ def translate_sentence(sentence, model, opt, SRC, TRG, gold = "", daille_type = 
 
     dailleVec = getDailleVec([daille_type,])
     sentence = beam_search(sentence, model, SRC, TRG, opt, gold = gold, dailleVec = dailleVec)
-    exit()
+    opt.countdown += -1;
+    if opt.countdown == 0:
+        exit()
 
     return multiple_replace({' ?': '?', ' !': '!', ' .': '.', '\' ': '\'', ' ,': ','}, sentence)
 
@@ -328,6 +330,7 @@ def evaluate(opt, model, SRC, TRG, df, suffix, fineTune = True, camemTok = None)
         print("no best weights available, no worries hoss",e)
         raise(e);
 
+    opt.countdown = 2
     df = df.reset_index()
     df["byChar_" + suffix] = df.progress_apply(lambda row: translate_sentence(row.defn, model, opt, SRC, TRG, gold = row.term, daille_type = row.daille_type, camemTok=camemTok),axis=1)
     return df
