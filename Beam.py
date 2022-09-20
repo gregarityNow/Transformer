@@ -10,8 +10,7 @@ def init_vars(src, model, SRC, TRG, opt, dailleVec = None):
     src_mask = getSrcMask(src, opt);
     e_output = model.encoder(src, src_mask, dailleVec)
     print("sourcey",src.shape);
-    exit()
-    
+
     outputs = torch.LongTensor([[init_tok]])
     if opt.device == 0:
         outputs = outputs.cuda()

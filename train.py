@@ -297,6 +297,7 @@ def translate_sentence(sentence, model, opt, SRC, TRG, gold = "", daille_type = 
 
     dailleVec = getDailleVec([daille_type,])
     sentence = beam_search(sentence, model, SRC, TRG, opt, gold = gold, dailleVec = dailleVec)
+    exit()
 
     return multiple_replace({' ?': '?', ' !': '!', ' .': '.', '\' ': '\'', ' ,': ','}, sentence)
 
