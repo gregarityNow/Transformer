@@ -1,3 +1,4 @@
+import numpy as np
 import torch
 import torch.nn as nn
 from .Layers import EncoderLayer, DecoderLayer
@@ -39,7 +40,7 @@ class TransformerCamembertLayer(nn.Module):
         super().__init__()
         print("initializing the erweiteren model")
         #(src_vocab, d_model, N, heads, dropout)
-        self.encoder = EncoderCamemLayer(768, d_model, 1, heads, dropout, camemModel=camemModel, doDaille = doDaille)
+        self.encoder = EncoderCamemLayer(768, d_model, N, heads, dropout, camemModel=camemModel, doDaille = doDaille)
         self.decoder = Decoder(trg_vocab, d_model , N, heads, dropout)
         self.out = nn.Linear(d_model, trg_vocab)
     def forward(self, src, trg, src_mask, trg_mask, dailleVec = None):
@@ -84,9 +85,11 @@ class EncoderCamemLayer(nn.Module):
             dailleEmbedded = self.embed(dailleVec).reshape([x.shape[0],1,x.shape[2]]);
             x = torch.cat([x, dailleEmbedded],dim=1);
         # print("xing",x.shape);
+        printState = np.random.rand() < 0.01
         for i in range(self.N):
             x = self.layers[i](x, mask)
-            print("xmas",x.shape, x);
+            if printState:
+                print("xmas",x.shape, x);
         return self.norm(x)
 
 class Decoder(nn.Module):
