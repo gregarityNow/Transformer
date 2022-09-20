@@ -455,6 +455,10 @@ def mainFelixCamemLayer():
         print("srcy",dst)
         model = get_model(opt, SRC, len(TRG.vocab), camemModel=camemMod)
         dfTrain, dfValid = read_data_felix(opt, allTerms=False)
+        if opt.camemLayer:
+            opt.src_pad = camemTok.pad_token_id
+        else:
+            opt.src_pad = SRC.vocab.stoi['<pad>']
     if opt.doEval:
         # dfPreFinetune = evaluate(opt, model, SRC, TRG, dfValid, "_postTrain", camemTok=camemTok)
         df = evaluate(opt, model, SRC, TRG, dfValid, "_postFinetune", fineTune = True, camemTok=camemTok)
