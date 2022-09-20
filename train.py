@@ -456,7 +456,7 @@ def mainFelixCamemLayer():
         model = get_model(opt, len(SRC.vocab), len(TRG.vocab), camemModel=camemMod)
         dfTrain, dfValid = read_data_felix(opt, allTerms=False)
     if opt.doEval:
-        dfPreFinetune = evaluate(opt, model, SRC, TRG, dfValid, "_postTrain", camemTok=camemTok)
+        # dfPreFinetune = evaluate(opt, model, SRC, TRG, dfValid, "_postTrain", camemTok=camemTok)
         df = evaluate(opt, model, SRC, TRG, dfValid, "_postFinetune", fineTune = True, camemTok=camemTok)
 
         pickle.dump(df, open(f'{dst}/postTuneCamemLayer.pkl','wb'));
