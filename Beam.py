@@ -9,6 +9,7 @@ def init_vars(src, model, SRC, TRG, opt, dailleVec = None):
     init_tok = TRG.vocab.stoi['<sos>']
     src_mask = getSrcMask(src, opt);
     e_output = model.encoder(src, src_mask, dailleVec)
+    print("sourcey",src.shape);
     
     outputs = torch.LongTensor([[init_tok]])
     if opt.device == 0:
