@@ -81,7 +81,7 @@ class EncoderCamemLayer(nn.Module):
         camemOut = self.camemModel(src)[1][-1]
         print("davos", src, camemOut, camemOut.shape);
         x = Variable(camemOut,requires_grad=False)
-        print("davai",src, x, x.shape);
+        print("davai",self.camemModel, x, x.shape);
         if self.doDaille:
             dailleEmbedded = self.embed(dailleVec).reshape([x.shape[0],1,x.shape[2]]);
             x = torch.cat([x, dailleEmbedded],dim=1);
