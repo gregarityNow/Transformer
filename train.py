@@ -6,7 +6,7 @@ import argparse
 import time
 # from nltk.corpus import wordnet
 import torch
-from .Models import get_model
+from .Models import get_model, testModel
 from .Process import *
 import torch.nn.functional as F
 from .Optim import CosineWithRestarts
@@ -58,16 +58,7 @@ def loadTokenizerAndModel(name, loadFinetunedModels = False, modelToo = False, h
     # tokModDict[techName]["tok"] = tok
     # tokModDict[techName]["model"] = model
 
-    query = 'Ganglion nerveux du nerf trijumeau situé dans le cavum trigéminal.'
-    token_ids = tok.encode(query, return_tensors='pt')
-    masked_position = (token_ids.squeeze() == tok.mask_token_id).nonzero()
-    masked_pos = [mask.item() for mask in masked_position]
-    with torch.no_grad():
-        if torch.cuda.is_available():
-            output = model(token_ids.cuda())
-        else:
-            output = model(token_ids)
-        print("we got",output[1][-1]);
+    testModel(model, tok, "loading model");
 
     return tok, model
 
@@ -429,6 +420,7 @@ def mainFelixCamemLayer():
 
     camemTok, camemMod = loadTokenizerAndModel("camem", modelToo=True, hiddenStates=True)
     camOrLetterTokenizer = CamOrLetterTokenizer(camemTok)
+    testModel(camemMod, camemTok, "after loading model");
 
     dst = opt.weightSaveLoc
     if opt.checkpoint > 0:
@@ -443,7 +435,7 @@ def mainFelixCamemLayer():
         pickle.dump(SRC, open(f'{dst}/SRC.pkl', 'wb'))
         pickle.dump(TRG, open(f'{dst}/TRG.pkl', 'wb'))
 
-        model = get_model(opt, SRC, len(TRG.vocab), camemModel=(camemMod if opt.camemLayer else None))
+        model = get_model(opt, SRC, len(TRG.vocab), camemModel=(camemMod if opt.camemLayer else None), camemTok=(camemTok if opt.camemLayer else None))
 
         opt.optimizer = torch.optim.Adam(model.parameters(), lr=opt.lr, betas=(0.9, 0.98), eps=1e-9)
         if opt.SGDR == True:
@@ -488,7 +480,7 @@ def mainFelixCamemLayer():
         SRC = pickle.load(open(f'{dst}/SRC.pkl', 'rb'))
         TRG = pickle.load(open(f'{dst}/TRG.pkl', 'rb'))
         print("srcy",dst)
-        model = get_model(opt, SRC, len(TRG.vocab), camemModel=camemMod)
+        model = get_model(opt, SRC, len(TRG.vocab), camemModel=camemMod, camemTok=camemTok)
         dfTrain, dfValid = read_data_felix(opt, allTerms=False)
         if opt.camemLayer:
             opt.src_pad = camemTok.pad_token_id
