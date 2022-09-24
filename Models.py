@@ -15,6 +15,7 @@ def testModel(mod, tok, src):
     masked_position = (token_ids.squeeze() == tok.mask_token_id).nonzero()
     masked_pos = [mask.item() for mask in masked_position]
     with torch.no_grad():
+        print("cudington",torch.cuda.is_available());
         if torch.cuda.is_available():
             output = mod(token_ids.cuda())
         else:
@@ -106,6 +107,7 @@ class EncoderCamemLayer(nn.Module):
         testModel(self.camemModel, self.camemTok, "fwd EncoderCamemLayer pre applic")
         with torch.no_grad():
             camemOut = self.camemModel(src)[1][-1]
+            testModel(self.camemModel, self.camemTok, "fwd EncoderCamemLayer post nograd applic")
         testModel(self.camemModel, self.camemTok, "fwd EncoderCamemLayer post applic")
         print("davos", src, camemOut, camemOut.shape);
         x = Variable(camemOut,requires_grad=False)
