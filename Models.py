@@ -9,9 +9,7 @@ import copy
 
 
 def testModel(mod, tok, src):
-    params = mod.parameters()
-    next(params)
-    weights = next(params)
+    weights = [x[1] for x in mod.named_parameters() if x[0] == "roberta.encoder.layer.11.output.LayerNorm.weight"][0]
     print("testing 123", src, np.all([x.requires_grad for x in mod.parameters()]), np.any([x.requires_grad for x in mod.parameters()]), weights.shape, weights);
     query = "Guillocher un support en métal pour y faire adhérer un émail."
     token_ids = tok.encode(query, return_tensors='pt')
