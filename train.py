@@ -89,7 +89,6 @@ def train_model(model, opt, trainDf, validDf, SRC, TRG, camemMod = None, camemTo
 
     miniTestDf = validDf.sample(5)["term"];
 
-
     shouldBroke = 0
     epoch = initialEpoch
 
@@ -308,7 +307,7 @@ def translate_sentence(sentence, model, opt, SRC, TRG, gold = "", daille_type = 
     else:
         dailleVec = None
     sentence = beam_search(sentence, model, SRC, TRG, opt, gold = gold, dailleVec = dailleVec)
-    opt.countdown += -1;
+    # opt.countdown += -1;
     # if opt.countdown == 0:
     #     exit()
 
@@ -341,7 +340,7 @@ def evaluate(opt, model, SRC, TRG, df, suffix, fineTune = True, camemTok = None)
         print("no best weights available, no worries hoss",e)
         raise(e);
 
-    opt.countdown = 2
+    # opt.countdown = 2
     df = df.reset_index()
     df["byChar_" + suffix] = df.progress_apply(lambda row: translate_sentence(row.defn, model, opt, SRC, TRG, gold = row.term, daille_type = row.daille_type, camemTok=camemTok),axis=1)
     return df
