@@ -108,6 +108,10 @@ class EncoderCamemLayer(nn.Module):
             print("reg",x.shape)
         for x in self.named_parameters():
             print("name",x[0],x[1].shape)
+        for x in camemModel.parameters:
+            print("regCam", x.shape)
+        for x in camemModel.named_parameters():
+            print("camName", x[0], x[1].shape)
         exit()
 
 
