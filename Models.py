@@ -17,7 +17,7 @@ def testModel(mod, tok, src):
         with open("prevWeights.pkl","rb") as fp:
             prevWeights = pickle.load(fp);
         for weightIndex in range(len(currWeights)):
-            print("weight",currWeights[weightIndex][0],torch.norm(currWeights[weightIndex][1]-prevWeights[weightIndex][1]));
+            print("weight",torch.norm(currWeights[weightIndex][1]-prevWeights[weightIndex][1]).item(),currWeights[weightIndex][0]);
     except Exception as e:
         print(e)
         pass
