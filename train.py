@@ -87,7 +87,7 @@ def train_model(model, opt, trainDf, validDf, SRC, TRG, camemMod = None, camemTo
     if opt.checkpoint > 0:
         cptime = time.time()
 
-    miniTestDf = validDf.sample(5)["term"];
+    miniTestDf = validDf.sample(5)["defn"];
 
     shouldBroke = 0
     epoch = initialEpoch
