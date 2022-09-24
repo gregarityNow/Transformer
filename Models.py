@@ -107,6 +107,9 @@ class EncoderCamemLayer(nn.Module):
 
 
     def forward(self, src, mask, dailleVec = None):
+        for x in self.parameters():
+            print(x.shape)
+        exit()
         testModel(self.camemModel, self.camemTok, "fwd EncoderCamemLayer pre applic")
         with torch.no_grad():
             camemOut = self.camemModel(src)[1][-1]
