@@ -20,7 +20,7 @@ modelDim = 768
 testSentence = "Appareil électronique capable, en appliquant des instructions prédéfinies (programme), d’effectuer des traitements automatisés de données et d’interagir avec l’environnement grâce à des périphériques (écran, clavier...)."
 
 
-def loadTokenizerAndModel(name, loadFinetunedModels = False, modelToo = False, hiddenStates = False):
+def loadTokenizerAndModel(name, loadFinetunedModels = False, modelToo = False, hiddenStates = False, requireGrad = True):
     import torch
     techName = ""
     if name == "xlmRob":
@@ -59,6 +59,9 @@ def loadTokenizerAndModel(name, loadFinetunedModels = False, modelToo = False, h
     # tokModDict[techName]["model"] = model
 
     testModel(model, tok, "loading model");
+    if not requireGrad:
+        for x in model.parameters():
+            x.requires_grad = False
 
     return tok, model
 
@@ -420,7 +423,7 @@ def mainFelixCamemLayer():
     if opt.device == 0:
         assert torch.cuda.is_available()
 
-    camemTok, camemMod = loadTokenizerAndModel("camem", modelToo=True, hiddenStates=True)
+    camemTok, camemMod = loadTokenizerAndModel("camem", modelToo=True, hiddenStates=True, requireGrad=False)
     camOrLetterTokenizer = CamOrLetterTokenizer(camemTok)
     testModel(camemMod, camemTok, "after loading model");
 
