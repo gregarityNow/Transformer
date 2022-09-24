@@ -87,6 +87,8 @@ def train_model(model, opt, trainDf, validDf, SRC, TRG, camemMod = None, camemTo
     if opt.checkpoint > 0:
         cptime = time.time()
 
+    miniTestDf = validDf.sample(5)["term"];
+
 
     shouldBroke = 0
     epoch = initialEpoch
@@ -199,8 +201,9 @@ def train_model(model, opt, trainDf, validDf, SRC, TRG, camemMod = None, camemTo
         else:
             print("not computing the walidation this time soary")
         print("commencing testTrans");
-        translation = translate_sentence(testSentence, model, opt, SRC, TRG, gold="", daille_type=None, camemTok=camemTok)
-        print("test translation",translation)
+        miniTestDf.apply(lambda sent: print("test translation",translate_sentence(sent, model, opt, SRC, TRG, gold="", daille_type=None, camemTok=camemTok)))
+        # translation = translate_sentence(testSentence, model, opt, SRC, TRG, gold="", daille_type=None, camemTok=camemTok)
+        # print("test translation",translation)
         return bestLoss
 
     while True:
@@ -300,7 +303,10 @@ def translate_sentence(sentence, model, opt, SRC, TRG, gold = "", daille_type = 
     else:
         sentence = tensorCamemEncode([sentence], camemTok, -1)
 
-    dailleVec = getDailleVec([daille_type,])
+    if not daille_type is None:
+        dailleVec = getDailleVec([daille_type,])
+    else:
+        dailleVec = None
     sentence = beam_search(sentence, model, SRC, TRG, opt, gold = gold, dailleVec = dailleVec)
     opt.countdown += -1;
     # if opt.countdown == 0:
