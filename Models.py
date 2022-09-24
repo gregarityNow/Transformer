@@ -9,6 +9,7 @@ import copy
 
 
 def testModel(mod, tok, src):
+    mod.eval()
     print("testing 123", src)
     query = "Guillocher un support en métal pour y faire adhérer un émail."
     token_ids = tok.encode(query, return_tensors='pt')
