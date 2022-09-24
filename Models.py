@@ -6,11 +6,25 @@ from .Embed import Embedder, PositionalEncoder
 from .Sublayers import Norm
 from torch.autograd import Variable
 import copy
+import pickle
 
 
 def testModel(mod, tok, src):
     weights = [x[1] for x in mod.named_parameters() if x[0] == "roberta.encoder.layer.11.output.LayerNorm.weight"][0]
-    print("testing 123", src, np.all([x.requires_grad for x in mod.parameters()]), np.any([x.requires_grad for x in mod.parameters()]), weights.shape, weights);
+    currWeights = mod.named_parameters();
+    currWeights = sorted(currWeights, key = lambda x: x[0]);
+    try:
+        with open("prevWeights.pkl","rb") as fp:
+            prevWeights = pickle.load(fp);
+        for weightIndex in range(len(currWeights)):
+            print("weight",currWeights[weightIndex][0],np.linalg.norm(currWeights[weightIndex]-prevWeights[weightIndex]));
+    except:
+        pass
+    with open("prevWeights.pkl", "wb") as fp:
+        pickle.load(currWeights, fp);
+
+
+    print("testing 123", src, np.all([x.requires_grad for x in mod.parameters()]), np.any([x.requires_grad for x in mod.parameters()]), weights.shape);
     query = "Guillocher un support en métal pour y faire adhérer un émail."
     token_ids = tok.encode(query, return_tensors='pt')
     masked_position = (token_ids.squeeze() == tok.mask_token_id).nonzero()
