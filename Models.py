@@ -43,6 +43,10 @@ class TransformerCamembertLayer(nn.Module):
         self.encoder = EncoderCamemLayer(768, d_model, N, heads, dropout, camemModel=camemModel, doDaille = doDaille)
         self.decoder = Decoder(trg_vocab, d_model , N, heads, dropout)
         self.out = nn.Linear(d_model, trg_vocab)
+        print("horscht",self.parameters());
+        for p in self.parameters():
+            print("param",p, p.requires_grad);
+
     def forward(self, src, trg, src_mask, trg_mask, dailleVec = None):
         '''
         What's the deal with this mask? todo@feh
