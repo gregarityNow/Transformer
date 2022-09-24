@@ -104,7 +104,7 @@ class EncoderCamemLayer(nn.Module):
         self.camemTok = camemTok
 
         for x in self.named_parameters():
-            if "camemModel" in x[0] or "roberta" in x[0] or True:
+            if "camemModel" in x[0] or "roberta" in x[0]:
                 x[1].requires_grad=False
                 print(x[0])
         for x in self.parameters():
