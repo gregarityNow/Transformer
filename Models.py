@@ -9,8 +9,7 @@ import copy
 
 
 def testModel(mod, tok, src):
-    mod.eval()
-    print("testing 123", src)
+    print("testing 123", src, np.all([x.requires_grad for x in mod.parameters()]), np.any([x.requires_grad for x in mod.parameters()]));
     query = "Guillocher un support en métal pour y faire adhérer un émail."
     token_ids = tok.encode(query, return_tensors='pt')
     masked_position = (token_ids.squeeze() == tok.mask_token_id).nonzero()
