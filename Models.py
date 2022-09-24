@@ -80,12 +80,12 @@ class EncoderCamemLayer(nn.Module):
     def forward(self, src, mask, dailleVec = None):
         x = self.camemModel(src)[1][-1]
         x = Variable(x,requires_grad=False)
-        print("davai",src, x);
+        print("davai",src, x, x.shape);
         if self.doDaille:
             dailleEmbedded = self.embed(dailleVec).reshape([x.shape[0],1,x.shape[2]]);
             x = torch.cat([x, dailleEmbedded],dim=1);
         # print("xing",x.shape);
-        printState = np.random.rand() < 0.01
+        printState = True#np.random.rand() < 0.01
         for i in range(self.N):
             x = self.layers[i](x, mask)
             if printState:
