@@ -104,14 +104,12 @@ class EncoderCamemLayer(nn.Module):
         self.doDaille = doDaille
         testModel(camemModel, camemTok, "init EncoderCamemLayer");
         self.camemTok = camemTok
-        for x in self.parameters():
-            print("reg",x.shape)
+
         for x in self.named_parameters():
-            print("name",x[0],x[1].shape)
-        for x in camemModel.parameters():
-            print("regCam", x.shape)
+            if "camemModel" in x[0]:
+                x[1].requires_grad=False
         for x in camemModel.named_parameters():
-            print("camName", x[0], x[1].shape)
+            print("camName", x[0], x[1].shape, x[1].requires_grad)
         exit()
 
 
