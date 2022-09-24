@@ -18,7 +18,8 @@ def testModel(mod, tok, src):
             prevWeights = pickle.load(fp);
         for weightIndex in range(len(currWeights)):
             print("weight",currWeights[weightIndex][0],np.linalg.norm(currWeights[weightIndex]-prevWeights[weightIndex]));
-    except:
+    except Exception as e:
+        print(e)
         pass
     with open("prevWeights.pkl", "wb") as fp:
         pickle.dump(currWeights, fp);
