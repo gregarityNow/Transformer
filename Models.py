@@ -78,8 +78,9 @@ class EncoderCamemLayer(nn.Module):
 
 
     def forward(self, src, mask, dailleVec = None):
-        x = self.camemModel(src)[1][-1]
-        x = Variable(x,requires_grad=False)
+        camemOut = self.camemModel(src)[1][-1]
+        print("davos", src, camemOut, camemOut.shape);
+        x = Variable(camemOut,requires_grad=False)
         print("davai",src, x, x.shape);
         if self.doDaille:
             dailleEmbedded = self.embed(dailleVec).reshape([x.shape[0],1,x.shape[2]]);
