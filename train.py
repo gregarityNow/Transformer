@@ -163,6 +163,10 @@ def train_model(model, opt, trainDf, validDf, SRC, TRG, camemMod = None, camemTo
         return validLoss
 
     def handleTrain(src, trg, opt, losses, batchIndex, bestLoss, finetune, dailleVec = None):
+
+        print("testtrans before any losses can occur!", miniTestDf);
+        miniTestDf.apply(lambda sent: print("test translation pre", sent, translate_sentence(sent, model, opt, SRC, TRG, gold="", daille_type=None, camemTok=camemTok)))
+
         trg_input = trg[:, :-1]
         src_mask, trg_mask = create_masks(src, trg_input, opt)
         trainTime = time.time()
@@ -199,7 +203,7 @@ def train_model(model, opt, trainDf, validDf, SRC, TRG, camemMod = None, camemTo
             dumpLosses(losses, opt.weightSaveLoc)
         else:
             print("not computing the walidation this time soary")
-        print("commencing testTrans");
+        print("commencing testTrans", miniTestDf);
         miniTestDf.apply(lambda sent: print("test translation",sent,translate_sentence(sent, model, opt, SRC, TRG, gold="", daille_type=None, camemTok=camemTok)))
         # translation = translate_sentence(testSentence, model, opt, SRC, TRG, gold="", daille_type=None, camemTok=camemTok)
         # print("test translation",translation)
