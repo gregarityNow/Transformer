@@ -236,6 +236,7 @@ def train_model(model, opt, trainDf, validDf, SRC, TRG, camemMod = None, camemTo
             if initialBatchNumber > 0:
                 initialBatchNumber += -1;
                 continue;
+            testModel(camemMod, camemTok, "inTrainLoop")
             print("inTrain",psutil.virtual_memory())
             batchCreateTime = time.time()
             batch = trainDf[trainBatchIndex*batchSizeStandard:(trainBatchIndex+1)*batchSizeStandard];
