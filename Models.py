@@ -85,7 +85,8 @@ class EncoderCamemLayer(nn.Module):
 
 
     def forward(self, src, mask, dailleVec = None):
-        camemOut = self.camemModel(src)[1][-1]
+        with torch.no_grad():
+            camemOut = self.camemModel(src)[1][-1]
         print("davos", src, camemOut, camemOut.shape);
         x = Variable(camemOut,requires_grad=False)
         print("davai",self.camemModel, x, x.shape);

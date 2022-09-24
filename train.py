@@ -57,6 +57,18 @@ def loadTokenizerAndModel(name, loadFinetunedModels = False, modelToo = False, h
     # tokModDict[techName] = {}
     # tokModDict[techName]["tok"] = tok
     # tokModDict[techName]["model"] = model
+
+    query = 'Ganglion nerveux du nerf trijumeau situé dans le cavum trigéminal.'
+    token_ids = tok.encode(query, return_tensors='pt')
+    masked_position = (token_ids.squeeze() == tok.mask_token_id).nonzero()
+    masked_pos = [mask.item() for mask in masked_position]
+    with torch.no_grad():
+        if torch.cuda.is_available():
+            output = model(token_ids.cuda())
+        else:
+            output = model(token_ids)
+        print("we got",output[1][-1]);
+
     return tok, model
 
 def getPredsAndLoss(model, src,trg,  trg_input, src_mask, trg_mask, opt, isTrain = True, dailleVec = None):
@@ -87,7 +99,8 @@ def train_model(model, opt, trainDf, validDf, SRC, TRG, camemMod = None, camemTo
     if opt.checkpoint > 0:
         cptime = time.time()
 
-    miniTestDf = validDf.sample(5)["defn"];
+    # np.random.seed(420);
+    miniTestDf = validDf.sample(5, random_state=420)["defn"];
 
     shouldBroke = 0
     epoch = initialEpoch
