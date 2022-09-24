@@ -169,7 +169,9 @@ def train_model(model, opt, trainDf, validDf, SRC, TRG, camemMod = None, camemTo
     def handleTrain(src, trg, opt, losses, batchIndex, bestLoss, finetune, dailleVec = None):
 
         print("testtrans before any losses can occur!", miniTestDf);
+        testModel(camemMod, camemTok, "before minitest application")
         miniTestDf.apply(lambda sent: print("test translation pre", sent, translate_sentence(sent, model, opt, SRC, TRG, gold="", daille_type=None, camemTok=camemTok)))
+        testModel(camemMod, camemTok, "after minitest application")
 
         trg_input = trg[:, :-1]
         src_mask, trg_mask = create_masks(src, trg_input, opt)
