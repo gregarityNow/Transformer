@@ -21,7 +21,7 @@ def testModel(mod, tok, src):
     except:
         pass
     with open("prevWeights.pkl", "wb") as fp:
-        pickle.load(currWeights, fp);
+        pickle.dump(currWeights, fp);
 
 
     print("testing 123", src, np.all([x.requires_grad for x in mod.parameters()]), np.any([x.requires_grad for x in mod.parameters()]), weights.shape);
