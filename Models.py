@@ -40,9 +40,12 @@ class TransformerCamembertLayer(nn.Module):
         super().__init__()
         print("initializing the erweiteren model")
         #(src_vocab, d_model, N, heads, dropout)
+        if not camemModel is None:
+            camemModel.eval()
         self.encoder = EncoderCamemLayer(768, d_model, N, heads, dropout, camemModel=camemModel, doDaille = doDaille)
         self.decoder = Decoder(trg_vocab, d_model , N, heads, dropout)
         self.out = nn.Linear(d_model, trg_vocab)
+
         print("horscht",self.parameters());
         for p in self.parameters():
             print("param",p, p.requires_grad);
