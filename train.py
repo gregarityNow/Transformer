@@ -62,6 +62,7 @@ def loadTokenizerAndModel(name, loadFinetunedModels = False, modelToo = False, h
     if not requireGrad:
         for x in model.parameters():
             x.requires_grad = False
+            x.grad = None
 
     return tok, model
 

@@ -121,6 +121,7 @@ class EncoderCamemLayer(nn.Module):
         for x in self.named_parameters():
             if "camemModel" in x[0] or "roberta" in x[0]:
                 x[1].requires_grad=False
+                x[1].grad = None
                 print(x[0])
         for x in self.parameters():
             print("gradius",x.requires_grad);
