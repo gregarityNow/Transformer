@@ -200,7 +200,7 @@ def train_model(model, opt, trainDf, validDf, SRC, TRG, camemMod = None, camemTo
         else:
             print("not computing the walidation this time soary")
         print("commencing testTrans");
-        miniTestDf.apply(lambda sent: print("test translation",translate_sentence(sent, model, opt, SRC, TRG, gold="", daille_type=None, camemTok=camemTok)))
+        miniTestDf.apply(lambda sent: print("test translation",sent,translate_sentence(sent, model, opt, SRC, TRG, gold="", daille_type=None, camemTok=camemTok)))
         # translation = translate_sentence(testSentence, model, opt, SRC, TRG, gold="", daille_type=None, camemTok=camemTok)
         # print("test translation",translation)
         return bestLoss
