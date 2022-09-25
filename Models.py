@@ -194,6 +194,11 @@ def get_model(opt, SRC, trg_vocabLen, camemModel = None, camemTok = None):
     if opt.camemLayer:
         print("getting extended model")
         model = TransformerCamembertLayer(trg_vocabLen, opt.d_model, opt.n_layers, opt.heads, opt.dropout, camemModel, doDaille= opt.daillePrediction, camemTok=camemTok)
+        for x in model.named_parameters():
+            if "camemModel" in x[0] or "roberta" in x[0]:
+                x[1].requires_grad=False
+                x[1].grad = None
+                print(x[0])
     else:
         model = Transformer(src_vocab_len, trg_vocabLen, opt.d_model, opt.n_layers, opt.heads, opt.dropout)
 
@@ -207,6 +212,8 @@ def get_model(opt, SRC, trg_vocabLen, camemModel = None, camemTok = None):
 
     if opt.device == 0:
         model = model.to("cuda:0")
+
+
 
     return model
 
