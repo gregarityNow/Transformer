@@ -203,6 +203,7 @@ def get_model(opt, SRC, trg_vocabLen, camemModel = None, camemTok = None):
     else:
         model = Transformer(src_vocab_len, trg_vocabLen, opt.d_model, opt.n_layers, opt.heads, opt.dropout)
 
+    testModel(camemModel, camemTok,"in get_model")
     if opt.load_weights:
         print("loading pretrained weights...")
         model.load_state_dict(torch.load(f'{opt.weightSaveLoc}/model_weights'))
@@ -210,6 +211,7 @@ def get_model(opt, SRC, trg_vocabLen, camemModel = None, camemTok = None):
         for p in model.parameters():
             if p.dim() > 1 and not p.requires_grad:
                 nn.init.xavier_uniform_(p)
+    testModel(camemModel, camemTok, "after xavier")
 
     if opt.device == 0:
         model = model.to("cuda:0")
