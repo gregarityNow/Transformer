@@ -208,7 +208,7 @@ def get_model(opt, SRC, trg_vocabLen, camemModel = None, camemTok = None):
         model.load_state_dict(torch.load(f'{opt.weightSaveLoc}/model_weights'))
     else:
         for p in model.parameters():
-            if p.dim() > 1:
+            if p.dim() > 1 and not p.requires_grad:
                 nn.init.xavier_uniform_(p)
 
     if opt.device == 0:
