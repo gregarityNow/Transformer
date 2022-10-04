@@ -89,7 +89,10 @@ def tensorCamemEncode(inputs, camemTok, maxLen):
 def train_model(model, opt, trainDf, validDf, SRC, TRG, camemMod = None, camemTok = None, numEpochsShouldBreak = 3, bestLoss = np.inf, losses = [], initialEpoch = 0,initialBatchNumber = 0, fineTune = False):
     
     print("training model...",trainDf,validDf)
+    testModel(camemMod,camemTok,"begninning of train_model")
+    opt.optimizer.zero_grad()
     model.train()
+    opt.optimizer.zero_grad()
     start = time.time()
     if opt.checkpoint > 0:
         cptime = time.time()
@@ -221,6 +224,7 @@ def train_model(model, opt, trainDf, validDf, SRC, TRG, camemMod = None, camemTo
 
     while True:
         print("beginning of while loop")
+        testModel(camemMod, camemTok, "beginning of while loop")
         if opt.floyd is False:
             print("floyd   %dm: epoch %d [%s]  %d%%  loss = %s" %\
             ((time.time() - start)//60, epoch + 1, "".join(' '*20), 0, '...'), end='\r')
