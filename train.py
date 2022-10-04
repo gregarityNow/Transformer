@@ -220,9 +220,9 @@ def train_model(model, opt, trainDf, validDf, SRC, TRG, camemMod = None, camemTo
         return bestLoss
 
     while True:
-
+        print("beginning of while loop")
         if opt.floyd is False:
-            print("   %dm: epoch %d [%s]  %d%%  loss = %s" %\
+            print("floyd   %dm: epoch %d [%s]  %d%%  loss = %s" %\
             ((time.time() - start)//60, epoch + 1, "".join(' '*20), 0, '...'), end='\r')
 
         if opt.checkpoint > 0:
