@@ -184,9 +184,9 @@ def train_model(model, opt, trainDf, validDf, SRC, TRG, camemMod = None, camemTo
         src_mask, trg_mask = create_masks(src, trg_input, opt)
         trainTime = time.time()
         preds, loss = getPredsAndLoss(model, src, trg, trg_input, src_mask, trg_mask, opt, isTrain=True, dailleVec=dailleVec)
-        # loss.backward()
+        loss.backward()
 
-        # opt.optimizer.step()
+        opt.optimizer.step()
 
         if opt.SGDR == True:
             opt.sched.step()
