@@ -10,6 +10,7 @@ import pickle
 
 
 def testModel(mod, tok, src):
+    print('wizard of id',id(mod));
     weights = [x[1] for x in mod.named_parameters() if x[0] == "roberta.encoder.layer.11.output.LayerNorm.weight"][0]
     currWeights = mod.named_parameters();
     currWeights = sorted(currWeights, key = lambda x: x[0]);

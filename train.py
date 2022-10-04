@@ -445,10 +445,11 @@ def mainFelixCamemLayer():
         model = get_model(opt, SRC, len(TRG.vocab), camemModel=(camemMod if opt.camemLayer else None), camemTok=(camemTok if opt.camemLayer else None))
 
         opt.optimizer = torch.optim.Adam(model.parameters(), lr=opt.lr, betas=(0.9, 0.98), eps=1e-9)
+        #todo@fehMaxim: consider optimizer parameters
         if opt.SGDR == True:
             opt.sched = CosineWithRestarts(opt.optimizer, T_max=opt.train_len)
 
-        print("moodely", model.state_dict().keys())
+        # print("moodely", model.state_dict().keys())
 
         if opt.startFromCheckpoint:
             getBestModel(model,opt.weightSaveLoc, fineTune=False)
