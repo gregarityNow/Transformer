@@ -153,9 +153,9 @@ class EncoderCamemLayer(nn.Module):
         #     x = self.layers[i](x, mask)
         #     if printState:
         #         print("xmas",x.shape, x);
-        norm = self.norm(x)
-        print("norman mailer",norm.shape,x.shape)
-        return norm
+        # x = self.norm(x)
+        # print("norman mailer",norm.shape,x.shape)
+        return x
 
 class Decoder(nn.Module):
     def __init__(self, vocab_size, d_model, N, heads, dropout):
