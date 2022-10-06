@@ -244,7 +244,7 @@ def train_model(model, opt, trainDf, validDf, SRC, TRG, camemMod = None, camemTo
                 initialBatchNumber += -1;
                 continue;
             testModel(camemMod, camemTok, "inTrainLoop")
-            print("inTrain",psutil.virtual_memory())
+            # print("inTrain",psutil.virtual_memory())
             batchCreateTime = time.time()
             batch = trainDf[trainBatchIndex*batchSizeStandard:(trainBatchIndex+1)*batchSizeStandard];
             src, trg, dailleVec = batchToSrcTrg(batch, TRG, opt.daillePrediction);
@@ -256,11 +256,11 @@ def train_model(model, opt, trainDf, validDf, SRC, TRG, camemMod = None, camemTo
         numBatches = opt.train_len
         for trainBatchIndex, batch in enumerate(opt.train):
             if opt.camemLayer: break;
-            print("inTrain",psutil.virtual_memory())
+            # print("inTrain",psutil.virtual_memory())
 
             src = batch.src.transpose(0,1)
             trg = batch.trg.transpose(0,1)
-            print("batchNoCam", epoch, trainBatchIndex, numBatches, len(batch), src.shape)
+            # print("batchNoCam", epoch, trainBatchIndex, numBatches, len(batch), src.shape)
 
             bestLoss = handleTrain(src, trg, opt, losses, trainBatchIndex, bestLoss, fineTune)
 
