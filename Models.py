@@ -9,7 +9,7 @@ import copy
 import pickle
 
 
-def testModel(mod, tok, src):
+def testModel(mod, tok, src, printWeights = False):
     print('wizard of id',id(mod));
     weights = [x[1] for x in mod.named_parameters() if x[0] == "roberta.encoder.layer.11.output.LayerNorm.weight"][0]
     currWeights = mod.named_parameters();
@@ -18,6 +18,8 @@ def testModel(mod, tok, src):
         with open("prevWeights.pkl","rb") as fp:
             prevWeights = pickle.load(fp);
         for weightIndex in range(len(currWeights)):
+            if not printWeights:
+                continue;
             print("weight",torch.norm(currWeights[weightIndex][1]-prevWeights[weightIndex][1]).item(),currWeights[weightIndex][0], currWeights[weightIndex][1].requires_grad,currWeights[weightIndex][1].grad,prevWeights[weightIndex][1].requires_grad,prevWeights[weightIndex][1].grad);
     except Exception as e:
         print(e)
@@ -76,7 +78,7 @@ class TransformerCamembertLayer(nn.Module):
             camemModel.eval()
             if not camemTok is None:
                 testModel(camemModel, camemTok, "init TransformerCamembertLayer");
-        self.encoder = EncoderCamemLayer(768, d_model, N, heads, dropout, camemModel=camemModel, doDaille = doDaille, camemTok = camemTok)
+        self.encoder = EncoderCamemLayer(768, d_model, 1, heads, dropout, camemModel=camemModel, doDaille = doDaille, camemTok = camemTok)
         self.decoder = Decoder(trg_vocab, d_model , N, heads, dropout)
         self.out = nn.Linear(d_model, trg_vocab)
 
@@ -112,7 +114,7 @@ class EncoderCamemLayer(nn.Module):
         self.embed = Embedder(7, d_model)
         self.N = N
         self.pe = PositionalEncoder(d_model, dropout=dropout)
-        self.layers = get_clones(EncoderLayer(d_model, heads, dropout), N)
+        # self.layers = get_clones(EncoderLayer(d_model, heads, dropout), N)
         self.norm = Norm(d_model)
         self.camemModel = camemModel
         self.doDaille = doDaille
@@ -146,10 +148,10 @@ class EncoderCamemLayer(nn.Module):
             x = torch.cat([x, dailleEmbedded],dim=1);
         # print("xing",x.shape);
         printState = True#np.random.rand() < 0.01
-        for i in range(self.N):
-            x = self.layers[i](x, mask)
-            if printState:
-                print("xmas",x.shape, x);
+        # for i in range(self.N):
+        #     x = self.layers[i](x, mask)
+        #     if printState:
+        #         print("xmas",x.shape, x);
         return self.norm(x)
 
 class Decoder(nn.Module):
@@ -217,8 +219,6 @@ def get_model(opt, SRC, trg_vocabLen, camemModel = None, camemTok = None):
         model = model.to("cuda:0")
 
     testModel(camemModel, camemTok, "after cuda!?")
-
-
 
     return model
 
