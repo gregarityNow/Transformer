@@ -149,11 +149,11 @@ class EncoderCamemLayer(nn.Module):
             x = torch.cat([x, dailleEmbedded],dim=1);
         # print("xing",x.shape);
         printState = True#np.random.rand() < 0.01
-        # for i in range(self.N):
-        #     x = self.layers[i](x, mask)
-        #     if printState:
-        #         print("xmas",x.shape, x);
-        # x = self.norm(x)
+        for i in range(self.N):
+            x = self.layers[i](x, mask)
+            # if printState:
+            #     print("xmas",x.shape, x);
+        x = self.norm(x)
         # print("norman mailer",norm.shape,x.shape)
         return x
 
