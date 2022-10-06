@@ -139,7 +139,7 @@ class EncoderCamemLayer(nn.Module):
             camemOut = self.camemModel(src)[1][-1]
             testModel(self.camemModel, self.camemTok, "fwd EncoderCamemLayer post nograd applic")
         testModel(self.camemModel, self.camemTok, "fwd EncoderCamemLayer post applic")
-        print("davos", src, camemOut, camemOut.shape);
+        # print("davos", src, camemOut, camemOut.shape);
         x = camemOut
         # x = Variable(camemOut,requires_grad=False)
         # print("davai", x, x.shape);
@@ -152,7 +152,9 @@ class EncoderCamemLayer(nn.Module):
         #     x = self.layers[i](x, mask)
         #     if printState:
         #         print("xmas",x.shape, x);
-        return self.norm(x)
+        norm = self.norm(x)
+        print("norman mailer",norm.shape,x.shape)
+        return norm
 
 class Decoder(nn.Module):
     def __init__(self, vocab_size, d_model, N, heads, dropout):
