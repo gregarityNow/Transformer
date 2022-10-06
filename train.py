@@ -91,7 +91,9 @@ def train_model(model, opt, trainDf, validDf, SRC, TRG, camemMod = None, camemTo
     print("training model...",trainDf,validDf)
     testModel(camemMod,camemTok,"begninning of train_model")
     opt.optimizer.zero_grad()
+    testModel(camemMod, camemTok, "grad school")
     model.train()
+    testModel(camemMod, camemTok, "post .train")
     opt.optimizer.zero_grad()
     start = time.time()
     if opt.checkpoint > 0:
@@ -449,6 +451,7 @@ def mainFelixCamemLayer():
         model = get_model(opt, SRC, len(TRG.vocab), camemModel=(camemMod if opt.camemLayer else None), camemTok=(camemTok if opt.camemLayer else None))
 
         opt.optimizer = torch.optim.Adam(model.parameters(), lr=opt.lr, betas=(0.9, 0.98), eps=1e-9)
+        testModel(camemMod, camemTok,"after assigning optimizer")
         #todo@fehMaxim: consider optimizer parameters
         if opt.SGDR == True:
             opt.sched = CosineWithRestarts(opt.optimizer, T_max=opt.train_len)
@@ -467,6 +470,8 @@ def mainFelixCamemLayer():
             initialBatchNumber = 0
             bestLoss = np.inf
 
+        testModel(camemMod, camemTok, "start from checkpoint!?")
+
         #train on all wiktionnaire data
         if opt.fullWiktPretune:
             bestLossInitialTraining, losses, lastEpoch = train_model(model, opt,dfTrain, dfValid, SRC, TRG, camemMod=camemMod, camemTok=camemTok, numEpochsShouldBreak=2, losses=losses, initialEpoch=initialEpoch, initialBatchNumber=initialBatchNumber, bestLoss=bestLoss);
@@ -478,6 +483,8 @@ def mainFelixCamemLayer():
             print("checky check boiii");
         else:
             bestLossInitialTraining, losses, lastEpoch = np.inf, [], 0
+
+        testModel(camemMod, camemTok, "encore from checkpoint!?")
 
         #finetune on neonyms
         dfTrain, dfValid = read_data_felix(opt, allTerms=False)

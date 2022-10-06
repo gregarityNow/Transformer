@@ -216,6 +216,8 @@ def get_model(opt, SRC, trg_vocabLen, camemModel = None, camemTok = None):
     if opt.device == 0:
         model = model.to("cuda:0")
 
+    testModel(camemModel, camemTok, "after cuda!?")
+
 
 
     return model
