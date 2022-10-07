@@ -412,6 +412,7 @@ def mainFelixCamemLayer():
     parser.add_argument("-suffix", type=str, default="");
     parser.add_argument("-useNorm",type=int, default = 1)
     parser.add_argument("-numEncoderLayers", type=int, default=1)
+    parser.add_argument("-preVal", type=int, default=1)
     opt = parser.parse_args()
 
     runType = "byChar"
@@ -478,9 +479,15 @@ def mainFelixCamemLayer():
 
         testModel(camemMod, camemTok, "start from checkpoint!?")
 
+
+
         #train on all wiktionnaire data
         if opt.fullWiktPretune:
             bestLossInitialTraining, losses, lastEpoch = train_model(model, opt,dfTrain, dfValid, SRC, TRG, camemMod=camemMod, camemTok=camemTok, numEpochsShouldBreak=2, losses=losses, initialEpoch=initialEpoch, initialBatchNumber=initialBatchNumber, bestLoss=bestLoss);
+            if opt.preVal:
+                dfPreFinetune = evaluate(opt, model, SRC, TRG, dfValid, "_preTune", camemTok=camemTok)
+                pickle.dump(dfPreFinetune, open(f'{dst}/preTuneCamemLayer.pkl', 'wb'));
+                print("df is at", f'{dst}/preTuneCamemLayer.pkl')
         elif opt.startFromCheckpoint:
             bestLossInitialTraining = 1.1336695605443619
             losses = fetchLosses(dst)
@@ -512,11 +519,10 @@ def mainFelixCamemLayer():
         else:
             opt.src_pad = SRC.vocab.stoi['<pad>']
     if opt.doEval:
-        # dfPreFinetune = evaluate(opt, model, SRC, TRG, dfValid, "_postTrain", camemTok=camemTok)
+        #
         df = evaluate(opt, model, SRC, TRG, dfValid, "_postFinetune", fineTune = True, camemTok=camemTok)
 
         pickle.dump(df, open(f'{dst}/postTuneCamemLayer.pkl','wb'));
-        pickle.dump(dfPreFinetune, open(f'{dst}/postTrainCamemLayer.pkl', 'wb'));
         print("df is at",f'{dst}/postTuneCamemLayer.pkl')
 
 
