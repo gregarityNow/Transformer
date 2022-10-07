@@ -115,7 +115,7 @@ class EncoderCamemLayer(nn.Module):
         self.embed = Embedder(7, d_model)
         self.N = N
         self.pe = PositionalEncoder(d_model, dropout=dropout)
-        # self.layers = get_clones(EncoderLayer(d_model, heads, dropout), N)
+        self.layers = get_clones(EncoderLayer(d_model, heads, dropout), N)
         self.norm = Norm(d_model)
         self.camemModel = camemModel
         self.doDaille = doDaille
