@@ -409,6 +409,9 @@ def mainFelixCamemLayer():
     parser.add_argument("-fullWiktPretune", type=int, default=1);
     parser.add_argument("-daillePrediction", type=int, default=1);
     parser.add_argument("-revise", type=int, default=1);
+    parser.add_argument("-suffix", type=str, default="");
+    parser.add_argument("-useNorm",type=int, default = 1)
+    parser.add_argument("-numEncoderLayers", type=int, default=1)
     opt = parser.parse_args()
 
     runType = "byChar"
@@ -423,6 +426,9 @@ def mainFelixCamemLayer():
 
     if opt.quickie:
         runType += "_quickie";
+
+    if len(opt.suffix) > 0:
+        opt.runType += "_" + opt.suffix
 
     opt.weightSaveLoc = "/mnt/beegfs/home/herron/neo_scf_herron/stage/out/dump/" + runType + "/weights"
     pathlib.Path(opt.weightSaveLoc).mkdir(exist_ok=True,parents=True)

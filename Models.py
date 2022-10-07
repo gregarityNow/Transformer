@@ -71,7 +71,7 @@ class Encoder(nn.Module):
 
 
 class TransformerCamembertLayer(nn.Module):
-    def __init__(self, trg_vocab, d_model, N, heads, dropout, camemModel, doDaille = True, camemTok = None):
+    def __init__(self, trg_vocab, d_model, N, heads, dropout, camemModel, doDaille = True, camemTok = None, useNorm = True, numEncoderLayers = 1):
         super().__init__()
         print("initializing the erweiteren model")
         #(src_vocab, d_model, N, heads, dropout)
@@ -79,7 +79,7 @@ class TransformerCamembertLayer(nn.Module):
             camemModel.eval()
             if not camemTok is None:
                 testModel(camemModel, camemTok, "init TransformerCamembertLayer");
-        self.encoder = EncoderCamemLayer(768, d_model, 1, heads, dropout, camemModel=camemModel, doDaille = doDaille, camemTok = camemTok)
+        self.encoder = EncoderCamemLayer(768, d_model, numEncoderLayers, heads, dropout, camemModel=camemModel, doDaille = doDaille, camemTok = camemTok, useNorm = useNorm)
         self.decoder = Decoder(trg_vocab, d_model , N, heads, dropout)
         self.out = nn.Linear(d_model, trg_vocab)
 
@@ -109,14 +109,20 @@ class TransformerCamembertLayer(nn.Module):
         return output
 
 class EncoderCamemLayer(nn.Module):
-    def __init__(self, camemHiddenSize, d_model, N, heads, dropout, camemModel, doDaille, camemTok):
+    def __init__(self, camemHiddenSize, d_model, N, heads, dropout, camemModel, doDaille, camemTok, useNorm = True):
         super().__init__()
         assert camemHiddenSize==d_model
         self.embed = Embedder(7, d_model)
         self.N = N
         self.pe = PositionalEncoder(d_model, dropout=dropout)
-        self.layers = get_clones(EncoderLayer(d_model, heads, dropout), N)
-        self.norm = Norm(d_model)
+        if N > 0:
+            self.layers = get_clones(EncoderLayer(d_model, heads, dropout), N)
+        else:
+            self.layers = None
+        if useNorm:
+            self.norm = Norm(d_model)
+        else:
+            self.norm = None
         self.camemModel = camemModel
         self.doDaille = doDaille
         testModel(camemModel, camemTok, "init EncoderCamemLayer");
@@ -127,8 +133,8 @@ class EncoderCamemLayer(nn.Module):
                 x[1].requires_grad=False
                 x[1].grad = None
                 print(x[0])
-        for x in self.parameters():
-            print("gradius",x.requires_grad);
+        # for x in self.parameters():
+        #     print("gradius",x.requires_grad);
         # for x in self.named_parameters():
         #     print("camName", x[0], x[1].shape, x[1].requires_grad)
 
@@ -153,7 +159,8 @@ class EncoderCamemLayer(nn.Module):
             x = self.layers[i](x, mask)
             # if printState:
             #     print("xmas",x.shape, x);
-        x = self.norm(x)
+        if self.norm is not None:
+            x = self.norm(x)
         # print("norman mailer",norm.shape,x.shape)
         return x
 
@@ -199,7 +206,7 @@ def get_model(opt, SRC, trg_vocabLen, camemModel = None, camemTok = None):
 
     if opt.camemLayer:
         print("getting extended model")
-        model = TransformerCamembertLayer(trg_vocabLen, opt.d_model, opt.n_layers, opt.heads, opt.dropout, camemModel, doDaille= opt.daillePrediction, camemTok=camemTok)
+        model = TransformerCamembertLayer(trg_vocabLen, opt.d_model, opt.n_layers, opt.heads, opt.dropout, camemModel, doDaille= opt.daillePrediction, camemTok=camemTok, useNorm = opt.useNorm, numEncoderLayers=opt.numEncoderLayers)
         for x in model.named_parameters():
             if "camemModel" in x[0] or "roberta" in x[0]:
                 x[1].requires_grad=False
