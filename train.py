@@ -213,7 +213,7 @@ def train_model(model, opt, trainDf, validDf, SRC, TRG, camemMod = None, camemTo
                 if fineTune: bestPath += "_fineTune"
                 torch.save(model.state_dict(), bestPath)
                 print("saving best model woot", bestPath)
-                print("horus",model.state_dict())
+                print("horus",len(model.state_dict()))
                 bestLoss = validLoss
 
             dumpLosses(losses, opt.weightSaveLoc)
@@ -349,7 +349,9 @@ def getBestModel(model, path, fineTune = True):
     bestPath = f'{path}/model_weights_best'
     if fineTune:
         bestPath += "_fineTune"
-    model.load_state_dict(torch.load(bestPath))
+    sd = torch.load(bestPath)
+    print("sd",len(sd))
+    model.load_state_dict(sd)
     print("the model now has (lowers sunglasses) best weights, ooo");
 
 def evaluate(opt, model, SRC, TRG, df, suffix, fineTune = True, camemTok = None):
