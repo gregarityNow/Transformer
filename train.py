@@ -214,6 +214,8 @@ def train_model(model, opt, trainDf, validDf, SRC, TRG, camemMod = None, camemTo
                 torch.save(model.state_dict(), bestPath)
                 print("saving best model woot", bestPath)
                 print("horus",len(model.state_dict()))
+                for k in model.state_dict().keys():
+                    print(k, model.state_dict()[k]);
                 bestLoss = validLoss
 
             dumpLosses(losses, opt.weightSaveLoc)
@@ -350,7 +352,9 @@ def getBestModel(model, path, fineTune = True):
     if fineTune:
         bestPath += "_fineTune"
     sd = torch.load(bestPath)
-    print("sd",len(sd))
+    print("norus",len(sd))
+    for k in sd.keys():
+        print(k, sd[k]);
     model.load_state_dict(sd)
     print("the model now has (lowers sunglasses) best weights, ooo");
 
