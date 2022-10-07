@@ -353,7 +353,7 @@ def getBestModel(model, path, fineTune = True):
     if fineTune:
         bestPath += "_fineTune"
     sd = torch.load(bestPath)
-    print("norus",len(sd))
+    print("norus",len(sd), bestPath)
     for k in sd.keys():
         v = sd[k]
         print("key: ",k, v.shape);
@@ -451,7 +451,7 @@ def mainFelixCamemLayer():
     camOrLetterTokenizer = CamOrLetterTokenizer(camemTok)
     testModel(camemMod, camemTok, "after loading model");
 
-    dst = opt.weightSaveLoc
+    dst = opt.weightSaveLoc + "/.."
     if opt.checkpoint > 0:
         print("model weights will be saved every %d minutes and at end of epoch to directory weights/" % (opt.checkpoint))
 
@@ -494,7 +494,7 @@ def mainFelixCamemLayer():
         if opt.fullWiktPretune:
             bestLossInitialTraining, losses, lastEpoch = train_model(model, opt,dfTrain, dfValid, SRC, TRG, camemMod=camemMod, camemTok=camemTok, numEpochsShouldBreak=2, losses=losses, initialEpoch=initialEpoch, initialBatchNumber=initialBatchNumber, bestLoss=bestLoss);
             if opt.preVal:
-                dfPreFinetune = evaluate(opt, model, SRC, TRG, dfValid, "_preTune", camemTok=camemTok)
+                dfPreFinetune = evaluate(opt, model, SRC, TRG, dfValid, "_preTune", camemTok=camemTok,fineTune=False)
                 pickle.dump(dfPreFinetune, open(f'{dst}/preTuneCamemLayer.pkl', 'wb'));
                 print("df is at", f'{dst}/preTuneCamemLayer.pkl')
         elif opt.startFromCheckpoint:
