@@ -428,7 +428,7 @@ def mainFelixCamemLayer():
         runType += "_quickie";
 
     if len(opt.suffix) > 0:
-        opt.runType += "_" + opt.suffix
+        runType += "_" + opt.suffix
 
     opt.weightSaveLoc = "/mnt/beegfs/home/herron/neo_scf_herron/stage/out/dump/" + runType + "/weights"
     pathlib.Path(opt.weightSaveLoc).mkdir(exist_ok=True,parents=True)
