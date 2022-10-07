@@ -213,6 +213,7 @@ def train_model(model, opt, trainDf, validDf, SRC, TRG, camemMod = None, camemTo
                 if fineTune: bestPath += "_fineTune"
                 torch.save(model.state_dict(), bestPath)
                 print("saving best model woot", bestPath)
+                print("horus",model.state_dict())
                 bestLoss = validLoss
 
             dumpLosses(losses, opt.weightSaveLoc)
