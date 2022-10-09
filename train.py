@@ -100,7 +100,7 @@ def train_model(model, opt, trainDf, validDf, SRC, TRG, camemMod = None, camemTo
         cptime = time.time()
 
     # np.random.seed(420);
-    miniTestDf = validDf.sample(5, random_state=420)["defn"];
+    # miniTestDf = validDf.sample(5, random_state=420)["defn"];
 
     shouldBroke = 0
     epoch = initialEpoch
@@ -177,10 +177,10 @@ def train_model(model, opt, trainDf, validDf, SRC, TRG, camemMod = None, camemTo
 
     def handleTrain(src, trg, opt, losses, batchIndex, bestLoss, finetune, dailleVec = None):
 
-        print("testtrans before any losses can occur!", miniTestDf);
-        testModel(camemMod, camemTok, "before minitest application")
-        miniTestDf.apply(lambda sent: print("test translation pre", sent, translate_sentence(sent, model, opt, SRC, TRG, gold="", daille_type=None, camemTok=camemTok)))
-        testModel(camemMod, camemTok, "after minitest application")
+        # print("testtrans before any losses can occur!", miniTestDf);
+        # testModel(camemMod, camemTok, "before minitest application")
+        # miniTestDf.apply(lambda sent: print("test translation pre", sent, translate_sentence(sent, model, opt, SRC, TRG, gold="", daille_type=None, camemTok=camemTok)))
+        # testModel(camemMod, camemTok, "after minitest application")
 
         trg_input = trg[:, :-1]
         src_mask, trg_mask = create_masks(src, trg_input, opt)
@@ -222,8 +222,8 @@ def train_model(model, opt, trainDf, validDf, SRC, TRG, camemMod = None, camemTo
             dumpLosses(losses, opt.weightSaveLoc)
         else:
             print("not computing the walidation this time soary")
-        print("commencing testTrans", miniTestDf);
-        miniTestDf.apply(lambda sent: print("test translation",sent,translate_sentence(sent, model, opt, SRC, TRG, gold="", daille_type=None, camemTok=camemTok)))
+        # print("commencing testTrans", miniTestDf);
+        # miniTestDf.apply(lambda sent: print("test translation",sent,translate_sentence(sent, model, opt, SRC, TRG, gold="", daille_type=None, camemTok=camemTok)))
         # translation = translate_sentence(testSentence, model, opt, SRC, TRG, gold="", daille_type=None, camemTok=camemTok)
         # print("test translation",translation)
         return bestLoss
@@ -486,7 +486,7 @@ def mainFelixCamemLayer():
             initialBatchNumber = 0
             bestLoss = np.inf
 
-        testModel(camemMod, camemTok, "start from checkpoint!?")
+        # testModel(camemMod, camemTok, "start from checkpoint!?")
 
 
 
@@ -498,9 +498,9 @@ def mainFelixCamemLayer():
                 pickle.dump(dfPreFinetune, open(f'{dst}/preTuneCamemLayer.pkl', 'wb'));
                 print("df is at", f'{dst}/preTuneCamemLayer.pkl')
         elif opt.startFromCheckpoint:
-            bestLossInitialTraining = 1.1336695605443619
+            bestLossInitialTraining = 1.55
             losses = fetchLosses(dst)
-            lastEpoch=7
+            lastEpoch=1
             getBestModel(model, opt.weightSaveLoc, fineTune=False)
             print("checky check boiii");
         else:
