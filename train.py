@@ -488,7 +488,7 @@ def mainFelixCamemLayer():
 
         # testModel(camemMod, camemTok, "start from checkpoint!?")
 
-
+        print("it's a mad mad mad mad world", opt.fullWiktPretune,opt.startFromCheckpoint)
 
         #train on all wiktionnaire data
         if opt.fullWiktPretune:
