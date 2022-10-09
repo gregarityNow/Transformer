@@ -515,7 +515,7 @@ def mainFelixCamemLayer():
         if opt.SGDR == True:
             opt.sched = CosineWithRestarts(opt.optimizer, T_max=opt.train_len)
 
-        train_model(model, opt, dfTrain, dfValid, SRC, TRG, camemMod=camemMod, camemTok=camemTok, bestLoss=bestLossInitialTraining, losses = losses, initialEpoch = lastEpoch+1, numEpochsShouldBreak=2, fineTune = True);
+        train_model(model, opt, dfTrain, dfValid, SRC, TRG, camemMod=camemMod, camemTok=camemTok, losses = losses, initialEpoch = lastEpoch+1, numEpochsShouldBreak=2, fineTune = True);
         dumpLosses(losses, dst)
     else:
         SRC = pickle.load(open(f'{dst}/SRC.pkl', 'rb'))
