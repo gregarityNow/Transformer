@@ -530,9 +530,13 @@ def mainFelixCamemLayer():
     if opt.doEval:
         #
         df = evaluate(opt, model, SRC, TRG, dfValid, "_postFinetune", fineTune = True, camemTok=camemTok)
-
         pickle.dump(df, open(f'{dst}/postTuneCamemLayer.pkl','wb'));
         print("df is at",f'{dst}/postTuneCamemLayer.pkl')
+
+        getBestModel(model, opt.weightSaveLoc, fineTune=False)
+        df = evaluate(opt, model, SRC, TRG, dfValid, "_preFinetune", fineTune=False, camemTok=camemTok)
+        pickle.dump(df, open(f'{dst}/preTuneCamemLayer.pkl', 'wb'));
+        print("df is at", f'{dst}/preTuneCamemLayer.pkl')
 
 
 
