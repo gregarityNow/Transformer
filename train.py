@@ -418,8 +418,8 @@ def mainFelixCamemLayer():
     parser.add_argument('-doEval', type=int, default=1)
     parser.add_argument('-camemLayer',type=int,default=1)
     parser.add_argument("-hack",type=int,default=0)
-    parser.add_argument("-startFromCheckpoint",type=int,default=1);
-    parser.add_argument("-fullWiktPretune", type=int, default=0);
+    parser.add_argument("-startFromCheckpoint",type=int,default=0);
+    parser.add_argument("-fullWiktPretune", type=int, default=1);
     parser.add_argument("-daillePrediction", type=int, default=1);
     parser.add_argument("-revise", type=int, default=1);
     parser.add_argument("-suffix", type=str, default="");
