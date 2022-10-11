@@ -287,7 +287,7 @@ def train_model(model, opt, trainDf, validDf, SRC, TRG, camemMod = None, camemTo
             epoch += 1;
             print("pssh we ain't breaking!")
 
-    lastPath = outPath + '/model_weights_best'
+    lastPath = outPath + '/model_weights_last'
     torch.save(model.state_dict(), lastPath)
     print("saving last model", lastPath)
 
@@ -418,14 +418,14 @@ def mainFelixCamemLayer():
     parser.add_argument('-doEval', type=int, default=1)
     parser.add_argument('-camemLayer',type=int,default=1)
     parser.add_argument("-hack",type=int,default=0)
-    parser.add_argument("-startFromCheckpoint",type=int,default=0);
-    parser.add_argument("-fullWiktPretune", type=int, default=1);
+    parser.add_argument("-startFromCheckpoint",type=int,default=1);
+    parser.add_argument("-fullWiktPretune", type=int, default=0);
     parser.add_argument("-daillePrediction", type=int, default=1);
     parser.add_argument("-revise", type=int, default=1);
     parser.add_argument("-suffix", type=str, default="");
     parser.add_argument("-useNorm",type=int, default = 1)
     parser.add_argument("-numEncoderLayers", type=int, default=1)
-    parser.add_argument("-preVal", type=int, default=1)
+    parser.add_argument("-preVal", type=int, default=0)
     opt = parser.parse_args()
 
     runType = "byChar"
@@ -497,14 +497,14 @@ def mainFelixCamemLayer():
         #train on all wiktionnaire data
         if opt.fullWiktPretune:
             bestLossInitialTraining, losses, lastEpoch = train_model(model, opt,dfTrain, dfValid, SRC, TRG, camemMod=camemMod, camemTok=camemTok, numEpochsShouldBreak=2, losses=losses, initialEpoch=initialEpoch, initialBatchNumber=initialBatchNumber, bestLoss=bestLoss);
-            if opt.preVal:
-                dfPreFinetune = evaluate(opt, model, SRC, TRG, dfValid, "_preTune", camemTok=camemTok,fineTune=False)
-                pickle.dump(dfPreFinetune, open(f'{dst}/preTuneCamemLayer.pkl', 'wb'));
-                print("df is at", f'{dst}/preTuneCamemLayer.pkl')
+            # if opt.preVal:
+            #     dfPreFinetune = evaluate(opt, model, SRC, TRG, dfValid, "_preTune", camemTok=camemTok,fineTune=False)
+            #     pickle.dump(dfPreFinetune, open(f'{dst}/preTuneCamemLayer.pkl', 'wb'));
+            #     print("df is at", f'{dst}/preTuneCamemLayer.pkl')
         elif opt.startFromCheckpoint:
             bestLossInitialTraining = 1.55
             losses = fetchLosses(dst)
-            lastEpoch=1
+            lastEpoch=7
             getBestModel(model, opt.weightSaveLoc, fineTune=False)
             print("checky check boiii");
         else:
