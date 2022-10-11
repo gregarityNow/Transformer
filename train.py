@@ -213,7 +213,7 @@ def train_model(model, opt, trainDf, validDf, SRC, TRG, camemMod = None, camemTo
                 if fineTune: bestPath += "_fineTune"
                 torch.save(model.state_dict(), bestPath)
                 print("saving best model woot", bestPath)
-                print("horus",len(model.state_dict()))
+                # print("horus",len(model.state_dict()))
                 # for k in model.state_dict().keys():
                 #     v = model.state_dict()[k]
                 #     print("key: ",k, v.shape);
