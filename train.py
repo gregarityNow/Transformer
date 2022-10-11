@@ -285,7 +285,11 @@ def train_model(model, opt, trainDf, validDf, SRC, TRG, camemMod = None, camemTo
         else:
             shouldBroke = 0;
             epoch += 1;
-            print("pssh we ain't brekaing!")
+            print("pssh we ain't breaking!")
+
+    lastPath = outPath + '/model_weights_best'
+    torch.save(model.state_dict(), lastPath)
+    print("saving last model", lastPath)
 
     return bestLoss, losses, epoch
 
