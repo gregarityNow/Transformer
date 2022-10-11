@@ -357,10 +357,10 @@ def getBestModel(model, path, fineTune = True):
     if fineTune:
         bestPath += "_fineTune"
     sd = torch.load(bestPath)
-    print("norus",len(sd), bestPath)
-    for k in sd.keys():
-        v = sd[k]
-        print("key: ",k, v.shape);
+    # print("norus",len(sd), bestPath)
+    # for k in sd.keys():
+    #     v = sd[k]
+    #     print("key: ",k, v.shape);
     model.load_state_dict(sd)
     print("the model now has (lowers sunglasses) best weights, ooo");
 
