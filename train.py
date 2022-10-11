@@ -504,7 +504,7 @@ def mainFelixCamemLayer():
         elif opt.startFromCheckpoint:
             bestLossInitialTraining = 1.55
             losses = fetchLosses(dst)
-            lastEpoch=7
+            lastEpoch=8
             getBestModel(model, opt.weightSaveLoc, fineTune=False)
             print("checky check boiii");
         else:
