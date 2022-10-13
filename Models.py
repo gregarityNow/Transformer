@@ -83,9 +83,6 @@ class TransformerCamembertLayer(nn.Module):
         self.decoder = Decoder(trg_vocab, d_model , N, heads, dropout)
         self.out = nn.Linear(d_model, trg_vocab)
 
-        # print("horscht",self.parameters());
-        # for p in self.parameters():
-        #     print("param",p, p.requires_grad);
 
     def forward(self, src, trg, src_mask, trg_mask, dailleVec = None):
         '''
@@ -97,13 +94,7 @@ class TransformerCamembertLayer(nn.Module):
         :return:
         '''
         e_outputs = self.encoder(src, src_mask, dailleVec)
-        # print("davor",e_outputs.shape);
-        # if self.doDaille:
-        #     q = torch.ones(e_outputs.shape[:2]).reshape(list(e_outputs.shape[:2])+[1]).to("cuda");
-        #     e_outputs = torch.cat([e_outputs,q], dim=2);
-        # print("how do you like me now",e_outputs.shape)
-        # exit()
-        # print("DECODER", e_outputs.shape, e_outputs.max(), e_outputs.min(), e_outputs)#,self.decoder)
+
         d_output = self.decoder(trg, e_outputs, src_mask, trg_mask)
         output = self.out(d_output)
         return output
@@ -133,11 +124,6 @@ class EncoderCamemLayer(nn.Module):
                 x[1].requires_grad=False
                 x[1].grad = None
                 print(x[0])
-        # for x in self.parameters():
-        #     print("gradius",x.requires_grad);
-        # for x in self.named_parameters():
-        #     print("camName", x[0], x[1].shape, x[1].requires_grad)
-
 
     def forward(self, src, mask, dailleVec = None):
 
@@ -146,22 +132,15 @@ class EncoderCamemLayer(nn.Module):
             camemOut = self.camemModel(src)[1][-1]
             testModel(self.camemModel, self.camemTok, "fwd EncoderCamemLayer post nograd applic")
         testModel(self.camemModel, self.camemTok, "fwd EncoderCamemLayer post applic")
-        # print("davos", src, camemOut, camemOut.shape);
         x = camemOut
-        # x = Variable(camemOut,requires_grad=False)
-        # print("davai", x, x.shape);
         if self.doDaille:
             dailleEmbedded = self.embed(dailleVec).reshape([x.shape[0],1,x.shape[2]]);
             x = torch.cat([x, dailleEmbedded],dim=1);
-        # print("xing",x.shape);
-        printState = True#np.random.rand() < 0.01
         for i in range(self.N):
             x = self.layers[i](x, mask)
-            # if printState:
-            #     print("xmas",x.shape, x);
+
         if self.norm is not None:
             x = self.norm(x)
-        # print("norman mailer",norm.shape,x.shape)
         return x
 
 class Decoder(nn.Module):
