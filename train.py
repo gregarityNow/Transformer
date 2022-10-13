@@ -209,7 +209,8 @@ def train_model(model, opt, trainDf, validDf, SRC, TRG, camemMod = None, camemTo
             print("trainLoss", trainLoss, "walidLoss", validLoss);
 
             if validLoss < bestLoss:
-                bestPath = outPath + '/model_weights_best'  # + ("_quickie" if opt.quickie else "");
+                bestPath = outPath + '/model_weights_best'   # + ("_quickie" if opt.quickie else "");
+                bestPath += opt.outAddendum
                 if fineTune: bestPath += "_fineTune"
                 torch.save(model.state_dict(), bestPath)
                 print("saving best model woot", bestPath)
@@ -235,9 +236,9 @@ def train_model(model, opt, trainDf, validDf, SRC, TRG, camemMod = None, camemTo
             print("floyd   %dm: epoch %d [%s]  %d%%  loss = %s" %\
             ((time.time() - start)//60, epoch + 1, "".join(' '*20), 0, '...'), end='\r')
 
-        if opt.checkpoint > 0:
-            print("each save")
-            torch.save(model.state_dict(), outPath + '/model_weights')
+        # if opt.checkpoint > 0:
+        #     print("each save")
+        #     torch.save(model.state_dict(), outPath + '/model_weights')
 
         numBatches = max(len(trainDf) // opt.batchsize,1)
         trainDf = trainDf.sample(frac=1);
@@ -276,7 +277,7 @@ def train_model(model, opt, trainDf, validDf, SRC, TRG, camemMod = None, camemTo
             else:
                 print("ok you get another chance to do better next time")
                 epoch += 1;
-        elif (fineTune and epoch == 14) or (not fineTune and epoch == 7):
+        elif (fineTune and epoch == 30) or (not fineTune and epoch == 7):
             print("already done a lot of epochs, that seems to be quite enough")
             break;
         elif opt.quickie:
@@ -287,7 +288,8 @@ def train_model(model, opt, trainDf, validDf, SRC, TRG, camemMod = None, camemTo
             epoch += 1;
             print("pssh we ain't breaking!")
 
-    lastPath = outPath + '/model_weights_last'
+    lastPath = outPath + '/model_weights_last' + opt.outAddendum
+    if fineTune: lastPath += "_fineTune"
     torch.save(model.state_dict(), lastPath)
     print("saving last model", lastPath)
 
@@ -423,6 +425,7 @@ def mainFelixCamemLayer():
     parser.add_argument("-daillePrediction", type=int, default=1);
     parser.add_argument("-revise", type=int, default=1);
     parser.add_argument("-suffix", type=str, default="");
+    parser.add_argument("-outAddendum", type=str, default="");
     parser.add_argument("-useNorm",type=int, default = 1)
     parser.add_argument("-numEncoderLayers", type=int, default=1)
     parser.add_argument("-preVal", type=int, default=0)
@@ -504,7 +507,7 @@ def mainFelixCamemLayer():
         elif opt.startFromCheckpoint:
             bestLossInitialTraining = 1.55
             losses = fetchLosses(dst)
-            lastEpoch=8
+            lastEpoch=15
             getBestModel(model, opt.weightSaveLoc, fineTune=False)
             print("checky check boiii");
         else:
@@ -519,7 +522,7 @@ def mainFelixCamemLayer():
         if opt.SGDR == True:
             opt.sched = CosineWithRestarts(opt.optimizer, T_max=opt.train_len)
 
-        train_model(model, opt, dfTrain, dfValid, SRC, TRG, camemMod=camemMod, camemTok=camemTok, losses = losses, initialEpoch = lastEpoch+1, numEpochsShouldBreak=2, fineTune = True);
+        train_model(model, opt, dfTrain, dfValid, SRC, TRG, camemMod=camemMod, camemTok=camemTok, losses = losses, initialEpoch = lastEpoch+1, numEpochsShouldBreak=15, fineTune = True);
         dumpLosses(losses, dst)
     else:
         SRC = pickle.load(open(f'{dst}/SRC.pkl', 'rb'))
@@ -534,13 +537,13 @@ def mainFelixCamemLayer():
     if opt.doEval:
         #
         df = evaluate(opt, model, SRC, TRG, dfValid, "_postFinetune", fineTune = True, camemTok=camemTok)
-        pickle.dump(df, open(f'{dst}/postTuneCamemLayer.pkl','wb'));
-        print("df is at",f'{dst}/postTuneCamemLayer.pkl')
+        pickle.dump(df, open(dst + "/postTuneCamemLayer" + opt.outAddendum + ".pkl",'wb'));
+        print("df is at",f"{dst}/postTuneCamemLayer" + opt.outAddendum + ".pkl")
 
         getBestModel(model, opt.weightSaveLoc, fineTune=False)
         df = evaluate(opt, model, SRC, TRG, dfValid, "_preFinetune", fineTune=False, camemTok=camemTok)
-        pickle.dump(df, open(f'{dst}/preTuneCamemLayer.pkl', 'wb'));
-        print("df is at", f'{dst}/preTuneCamemLayer.pkl')
+        pickle.dump(df, open(dst + "/preTuneCamemLayer" + opt.outAddendum + ".pkl", 'wb'));
+        print("df is at", dst + "/postTuneCamemLayer" + opt.outAddendum + ".pkl")
 
 
 
