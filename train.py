@@ -390,7 +390,7 @@ def dumpLosses(losses, dst):
     print("dumped to",dumpPath,dumpTime)
 
 def fetchLosses(dst):
-    dumpPath = dst + "/../losses.pickle"
+    dumpPath = dst + "/losses.pickle"
     with open(dumpPath, "rb") as fp:
         losses = pickle.load(fp);
     return losses
@@ -434,8 +434,8 @@ def mainFelixCamemLayer():
     runType = "byChar"
     if opt.camemLayer:
         runType += "_camemLayer"
-    if opt.daillePrediction:
-        runType += "_daillePrediction";
+    # if opt.daillePrediction:
+    #     runType += "_daillePrediction";
 
     if opt.revise:
         runType += "_revise"
