@@ -391,8 +391,12 @@ def dumpLosses(losses, dst):
 
 def fetchLosses(dst):
     dumpPath = dst + "/losses.pickle"
-    with open(dumpPath, "rb") as fp:
-        losses = pickle.load(fp);
+    try:
+        with open(dumpPath, "rb") as fp:
+            losses = pickle.load(fp);
+    except:
+        print("no losses yet hoss")
+        return None
     return losses
 
 
@@ -429,6 +433,7 @@ def mainFelixCamemLayer():
     parser.add_argument("-useNorm",type=int, default = 1)
     parser.add_argument("-numEncoderLayers", type=int, default=1)
     parser.add_argument("-preVal", type=int, default=0)
+    parser.add_argument("-hundoEpochs", type=int, default=1)
     opt = parser.parse_args()
 
     runType = "byChar"
@@ -447,6 +452,9 @@ def mainFelixCamemLayer():
     if len(opt.suffix) > 0:
         runType += "_" + opt.suffix
 
+    if opt.hundoEpochs:
+        runType += "_hundo"
+
     opt.weightSaveLoc = "/mnt/beegfs/home/herron/neo_scf_herron/stage/out/dump/final/" + runType + "/weights"
     pathlib.Path(opt.weightSaveLoc).mkdir(exist_ok=True,parents=True)
 
@@ -462,6 +470,9 @@ def mainFelixCamemLayer():
     if opt.checkpoint > 0:
         print("model weights will be saved every %d minutes and at end of epoch to directory weights/" % (opt.checkpoint))
 
+    initLosses = fetchLosses(dst)
+    print("losses",initLosses)
+    exit()
 
     if opt.doTrain:
         dfTrain, dfValid = read_data_felix(opt, allTerms=True)
