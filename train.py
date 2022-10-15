@@ -492,7 +492,7 @@ def mainFelixCamemLayer():
     currEpoch = 0
     minLoss = 10000
     if opt.hundoEpochs:
-        if losses is not None:
+        if len(losses) > 0:
             currEpoch = int(max([x["epoch"] for x in losses]))
             minLoss = min([x["valid_loss"] for x in losses])
 
