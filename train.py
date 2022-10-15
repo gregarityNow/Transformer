@@ -517,7 +517,7 @@ def mainFelixCamemLayer():
 
         # print("moodely", model.state_dict().keys())
 
-        if opt.hundoEpochs and currEpoch < 10:
+        if opt.hundoEpochs and 0 < currEpoch < 10:
             getBestModel(model,opt.weightSaveLoc, fineTune=False)
         elif opt.hundoEpochs and currEpoch >= 10:
             getBestModel(model,opt.weightSaveLoc, fineTune=True)
