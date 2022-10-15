@@ -390,6 +390,7 @@ def dumpLosses(losses, dst):
     print("dumped to",dumpPath,dumpTime)
 
 def fetchLosses(dst):
+    print("nst",dst)
     dumpPath = dst + "/losses.pickle"
     try:
         with open(dumpPath, "rb") as fp:
