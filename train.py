@@ -269,7 +269,10 @@ def train_model(model, opt, trainDf, validDf, SRC, TRG, camemMod = None, camemTo
 
             bestLoss = handleTrain(src, trg, opt, losses, trainBatchIndex, bestLoss, fineTune)
 
-        if shouldBreak([loss["train_loss"] for loss in losses if loss["epoch"] > epoch], epoch):
+        if opt.hundoEpochs and epoch % 5 == 0:
+            performValidation(opt, model, SRC, TRG, camemTok, currEpoch = epoch)
+
+        if not opt.hundoEpochs and (shouldBreak([loss["train_loss"] for loss in losses if loss["epoch"] > epoch], epoch)):#
             shouldBroke += 1
             if shouldBroke == numEpochsShouldBreak or opt.quickie:
                 print("progress has stopped; breaking")
@@ -277,7 +280,7 @@ def train_model(model, opt, trainDf, validDf, SRC, TRG, camemMod = None, camemTo
             else:
                 print("ok you get another chance to do better next time")
                 epoch += 1;
-        elif (fineTune and epoch == 30) or (not fineTune and epoch == 7):
+        elif opt.hundoEpochs and ((fineTune and epoch >= 100) or (not fineTune and epoch >= 10)):
             print("already done a lot of epochs, that seems to be quite enough")
             break;
         elif opt.quickie:
@@ -358,11 +361,12 @@ def getBestModel(model, path, fineTune = True):
     bestPath = f'{path}/model_weights_best'
     if fineTune:
         bestPath += "_fineTune"
+
+    if not os.path.exists(bestPath):
+        print("no FT weights, reverting to no FT")
+        bestPath = f'{path}/model_weights_best'
+
     sd = torch.load(bestPath)
-    # print("norus",len(sd), bestPath)
-    # for k in sd.keys():
-    #     v = sd[k]
-    #     print("key: ",k, v.shape);
     model.load_state_dict(sd)
     print("the model now has (lowers sunglasses) best weights, ooo");
 
@@ -397,8 +401,20 @@ def fetchLosses(dst):
             losses = pickle.load(fp);
     except:
         print("no losses yet hoss")
-        return None
+        return []
     return losses
+
+
+def performValidation(opt, model, SRC, TRG, camemTok, currEpoch = 0):
+    dst = opt.weightSaveLoc + "/.."
+    _, dfValid = read_data_felix(opt, allTerms=False)
+    if opt.camemLayer:
+        opt.src_pad = camemTok.pad_token_id
+    else:
+        opt.src_pad = SRC.vocab.stoi['<pad>']
+    df = evaluate(opt, model, SRC, TRG, dfValid, "_epoch_"+str(currEpoch), fineTune=True, camemTok=camemTok)
+    pickle.dump(df, open(dst + "/allRes100_" + str(currEpoch) + "_" + opt.outAddendum + ".pkl", 'wb'));
+    print("df is at", f"{dst}/allRes100_" + str(currEpoch) + "_" + opt.outAddendum + ".pkl")
 
 
 def mainFelixCamemLayer():
@@ -471,11 +487,20 @@ def mainFelixCamemLayer():
     if opt.checkpoint > 0:
         print("model weights will be saved every %d minutes and at end of epoch to directory weights/" % (opt.checkpoint))
 
-    initLosses = fetchLosses(dst)
-    print("losses",initLosses)
-    exit()
+    losses = fetchLosses(dst)
 
-    if opt.doTrain:
+    currEpoch = 0
+    minLoss = 10000
+    if opt.hundoEpochs:
+        if losses is not None:
+            currEpoch = int(max([x["epoch"] for x in losses]))
+            minLoss = min([x["valid_loss"] for x in losses])
+
+    if opt.hundoEpochs and currEpoch >= 100:
+        print("100 epochs done; woot!")
+        exit()
+
+    if opt.doTrain or opt.hundoEpochs:
         dfTrain, dfValid = read_data_felix(opt, allTerms=True)
         SRC, TRG = create_fields(opt, camOrLetterTokenizer)
         opt.train, opt.valid = create_dataset(opt, SRC, TRG, camemTok=camemTok)
@@ -486,42 +511,27 @@ def mainFelixCamemLayer():
         model = get_model(opt, SRC, len(TRG.vocab), camemModel=(camemMod if opt.camemLayer else None), camemTok=(camemTok if opt.camemLayer else None))
 
         opt.optimizer = torch.optim.Adam(model.parameters(), lr=opt.lr, betas=(0.9, 0.98), eps=1e-9)
-        testModel(camemMod, camemTok,"after assigning optimizer")
         #todo@fehMaxim: consider optimizer parameters
         if opt.SGDR == True:
             opt.sched = CosineWithRestarts(opt.optimizer, T_max=opt.train_len)
 
         # print("moodely", model.state_dict().keys())
 
-        if opt.startFromCheckpoint:
+        if opt.hundoEpochs and currEpoch < 10:
             getBestModel(model,opt.weightSaveLoc, fineTune=False)
-            initialEpoch = 7
-            initialBatchNumber = 0
-            losses = fetchLosses(dst)
-            bestLoss = 1.1336695605443619
-        else:
-            losses = []
-            initialEpoch = 0
-            initialBatchNumber = 0
-            bestLoss = np.inf
-
-        # testModel(camemMod, camemTok, "start from checkpoint!?")
+        elif opt.hundoEpochs and currEpoch >= 10:
+            getBestModel(model,opt.weightSaveLoc, fineTune=True)
 
         print("it's a mad mad mad mad world", opt.fullWiktPretune,opt.startFromCheckpoint)
 
         #train on all wiktionnaire data
-        if opt.fullWiktPretune:
-            bestLossInitialTraining, losses, lastEpoch = train_model(model, opt,dfTrain, dfValid, SRC, TRG, camemMod=camemMod, camemTok=camemTok, numEpochsShouldBreak=2, losses=losses, initialEpoch=initialEpoch, initialBatchNumber=initialBatchNumber, bestLoss=bestLoss);
-            # if opt.preVal:
-            #     dfPreFinetune = evaluate(opt, model, SRC, TRG, dfValid, "_preTune", camemTok=camemTok,fineTune=False)
-            #     pickle.dump(dfPreFinetune, open(f'{dst}/preTuneCamemLayer.pkl', 'wb'));
-            #     print("df is at", f'{dst}/preTuneCamemLayer.pkl')
+        if opt.fullWiktPretune or (opt.hundoEpochs and currEpoch < 10):
+            bestLossInitialTraining, losses, lastEpoch = train_model(model, opt,dfTrain, dfValid, SRC, TRG, camemMod=camemMod, camemTok=camemTok, numEpochsShouldBreak=2, losses=losses, initialEpoch=currEpoch, bestLoss=minLoss);
         elif opt.startFromCheckpoint:
-            bestLossInitialTraining = 1.55
-            losses = fetchLosses(dst)
-            lastEpoch=15
             getBestModel(model, opt.weightSaveLoc, fineTune=False)
             print("checky check boiii");
+        elif (opt.hundoEpochs and currEpoch >= 10):
+            getBestModel(model, opt.weightSaveLoc, fineTune=True)
         else:
             bestLossInitialTraining, losses, lastEpoch = np.inf, [], 0
 
@@ -534,28 +544,28 @@ def mainFelixCamemLayer():
         if opt.SGDR == True:
             opt.sched = CosineWithRestarts(opt.optimizer, T_max=opt.train_len)
 
-        train_model(model, opt, dfTrain, dfValid, SRC, TRG, camemMod=camemMod, camemTok=camemTok, losses = losses, initialEpoch = lastEpoch+1, numEpochsShouldBreak=15, fineTune = True);
+        train_model(model, opt, dfTrain, dfValid, SRC, TRG, camemMod=camemMod, camemTok=camemTok, losses = losses, initialEpoch = currEpoch, numEpochsShouldBreak=15, fineTune = True);
         dumpLosses(losses, dst)
-    else:
-        SRC = pickle.load(open(f'{dst}/SRC.pkl', 'rb'))
-        TRG = pickle.load(open(f'{dst}/TRG.pkl', 'rb'))
-        print("srcy",dst)
-        model = get_model(opt, SRC, len(TRG.vocab), camemModel=camemMod, camemTok=camemTok)
-        dfTrain, dfValid = read_data_felix(opt, allTerms=False)
-        if opt.camemLayer:
-            opt.src_pad = camemTok.pad_token_id
-        else:
-            opt.src_pad = SRC.vocab.stoi['<pad>']
-    if opt.doEval:
-        #
-        df = evaluate(opt, model, SRC, TRG, dfValid, "_postFinetune", fineTune = True, camemTok=camemTok)
-        pickle.dump(df, open(dst + "/postTuneCamemLayer" + opt.outAddendum + ".pkl",'wb'));
-        print("df is at",f"{dst}/postTuneCamemLayer" + opt.outAddendum + ".pkl")
-
-        getBestModel(model, opt.weightSaveLoc, fineTune=False)
-        df = evaluate(opt, model, SRC, TRG, dfValid, "_preFinetune", fineTune=False, camemTok=camemTok)
-        pickle.dump(df, open(dst + "/preTuneCamemLayer" + opt.outAddendum + ".pkl", 'wb'));
-        print("df is at", dst + "/postTuneCamemLayer" + opt.outAddendum + ".pkl")
+    # else:
+    #     SRC = pickle.load(open(f'{dst}/SRC.pkl', 'rb'))
+    #     TRG = pickle.load(open(f'{dst}/TRG.pkl', 'rb'))
+    #     print("srcy",dst)
+    #     model = get_model(opt, SRC, len(TRG.vocab), camemModel=camemMod, camemTok=camemTok)
+    #     dfTrain, dfValid = read_data_felix(opt, allTerms=False)
+    #     if opt.camemLayer:
+    #         opt.src_pad = camemTok.pad_token_id
+    #     else:
+    #         opt.src_pad = SRC.vocab.stoi['<pad>']
+    # if opt.doEval:
+    #     #
+    #     df = evaluate(opt, model, SRC, TRG, dfValid, "_postFinetune", fineTune = True, camemTok=camemTok)
+    #     pickle.dump(df, open(dst + "/postTuneCamemLayer" + opt.outAddendum + ".pkl",'wb'));
+    #     print("df is at",f"{dst}/postTuneCamemLayer" + opt.outAddendum + ".pkl")
+    #
+    #     getBestModel(model, opt.weightSaveLoc, fineTune=False)
+    #     df = evaluate(opt, model, SRC, TRG, dfValid, "_preFinetune", fineTune=False, camemTok=camemTok)
+    #     pickle.dump(df, open(dst + "/preTuneCamemLayer" + opt.outAddendum + ".pkl", 'wb'));
+    #     print("df is at", dst + "/postTuneCamemLayer" + opt.outAddendum + ".pkl")
 
 
 
