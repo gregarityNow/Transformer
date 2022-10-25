@@ -237,6 +237,10 @@ def train_model(model, opt, trainDf, validDf, SRC, TRG, camemMod = None, camemTo
         #     print("each save")
         #     torch.save(model.state_dict(), outPath + '/model_weights')
 
+        dfPathPotential = getDfPath(epoch-1, opt);
+        if opt.hundoEpochs and epoch % 5 == 1 and (not os.path.exists(dfPathPotential)):
+            performValidation(opt, model, SRC, TRG, camemTok, currEpoch = epoch-1)
+
         numBatches = max(len(trainDf) // opt.batchsize,1)
         trainDf = trainDf.sample(frac=1);
         print("sizes",numBatches, len(trainDf), numBatchesTrain)
@@ -402,9 +406,13 @@ def fetchLosses(dst):
         return []
     return losses
 
+def getDfPath(currEpoch, opt):
+    return opt.weightSaveLoc + "/../allRes100_" + str(currEpoch) + "_" + opt.outAddendum + ".pkl"
 
 def performValidation(opt, model, SRC, TRG, camemTok, currEpoch = 0):
+    dfPath = getDfPath(currEpoch, opt);
     dst = opt.weightSaveLoc + "/.."
+
     _, dfValid = read_data_felix(opt, allTerms=False)
     if opt.camemLayer:
         opt.src_pad = camemTok.pad_token_id
@@ -412,7 +420,7 @@ def performValidation(opt, model, SRC, TRG, camemTok, currEpoch = 0):
         opt.src_pad = SRC.vocab.stoi['<pad>']
     df = evaluate(opt, model, SRC, TRG, dfValid, "_epoch_"+str(currEpoch), fineTune=True, camemTok=camemTok)
     pickle.dump(df, open(dst + "/allRes100_" + str(currEpoch) + "_" + opt.outAddendum + ".pkl", 'wb'));
-    print("df is at", f"{dst}/allRes100_" + str(currEpoch) + "_" + opt.outAddendum + ".pkl")
+    print("df is at", dfPath)
 
 
 def mainFelixCamemLayer():
