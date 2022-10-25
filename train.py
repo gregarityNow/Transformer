@@ -124,8 +124,6 @@ def train_model(model, opt, trainDf, validDf, SRC, TRG, camemMod = None, camemTo
 
     outPath = opt.weightSaveLoc#"/mnt/beegfs/home/herron/neo_scf_herron/stage/out/dump/byChar"
 
-
-
     def batchToSrcTrg(batch, TRG, doDaille = True):
         inputs = list(batch.defn)
         src = tensorCamemEncode(inputs, camemTok, batch.camemDefnLen.max())
@@ -268,7 +266,7 @@ def train_model(model, opt, trainDf, validDf, SRC, TRG, camemMod = None, camemTo
             # print("batchNoCam", epoch, trainBatchIndex, numBatches, len(batch), src.shape)
 
             bestLoss = handleTrain(src, trg, opt, losses, trainBatchIndex, bestLoss, fineTune)
-
+        print("done batching, now we going for that sweet sweet eval")
         if opt.hundoEpochs and epoch % 5 == 0:
             performValidation(opt, model, SRC, TRG, camemTok, currEpoch = epoch)
 
@@ -436,7 +434,7 @@ def mainFelixCamemLayer():
     parser.add_argument('-max_len', type=int, default=80)
     parser.add_argument('-floyd', action='store_true')
     parser.add_argument('-checkpoint', type=int, default=0)
-    parser.add_argument('-quickie', type=int, default=1)
+    parser.add_argument('-quickie', type=int, default=0)
     parser.add_argument('-doTrain', type=int, default=1)
     parser.add_argument('-doEval', type=int, default=1)
     parser.add_argument('-camemLayer',type=int,default=1)
