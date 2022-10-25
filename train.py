@@ -462,8 +462,9 @@ def mainFelixCamemLayer():
     runType = "byChar"
     if opt.camemLayer:
         runType += "_camemLayer"
-    # if opt.daillePrediction:
-    #     runType += "_daillePrediction";
+
+    if opt.daillePrediction:
+        runType += "_daillePrediction";
 
     if opt.revise:
         runType += "_revise"
