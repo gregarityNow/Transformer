@@ -509,7 +509,7 @@ def mainFelixCamemLayer():
     if opt.doTrain or opt.hundoEpochs:
         dfTrain, dfValid = read_data_felix(opt, allTerms=True)
         SRC, TRG = create_fields(opt, camOrLetterTokenizer)
-        opt.train, opt.valid = create_dataset(opt, SRC, TRG, camemTok=camemTok)
+        opt.train, opt.valid = create_dataset(opt, SRC, TRG, camemTok=camemTok, epoch0 = currEpoch == 0)
 
         pickle.dump(SRC, open(f'{dst}/SRC.pkl', 'wb'))
         pickle.dump(TRG, open(f'{dst}/TRG.pkl', 'wb'))
