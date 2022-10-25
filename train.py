@@ -210,7 +210,6 @@ def train_model(model, opt, trainDf, validDf, SRC, TRG, camemMod = None, camemTo
 
             if validLoss < bestLoss:
                 bestPath = outPath + '/model_weights_best'   # + ("_quickie" if opt.quickie else "");
-                bestPath += opt.outAddendum
                 if fineTune: bestPath += "_fineTune"
                 torch.save(model.state_dict(), bestPath)
                 print("saving best model woot", bestPath)
@@ -262,6 +261,7 @@ def train_model(model, opt, trainDf, validDf, SRC, TRG, camemMod = None, camemTo
         for trainBatchIndex, batch in enumerate(opt.train):
             if opt.camemLayer: break;
             # print("inTrain",psutil.virtual_memory())
+            print("batch", epoch, trainBatchIndex)
 
             src = batch.src.transpose(0,1)
             trg = batch.trg.transpose(0,1)
@@ -291,7 +291,7 @@ def train_model(model, opt, trainDf, validDf, SRC, TRG, camemMod = None, camemTo
             epoch += 1;
             print("pssh we ain't breaking!")
 
-    lastPath = outPath + '/model_weights_last' + opt.outAddendum
+    lastPath = outPath + '/model_weights_last'
     if fineTune: lastPath += "_fineTune"
     torch.save(model.state_dict(), lastPath)
     print("saving last model", lastPath)
