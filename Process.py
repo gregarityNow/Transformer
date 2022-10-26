@@ -103,8 +103,8 @@ def create_fields(opt, camOrLetterTokenizer, epoch0 = False):
     SRC = data.Field(lower=True, tokenize=(camOrLetterTokenizer.cam_tokenize if not opt.daillePrediction else camOrLetterTokenizer.cam_tokenize))
     if not epoch0:
         try:
-            srcPath = f'{opt.weightSaveLoc}/SRC.pkl'
-            trgPath = f'{opt.weightSaveLoc}/TRG.pkl'
+            srcPath = f'{opt.weightSaveLoc}/../SRC.pkl'
+            trgPath = f'{opt.weightSaveLoc}/../TRG.pkl'
             print("loading presaved fields...",srcPath)
             print(os.path.exists(srcPath),srcPath)
             SRC = pickle.load(open(srcPath, 'rb'))
