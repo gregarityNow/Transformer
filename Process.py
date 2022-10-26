@@ -150,10 +150,10 @@ def create_dataset(opt, SRC, TRG, validBatchSize = -1, fineTune = False, camemTo
         df = pd.DataFrame(raw_data, columns=["src", "trg"])
         print("deeyef",df);
 
-        if subset == "valid" and opt.quickie:
-            validBatchSize = 10#len(df);
-            print("validBatchSize",10)
-            df = df[:10];
+        # if subset == "valid" and opt.quickie:
+        #     validBatchSize = 10#len(df);
+        #     print("validBatchSize",10)
+        #     df = df[:10];
 
         mask = (df['src'].str.count(' ') < opt.max_len) & (df['trg'].str.count(' ') < opt.max_len)
         df = df.loc[mask]
