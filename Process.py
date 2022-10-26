@@ -79,6 +79,9 @@ def read_data_felix(opt, allTerms = False):
     # elif opt.quickie > 1:
     #     df = df.sample(min(len(df),opt.quickie));
 
+    if opt.quickie:
+        df = df.sample(20);
+
     if opt.daillePrediction and not opt.camemLayer:
         print("dude",df);
         df["defn"] = df.apply(lambda row: str(dailleEncoder[row.daille_type]) + row.defn,axis=1)

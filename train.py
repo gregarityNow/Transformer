@@ -239,6 +239,7 @@ def train_model(model, opt, trainDf, validDf, SRC, TRG, camemMod = None, camemTo
 
         dfPathPotential = getDfPath(epoch-1, opt);
         if opt.hundoEpochs and epoch % 5 == 1 and (not os.path.exists(dfPathPotential)):
+            print("interrupted mid validation I reckon, here we go again");
             performValidation(opt, model, SRC, TRG, camemTok, currEpoch = epoch-1)
 
         numBatches = max(len(trainDf) // opt.batchsize,1)
