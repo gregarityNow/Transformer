@@ -295,6 +295,7 @@ def train_model(model, opt, trainDf, validDf, SRC, TRG, camemMod = None, camemTo
             break;
         elif opt.quickie:
             print("quickie breaking",shouldBroke, epoch);
+            epoch += 1
             break;
         else:
             shouldBroke = 0;
