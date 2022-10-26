@@ -227,7 +227,7 @@ def train_model(model, opt, trainDf, validDf, SRC, TRG, camemMod = None, camemTo
         return bestLoss
 
     while True:
-        print("beginning of while loop")
+        print("beginning of while loop", epoch)
         testModel(camemMod, camemTok, "beginning of while loop")
         if opt.floyd is False:
             print("floyd   %dm: epoch %d [%s]  %d%%  loss = %s" %\
@@ -293,9 +293,9 @@ def train_model(model, opt, trainDf, validDf, SRC, TRG, camemMod = None, camemTo
         elif opt.hundoEpochs and ((fineTune and epoch >= 100) or (not fineTune and epoch >= 10)):
             print("already done a lot of epochs, that seems to be quite enough")
             break;
-        elif opt.quickie:
+        elif False and opt.quickie:
             print("quickie breaking",shouldBroke, epoch);
-            epoch += 1
+            # epoch += 1
             break;
         else:
             shouldBroke = 0;
