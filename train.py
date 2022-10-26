@@ -293,6 +293,11 @@ def train_model(model, opt, trainDf, validDf, SRC, TRG, camemMod = None, camemTo
             epoch += 1;
             print("pssh we ain't breaking!")
 
+        lastPath = outPath + '/model_weights_last_' + str(epoch);
+        if fineTune: lastPath += "_fineTune"
+        torch.save(model.state_dict(), lastPath)
+        print("saving last model", lastPath)
+
     lastPath = outPath + '/model_weights_last_' + str(epoch);
     if fineTune: lastPath += "_fineTune"
     torch.save(model.state_dict(), lastPath)
