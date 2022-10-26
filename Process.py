@@ -192,11 +192,10 @@ def create_dataset(opt, SRC, TRG, validBatchSize = -1, fineTune = False, camemTo
     return datasets["train"]["iter"], datasets["valid"]["iter"]
 
 def get_len(train):
-
-    for i, b in enumerate(train):
-        pass
-    
-    return i
+    lenny = 0
+    for _, _ in enumerate(train):
+        lenny += 1
+    return lenny + 1
 
 
 def create_fieldsFEH(tokenizer):
