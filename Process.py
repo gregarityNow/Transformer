@@ -74,10 +74,10 @@ def read_data_felix(opt, allTerms = False):
         df["daille_type"] = "UNKNOWN"
     else:
         df = df[["term","defn","subset","daille_type","camemDefnLen"]];
-    if opt.quickie == 1:
-        df = df.sample(1000);
-    elif opt.quickie > 1:
-        df = df.sample(min(len(df),opt.quickie));
+    # if opt.quickie == 1:
+    #     df = df.sample(1000);
+    # elif opt.quickie > 1:
+    #     df = df.sample(min(len(df),opt.quickie));
 
     if opt.daillePrediction and not opt.camemLayer:
         print("dude",df);
@@ -170,14 +170,10 @@ def create_dataset(opt, SRC, TRG, validBatchSize = -1, fineTune = False, camemTo
     if epoch0 and not fineTune:
         SRC.build_vocab(datasets["train"]["ds"])
         TRG.build_vocab(datasets["train"]["ds"])
-        if opt.checkpoint > 0:
-            try:
-                os.mkdir("weights")
-            except:
-                print("weights folder already exists, run program with -load_weights weights to load them")
-                quit()
-            pickle.dump(SRC, open('weights/SRC.pkl', 'wb'))
-            pickle.dump(TRG, open('weights/TRG.pkl', 'wb'))
+        dst = opt.weightSaveLoc + "/.."
+        pickle.dump(SRC, open(f'{dst}/SRC.pkl', 'wb'))
+        pickle.dump(TRG, open(f'{dst}/TRG.pkl', 'wb'))
+        print("dumped TRG, SRC");
 
     if opt.camemLayer:
         opt.src_pad = camemTok.pad_token_id

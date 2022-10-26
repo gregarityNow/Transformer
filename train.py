@@ -249,6 +249,10 @@ def train_model(model, opt, trainDf, validDf, SRC, TRG, camemMod = None, camemTo
             if initialBatchNumber > 0:
                 initialBatchNumber += -1;
                 continue;
+
+            if opt.quickie and trainBatchIndex > 10:
+                break;
+
             testModel(camemMod, camemTok, "inTrainLoop")
             # print("inTrain",psutil.virtual_memory())
             batchCreateTime = time.time()
@@ -262,6 +266,9 @@ def train_model(model, opt, trainDf, validDf, SRC, TRG, camemMod = None, camemTo
         numBatches = opt.train_len
         for trainBatchIndex, batch in enumerate(opt.train):
             if opt.camemLayer: break;
+
+            if opt.quickie and trainBatchIndex > 10:
+                break;
             # print("inTrain",psutil.virtual_memory())
             print("batch", epoch, trainBatchIndex)
 
@@ -517,8 +524,8 @@ def mainFelixCamemLayer():
         SRC, TRG = create_fields(opt, camOrLetterTokenizer)
         opt.train, opt.valid = create_dataset(opt, SRC, TRG, camemTok=camemTok, epoch0 = currEpoch == 0)
 
-        pickle.dump(SRC, open(f'{dst}/SRC.pkl', 'wb'))
-        pickle.dump(TRG, open(f'{dst}/TRG.pkl', 'wb'))
+        # pickle.dump(SRC, open(f'{dst}/SRC.pkl', 'wb'))
+        # pickle.dump(TRG, open(f'{dst}/TRG.pkl', 'wb'))
 
         model = get_model(opt, SRC, len(TRG.vocab), camemModel=(camemMod if opt.camemLayer else None), camemTok=(camemTok if opt.camemLayer else None))
 
