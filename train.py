@@ -427,6 +427,10 @@ def performValidation(opt, model, SRC, TRG, camemTok, currEpoch = 0):
     dst = opt.weightSaveLoc + "/.."
 
     _, dfValid = read_data_felix(opt, allTerms=False)
+
+    if opt.quickie:
+        dfValid = dfValid.sample(20);
+
     if opt.camemLayer:
         opt.src_pad = camemTok.pad_token_id
     else:
