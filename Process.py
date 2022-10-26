@@ -98,10 +98,10 @@ def read_data_felix(opt, allTerms = False):
 
 
 
-def create_fields(opt, camOrLetterTokenizer):
+def create_fields(opt, camOrLetterTokenizer, epoch0 = False):
     TRG = data.Field(lower=True, tokenize=camOrLetterTokenizer.letter_tokenize, init_token='<sos>', eos_token='<eos>')
     SRC = data.Field(lower=True, tokenize=(camOrLetterTokenizer.cam_tokenize if not opt.daillePrediction else camOrLetterTokenizer.cam_tokenize))
-    if opt.load_weights:
+    if not epoch0:
         try:
             srcPath = f'{opt.weightSaveLoc}/SRC.pkl'
             trgPath = f'{opt.weightSaveLoc}/TRG.pkl'
