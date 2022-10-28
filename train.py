@@ -552,7 +552,7 @@ def mainFelixCamemLayer():
         #train on all wiktionnaire data
         if opt.fullWiktPretune or (opt.hundoEpochs and currEpoch < 10):
             bestLossInitialTraining, losses, lastEpoch = train_model(model, opt,dfTrain, dfValid, SRC, TRG, camemMod=camemMod, camemTok=camemTok, numEpochsShouldBreak=2, losses=losses, initialEpoch=currEpoch, bestLoss=minLoss);
-            currEpoch = 10
+            # currEpoch = 10
         elif opt.startFromCheckpoint:
             getBestModel(model, opt.weightSaveLoc, fineTune=False)
             print("checky check boiii");
