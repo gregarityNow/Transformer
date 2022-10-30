@@ -378,7 +378,7 @@ def getBestModel(model, path, fineTune = True, epoch = -1):
         pathEpoch = epoch + 1
         bestPath = "./schmagorbitz"
         while not os.path.exists(bestPath):
-            bestPath = path+"/model_weights_last_" + str(pathEpoch)
+            bestPath = path+"/model_weights_last_" + str(pathEpoch) + "_fineTune"
             pathEpoch += -1
 
 
