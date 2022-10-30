@@ -89,15 +89,9 @@ def tensorCamemEncode(inputs, camemTok, maxLen):
 def train_model(model, opt, trainDf, validDf, SRC, TRG, camemMod = None, camemTok = None, numEpochsShouldBreak = 3, bestLoss = np.inf, losses = [], initialEpoch = 0,initialBatchNumber = 0, fineTune = False):
     
     print("training model...",trainDf,validDf)
-    testModel(camemMod,camemTok,"begninning of train_model")
-    opt.optimizer.zero_grad()
-    testModel(camemMod, camemTok, "grad school")
     model.train()
-    testModel(camemMod, camemTok, "post .train")
     opt.optimizer.zero_grad()
     start = time.time()
-    if opt.checkpoint > 0:
-        cptime = time.time()
 
     # np.random.seed(420);
     # miniTestDf = validDf.sample(5, random_state=420)["defn"];
@@ -375,7 +369,7 @@ def translate(opt, model, SRC, TRG):
 
 def getBestModel(model, path, fineTune = True, epoch = -1):
     if epoch > 0:
-        pathEpoch = epoch + 1
+        pathEpoch = epoch - 1
         bestPath = "./schmagorbitz"
         while not os.path.exists(bestPath):
             bestPath = path+"/model_weights_last_" + str(pathEpoch) + ("_fineTune" if fineTune else "");
