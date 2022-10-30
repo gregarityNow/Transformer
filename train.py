@@ -369,7 +369,7 @@ def translate(opt, model, SRC, TRG):
 
 def getBestModel(model, path, fineTune = True, epoch = -1):
     if epoch > 0:
-        pathEpoch = epoch - 1
+        pathEpoch = epoch + 1
         bestPath = "./schmagorbitz"
         while not os.path.exists(bestPath):
             bestPath = path+"/model_weights_last_" + str(pathEpoch) + ("_fineTune" if fineTune else "");
