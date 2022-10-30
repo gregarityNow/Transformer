@@ -378,23 +378,29 @@ def getBestModel(model, path, fineTune = True, epoch = -1):
         pathEpoch = epoch + 1
         bestPath = "./schmagorbitz"
         while not os.path.exists(bestPath):
-            bestPath = path+"/model_weights_last_" + str(pathEpoch) + "_fineTune"
+            bestPath = path+"/model_weights_last_" + str(pathEpoch) + ("_fineTune" if fineTune else "");
             pathEpoch += -1
-
-
+        if epoch > 0:
+            sd = torch.load(bestPath)
+            model.load_state_dict(sd)
+            print("the model now has (lowers sunglasses) best weights, ooo", bestPath);
+            return;
     else:
-        bestPath = f'{path}/model_weights_best'
-    if fineTune:
-        bestPath += "_fineTune"
+        raise Exception("looking for an epoch path actually")
+    #
+    # else:
+    #     bestPath = f'{path}/model_weights_best'
+    # if fineTune:
+    #     bestPath += "_fineTune"
+    #
+    #
+    # if not os.path.exists(bestPath):
+    #     print("no FT weights, reverting to no FT")
+    #     bestPath = f'{path}/model_weights_best'
+    #
+    # sd = torch.load(bestPath)
+    # model.load_state_dict(sd)
 
-
-    if not os.path.exists(bestPath):
-        print("no FT weights, reverting to no FT")
-        bestPath = f'{path}/model_weights_best'
-
-    sd = torch.load(bestPath)
-    model.load_state_dict(sd)
-    print("the model now has (lowers sunglasses) best weights, ooo", bestPath);
 
 def evaluate(opt, model, SRC, TRG, df, suffix, fineTune = True, camemTok = None, epoch = -1):
     from tqdm import tqdm
