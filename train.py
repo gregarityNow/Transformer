@@ -373,10 +373,20 @@ def translate(opt, model, SRC, TRG):
 
     return (' '.join(translated))
 
-def getBestModel(model, path, fineTune = True):
-    bestPath = f'{path}/model_weights_best'
+def getBestModel(model, path, fineTune = True, epoch = -1):
+    if epoch > 0:
+        pathEpoch = epoch + 1
+        bestPath = "./schmagorbitz"
+        while not os.path.exists(bestPath):
+            bestPath = path+"/model_weights_last_" + str(pathEpoch)
+            pathEpoch += -1
+
+
+    else:
+        bestPath = f'{path}/model_weights_best'
     if fineTune:
         bestPath += "_fineTune"
+
 
     if not os.path.exists(bestPath):
         print("no FT weights, reverting to no FT")
@@ -384,14 +394,14 @@ def getBestModel(model, path, fineTune = True):
 
     sd = torch.load(bestPath)
     model.load_state_dict(sd)
-    print("the model now has (lowers sunglasses) best weights, ooo");
+    print("the model now has (lowers sunglasses) best weights, ooo", bestPath);
 
-def evaluate(opt, model, SRC, TRG, df, suffix, fineTune = True, camemTok = None):
+def evaluate(opt, model, SRC, TRG, df, suffix, fineTune = True, camemTok = None, epoch = -1):
     from tqdm import tqdm
     tqdm.pandas()
     try:
         print("tryna load",f'{opt.weightSaveLoc}/model_weights_best')
-        getBestModel(model, opt.weightSaveLoc, fineTune = fineTune)
+        getBestModel(model, opt.weightSaveLoc, fineTune = fineTune, epoch = epoch)
     except Exception as e:
         print("no best weights available, no worries hoss",e)
         raise(e);
@@ -436,7 +446,7 @@ def performValidation(opt, model, SRC, TRG, camemTok, currEpoch = 0):
         opt.src_pad = camemTok.pad_token_id
     else:
         opt.src_pad = SRC.vocab.stoi['<pad>']
-    df = evaluate(opt, model, SRC, TRG, dfValid, "_epoch_"+str(currEpoch), fineTune=True, camemTok=camemTok)
+    df = evaluate(opt, model, SRC, TRG, dfValid, "_epoch_"+str(currEpoch), fineTune=True, camemTok=camemTok, epoch=currEpoch)
     pickle.dump(df, open(dst + "/allRes100_" + str(currEpoch) + "_" + opt.outAddendum + ".pkl", 'wb'));
     print("df is at", dfPath)
 
@@ -543,9 +553,9 @@ def mainFelixCamemLayer():
         # print("moodely", model.state_dict().keys())
 
         if opt.hundoEpochs and 0 < currEpoch < 10:
-            getBestModel(model,opt.weightSaveLoc, fineTune=False)
+            getBestModel(model,opt.weightSaveLoc, fineTune=False, epoch=currEpoch)
         elif opt.hundoEpochs and currEpoch >= 10:
-            getBestModel(model,opt.weightSaveLoc, fineTune=True)
+            getBestModel(model,opt.weightSaveLoc, fineTune=True, epoch=currEpoch)
 
         print("it's a mad mad mad mad world", opt.fullWiktPretune,opt.startFromCheckpoint)
 
@@ -554,10 +564,10 @@ def mainFelixCamemLayer():
             bestLossInitialTraining, losses, lastEpoch = train_model(model, opt,dfTrain, dfValid, SRC, TRG, camemMod=camemMod, camemTok=camemTok, numEpochsShouldBreak=2, losses=losses, initialEpoch=currEpoch, bestLoss=minLoss);
             # currEpoch = 10
         elif opt.startFromCheckpoint:
-            getBestModel(model, opt.weightSaveLoc, fineTune=False)
+            getBestModel(model, opt.weightSaveLoc, fineTune=False, epoch=currEpoch)
             print("checky check boiii");
         elif (opt.hundoEpochs and currEpoch >= 10):
-            getBestModel(model, opt.weightSaveLoc, fineTune=True)
+            getBestModel(model, opt.weightSaveLoc, fineTune=True, epoch=currEpoch)
         else:
             bestLossInitialTraining, losses, lastEpoch = np.inf, [], 0
 
