@@ -97,7 +97,6 @@ def read_data_felix(opt, allTerms = False):
     return df[df.subset=="train"],df[df.subset=="valid"]
 
 
-
 def create_fields(opt, camOrLetterTokenizer, epoch0 = False):
     TRG = data.Field(lower=True, tokenize=camOrLetterTokenizer.letter_tokenize, init_token='<sos>', eos_token='<eos>')
     SRC = data.Field(lower=True, tokenize=(camOrLetterTokenizer.cam_tokenize if not opt.daillePrediction else camOrLetterTokenizer.cam_tokenize))
